@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import {
     Select,
     SelectContent,
@@ -19,7 +20,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, Save } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import users from '@/routes/users';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -53,9 +55,40 @@ export default function Edit({ user, countries, statuses }: EditProps) {
         status_id: user.status_id.toString() || '',
     });
 
+    const [phoneValidationError, setPhoneValidationError] = useState<
+        string | null
+    >(null);
+
+    const handlePhoneChange = (value: string | undefined) => {
+        const phoneValue = value || '';
+        setData('mobile_number', phoneValue);
+
+        // Validate phone number
+        if (phoneValue && !isValidPhoneNumber(phoneValue)) {
+            setPhoneValidationError(
+                'Please enter a valid international phone number',
+            );
+        } else {
+            setPhoneValidationError(null);
+        }
+    };
+
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
-        patch(users.update.url(user.id));
+
+        // Final validation before submit
+        if (data.mobile_number && !isValidPhoneNumber(data.mobile_number)) {
+            setPhoneValidationError(
+                'Please enter a valid international phone number',
+            );
+            return;
+        }
+
+        patch(users.update.url(user.id), {
+            onSuccess: () => {
+                setPhoneValidationError(null);
+            },
+        });
     };
 
     return (
@@ -146,22 +179,24 @@ export default function Edit({ user, countries, statuses }: EditProps) {
                                             *
                                         </span>
                                     </Label>
-                                    <Input
+                                    <PhoneInput
                                         id="mobile_number"
-                                        type="text"
+                                        defaultCountry="SA"
                                         value={data.mobile_number}
-                                        onChange={(e) =>
-                                            setData(
-                                                'mobile_number',
-                                                e.target.value,
+                                        onChange={handlePhoneChange}
+                                        placeholder="Enter phone number"
+                                        aria-invalid={
+                                            !!(
+                                                errors.mobile_number ||
+                                                phoneValidationError
                                             )
                                         }
-                                        placeholder="1234567890"
-                                        aria-invalid={!!errors.mobile_number}
                                     />
-                                    {errors.mobile_number && (
+                                    {(errors.mobile_number ||
+                                        phoneValidationError) && (
                                         <p className="text-sm text-destructive">
-                                            {errors.mobile_number}
+                                            {errors.mobile_number ||
+                                                phoneValidationError}
                                         </p>
                                     )}
                                 </div>

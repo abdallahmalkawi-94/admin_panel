@@ -26,7 +26,12 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'country_code' => ['required', 'string', 'max:2', 'exists:countries,iso2'],
-            'mobile_number' => ['required', 'string', 'max:20', 'unique:users,mobile_number'],
+            'mobile_number' => [
+                'required',
+                'string',
+                'regex:/^\+[1-9]\d{1,14}$/',
+                'unique:users,mobile_number',
+            ],
         ];
     }
 
@@ -41,6 +46,18 @@ class StoreUserRequest extends FormRequest
             'name' => 'full name',
             'country_code' => 'country',
             'mobile_number' => 'mobile number',
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'mobile_number.regex' => 'The mobile number must be a valid international phone number in E.164 format (e.g., +966501234567).',
         ];
     }
 }

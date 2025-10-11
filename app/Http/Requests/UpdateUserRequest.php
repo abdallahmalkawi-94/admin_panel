@@ -29,7 +29,12 @@ class UpdateUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'country_code' => ['required', 'string', 'max:2', 'exists:countries,iso2'],
-            'mobile_number' => ['required', 'string', 'max:20', Rule::unique('users', 'mobile_number')->ignore($userId)],
+            'mobile_number' => [
+                'required',
+                'string',
+                'regex:/^\+[1-9]\d{1,14}$/',
+                Rule::unique('users', 'mobile_number')->ignore($userId),
+            ],
             'status_id' => ['required', 'integer', 'exists:user_statuses,id'],
         ];
     }
@@ -46,6 +51,18 @@ class UpdateUserRequest extends FormRequest
             'country_code' => 'country',
             'mobile_number' => 'mobile number',
             'status_id' => 'status',
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'mobile_number.regex' => 'The mobile number must be a valid international phone number in E.164 format (e.g., +966501234567).',
         ];
     }
 }
