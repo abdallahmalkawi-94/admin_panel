@@ -14,17 +14,17 @@ export function Pagination({ links, className, preserveQuery = {} }: PaginationP
     // Helper function to append query parameters to URL
     const appendQueryParams = (url: string | null): string | null => {
         if (!url) return null;
-        
+
         const urlObj = new URL(url);
         Object.entries(preserveQuery).forEach(([key, value]) => {
             urlObj.searchParams.set(key, value.toString());
         });
-        
+
         return urlObj.toString();
     };
 
     return (
-        <div className={cn('flex items-center justify-center gap-1', className)}>
+        <div className={cn('flex items-center justify-end gap-1', className)}>
             {links.map((link, index) => {
                 const preservedUrl = appendQueryParams(link.url);
                 // Handle Previous button

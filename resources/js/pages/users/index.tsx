@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type Column, type Action } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
 import { UserPlus } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -60,12 +60,17 @@ const getStatusVariant = (statusId: number): 'success' | 'dark' | 'info' | 'dest
 };
 
 export default function Index({ users, filters, statuses, countries }: IndexProps) {
-    const [searchFilters, setSearchFilters] = useState<Filters>({
-        name: filters.name || '',
-        email: filters.email || '',
-        phone: filters.phone || '',
-        status_id: filters.status_id || '',
-        country_code: filters.country_code || '',
+    // Use the reusable filters hook
+    const {
+        filters: searchFilters,
+        handleFilterChange,
+        handleSearch,
+        clearFilters,
+        hasActiveFilters,
+    } = useFilters<Filters>({
+        route: '/users',
+        initialFilters: filters,
+        perPage: users.meta.per_page,
     });
 
     const handlePerPageChange = (value: string) => {
@@ -78,36 +83,6 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
             }
         );
     };
-
-    const handleSearch = useCallback(() => {
-        router.get(
-            '/users',
-            { ...searchFilters, per_page: users.meta.per_page },
-            {
-                preserveState: true,
-                preserveScroll: true,
-            }
-        );
-    }, [searchFilters, users.meta.per_page]);
-
-    const handleFilterChange = (key: string, value: string) => {
-        // Convert "all" to empty string for filtering
-        const filterValue = value === 'all' ? '' : value;
-        setSearchFilters({ ...searchFilters, [key]: filterValue });
-    };
-
-    const clearFilters = () => {
-        setSearchFilters({
-            name: '',
-            email: '',
-            phone: '',
-            status_id: '',
-            country_code: '',
-        });
-        router.get('/users', { per_page: users.meta.per_page });
-    };
-
-    const hasActiveFilters = Object.values(searchFilters).some(value => value !== '');
 
     // Define table columns
     const columns: Column<User>[] = [
@@ -140,11 +115,6 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
                     {user.status.description}
                 </Badge>
             ),
-        },
-        {
-            key: 'created_at',
-            label: 'Created At',
-            render: (user) => new Date(user.created_at).toLocaleDateString(),
         },
     ];
 

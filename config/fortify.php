@@ -146,7 +146,7 @@ return [
     'features' => [
 //         Features::registration(),
         // Features::resetPasswords(),
-        // Features::emailVerification(),
+        // Features::emailVerification(),  // Disabled - using custom routes in auth.php
         // Features::updateProfileInformation(),
         // Features::updatePasswords(),
         Features::twoFactorAuthentication([

@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Http\Constants\UserStatusConstants;
+use App\Notifications\UserCreatedNotification;
 use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserService
 {
@@ -33,7 +36,24 @@ class UserService
      */
     public function create(array $data): Model
     {
-        return $this->userRepository->create($data);
+        // Generate a random password
+        $plainPassword = Str::password(12, true, true, false);
+        $data["password"] = Hash::make($plainPassword);
+        $data["status_id"] = UserStatusConstants::PENDING_VERIFICATION;
+
+        $user = $this->userRepository->create($data);
+
+        try {
+            // Send notification with credentials
+            $loginUrl = route('login');
+            $user->notify(new UserCreatedNotification($plainPassword, $loginUrl));
+            // Send email verification notification
+            $user->sendEmailVerificationNotification();
+        } catch (Exception $e) {
+            logger($e->getMessage());
+        }
+
+        return $user;
     }
 
     /**
@@ -62,6 +82,7 @@ class UserService
      */
     public function getDistinctCountries(): array
     {
+        // TODO will be move to countries service and use cache
         return $this->userRepository->getDistinctCountries();
     }
 }

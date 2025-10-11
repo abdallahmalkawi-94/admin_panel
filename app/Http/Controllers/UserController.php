@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Constants\UserStatusConstants;
+use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Notifications\UserCreatedNotification;
 use App\Services\UserService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -44,15 +51,25 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $countries = $this->userService->getDistinctCountries();
+
+        return inertia('users/create', [
+            'countries' => $countries,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        //
+        try {
+            $this->userService->create($request->validated());
+            return redirect()->route('users.index')->with('success', 'User created successfully. Login credentials and email verification link have been sent to their email.');
+        } catch (Exception $e) {
+            logger($e->getMessage());
+            return back()->withInput()->with('error', 'Failed to create user: ' . $e->getMessage());
+        }
     }
 
     /**
