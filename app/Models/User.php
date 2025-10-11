@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Nnjeim\World\Models\Country;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
@@ -64,7 +66,7 @@ class User extends Authenticatable
      */
     public function country(): BelongsTo
     {
-        return $this->belongsTo(\Nnjeim\World\Models\Country::class, 'country_code', 'iso2');
+        return $this->belongsTo(Country::class, 'country_code', 'iso2');
     }
 
     /**
