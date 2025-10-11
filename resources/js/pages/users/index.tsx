@@ -3,7 +3,7 @@ import { type BreadcrumbItem, type PaginatedResourceCollection, type User, type 
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DataTable, type Column, type Action } from '@/components/data-table';
+import { DataTable, type Column } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
 import { UserPlus } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
@@ -90,6 +90,14 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
             key: 'id',
             label: 'ID',
             className: 'font-medium',
+            render: (user) => (
+                <Link
+                    href={`/users/${user.id}`}
+                    className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                    {user.id}
+                </Link>
+            ),
         },
         {
             key: 'name',
@@ -115,15 +123,6 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
                     {user.status.description}
                 </Badge>
             ),
-        },
-    ];
-
-    // Define table actions
-    const actions: Action<User>[] = [
-        {
-            label: 'View',
-            href: (user) => `/users/${user.id}`,
-            variant: 'ghost',
         },
     ];
 
@@ -211,7 +210,6 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
                     description="A list of all users including their name, email, and contact information."
                     data={users}
                     columns={columns}
-                    actions={actions}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No users found."
