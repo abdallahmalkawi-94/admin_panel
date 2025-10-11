@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+//        User::factory()->count(100)->create();
         User::query()->firstOrCreate([
             "email" => "a.malkawi@classera.com"
         ], [

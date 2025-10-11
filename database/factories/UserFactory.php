@@ -3,8 +3,10 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Nnjeim\World\Models\Country;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -26,6 +28,9 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            "mobile_number" => fake()->phoneNumber(),
+            "country_code" => Country::query()->inRandomOrder()->first()->getAttribute("iso2"),
+            "status_id" => DB::table("user_statuses")->inRandomOrder()->first()->id,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

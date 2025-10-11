@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Http\Constants\UserStatusConstants;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -13,21 +13,33 @@ class UserStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('user_statuses')->updateOrInsert(
-            ['description' => 'ACTIVE'],
-            ['updated_at' => now()]
-        );
-        DB::table('user_statuses')->updateOrInsert(
-            ['description' => 'IN_ACTIVE'],
-            ['updated_at' => now()]
-        );
-        DB::table('user_statuses')->updateOrInsert(
-            ['description' => 'PENDING_VERIFICATION'],
-            ['updated_at' => now()]
-        );
-        DB::table('user_statuses')->updateOrInsert(
-            ['description' => 'BLOCKED'],
-            ['updated_at' => now()]
-        );
+        $statuses = [
+            [
+                'id' => UserStatusConstants::ACTIVE,
+                'description' => 'Active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => UserStatusConstants::IN_ACTIVE,
+                'description' => 'Inactive',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => UserStatusConstants::PENDING_VERIFICATION,
+                'description' => 'Pending Verification',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => UserStatusConstants::BLOCKED,
+                'description' => 'Blocked',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        DB::table('user_statuses')->insertOrIgnore($statuses);
     }
 }

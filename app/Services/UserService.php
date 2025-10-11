@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Constants\UserStatusConstants;
 use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,9 +18,9 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function paginate($perPage = 10): Collection|LengthAwarePaginator
+    public function paginate($perPage = 10, array $filters = []): Collection|LengthAwarePaginator
     {
-        return $this->userRepository->paginate($perPage);
+        return $this->userRepository->paginate($perPage, $filters);
     }
 
     public function find($id): ?Model
@@ -46,5 +47,21 @@ class UserService
     public function delete($id, $force = false): bool
     {
         return $this->userRepository->delete($id, $force);
+    }
+
+    /**
+     * Get all user statuses
+     */
+    public function getAllStatuses(): array
+    {
+        return $this->userRepository->getAllStatuses();
+    }
+
+    /**
+     * Get distinct countries from users
+     */
+    public function getDistinctCountries(): array
+    {
+        return $this->userRepository->getDistinctCountries();
     }
 }
