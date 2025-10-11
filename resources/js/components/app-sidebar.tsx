@@ -24,7 +24,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'User Management',
-        href: dashboard(),
+        href: "/users",
         icon: UsersIcon,
     },
 ];

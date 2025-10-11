@@ -14,7 +14,7 @@ class MakeModuleCommand extends Command
                             {--s|service : Create service}
                             {--p|policy : Create policy}
                             {--R|resource : Create resource}
-                            {--q|request : Create form request}';
+                            {--rq|request : Create form request}';
 
     protected $description = 'Generate optional module components (model, controller, repository, service, policy, resource, request)';
 
@@ -71,42 +71,20 @@ class MakeModuleCommand extends Command
             return;
         }
 
-        $model = "App\\Models\\{$name}";
         $content = <<<PHP
 <?php
 
 namespace App\Repositories;
 
-use {$model};
+use App\\Models\\{$name};
+use Illuminate\Database\Eloquent\Model;
 
-class {$name}Repository
+class {$name}Repository extends BaseRepository
 {
-    public function all()
-    {
-        return {$name}::all();
-    }
+    protected Model \$model;
 
-    public function find(\$id)
-    {
-        return {$name}::findOrFail(\$id);
-    }
-
-    public function create(array \$data)
-    {
-        return {$name}::create(\$data);
-    }
-
-    public function update(\$id, array \$data)
-    {
-        \$record = {$name}::findOrFail(\$id);
-        \$record->update(\$data);
-        return \$record;
-    }
-
-    public function delete(\$id)
-    {
-        \$record = {$name}::findOrFail(\$id);
-        return \$record->delete();
+    public function __construct($name \$model) {
+        parent::__construct(\$model);
     }
 }
 PHP;
@@ -133,39 +111,49 @@ PHP;
 namespace App\Services;
 
 use {$repository};
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class {$name}Service
 {
-    protected \${$camel}Repository;
+    protected {$name}Repository \${$camel}Repository;
 
     public function __construct({$name}Repository \${$camel}Repository)
     {
         \$this->{$camel}Repository = \${$camel}Repository;
     }
 
-    public function getAll()
+    public function paginate(\$perPage = 10): Collection|LengthAwarePaginator
     {
-        return \$this->{$camel}Repository->all();
+        return \$this->{$camel}Repository->paginate(\$perPage);
     }
 
-    public function getById(\$id)
+    public function find(\$id): ?Model
     {
-        return \$this->{$camel}Repository->find(\$id);
+        return \$this->{$camel}Repository->findById(\$id);
     }
 
-    public function create(array \$data)
+    /**
+     * @throws Exception
+     */
+    public function create(array \$data): Model
     {
         return \$this->{$camel}Repository->create(\$data);
     }
 
-    public function update(\$id, array \$data)
+    /**
+     * @throws Exception
+     */
+    public function update(\$id, array \$data): ?Model
     {
-        return \$this->{$camel}Repository->update(\$id, \$data);
+        return \$this->{$camel}Repository->update(\$data, \$id);
     }
 
-    public function delete(\$id)
+    public function delete(\$id, \$force = false): bool
     {
-        return \$this->{$camel}Repository->delete(\$id);
+        return \$this->{$camel}Repository->delete(\$id, \$force);
     }
 }
 PHP;
