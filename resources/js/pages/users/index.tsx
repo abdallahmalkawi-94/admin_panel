@@ -3,25 +3,9 @@ import { type BreadcrumbItem, type PaginatedResourceCollection, type User, type 
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Pagination } from '@/components/pagination';
-import { UserPlus, Search, X } from 'lucide-react';
+import { DataTable, type Column, type Action } from '@/components/data-table';
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { UserPlus } from 'lucide-react';
 import { useState, useCallback } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -106,17 +90,10 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
         );
     }, [searchFilters, users.meta.per_page]);
 
-    const handleFilterChange = (key: keyof Filters, value: string) => {
+    const handleFilterChange = (key: string, value: string) => {
         // Convert "all" to empty string for filtering
         const filterValue = value === 'all' ? '' : value;
-        const newFilters = { ...searchFilters, [key]: filterValue };
-        setSearchFilters(newFilters);
-    };
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
+        setSearchFilters({ ...searchFilters, [key]: filterValue });
     };
 
     const clearFilters = () => {
@@ -131,6 +108,102 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
     };
 
     const hasActiveFilters = Object.values(searchFilters).some(value => value !== '');
+
+    // Define table columns
+    const columns: Column<User>[] = [
+        {
+            key: 'id',
+            label: 'ID',
+            className: 'font-medium',
+        },
+        {
+            key: 'name',
+            label: 'Name',
+        },
+        {
+            key: 'email',
+            label: 'Email',
+        },
+        {
+            key: 'phone',
+            label: 'Phone',
+            render: (user) =>
+                user.country_code && user.mobile_number
+                    ? `${user.country_code} ${user.mobile_number}`
+                    : '-',
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            render: (user) => (
+                <Badge variant={getStatusVariant(user.status_id)}>
+                    {user.status.description}
+                </Badge>
+            ),
+        },
+        {
+            key: 'created_at',
+            label: 'Created At',
+            render: (user) => new Date(user.created_at).toLocaleDateString(),
+        },
+    ];
+
+    // Define table actions
+    const actions: Action<User>[] = [
+        {
+            label: 'View',
+            href: (user) => `/users/${user.id}`,
+            variant: 'ghost',
+        },
+    ];
+
+    // Define filter fields
+    const filterFields: FilterField[] = [
+        {
+            key: 'name',
+            label: 'Name',
+            type: 'text',
+            placeholder: 'Search by name...',
+        },
+        {
+            key: 'email',
+            label: 'Email',
+            type: 'text',
+            placeholder: 'Search by email...',
+        },
+        {
+            key: 'phone',
+            label: 'Phone',
+            type: 'text',
+            placeholder: 'Search by phone...',
+        },
+        {
+            key: 'status_id',
+            label: 'Status',
+            type: 'select',
+            placeholder: 'All statuses',
+            options: [
+                { value: 'all', label: 'All statuses' },
+                ...statuses.map((status) => ({
+                    value: status.id.toString(),
+                    label: status.description,
+                })),
+            ],
+        },
+        {
+            key: 'country_code',
+            label: 'Country',
+            type: 'select',
+            placeholder: 'All countries',
+            options: [
+                { value: 'all', label: 'All countries' },
+                ...countries.map((country) => ({
+                    value: country.code,
+                    label: country.name,
+                })),
+            ],
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -152,197 +225,27 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
                     </Button>
                 </div>
 
+                {/* Filters */}
+                <DataFilters
+                    fields={filterFields}
+                    values={searchFilters}
+                    onChange={handleFilterChange}
+                    onSearch={handleSearch}
+                    onClear={clearFilters}
+                    hasActiveFilters={hasActiveFilters}
+                />
 
-                {/* Search Filters */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Search className="h-5 w-5 text-muted-foreground" />
-                                <CardTitle>Search & Filter</CardTitle>
-                            </div>
-                            {hasActiveFilters && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={clearFilters}
-                                >
-                                    <X className="mr-2 h-4 w-4" />
-                                    Clear Filters
-                                </Button>
-                            )}
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Name</label>
-                                <Input
-                                    placeholder="Search by name..."
-                                    value={searchFilters.name}
-                                    onChange={(e) => handleFilterChange('name', e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Email</label>
-                                <Input
-                                    placeholder="Search by email..."
-                                    value={searchFilters.email}
-                                    onChange={(e) => handleFilterChange('email', e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Phone</label>
-                                <Input
-                                    placeholder="Search by phone..."
-                                    value={searchFilters.phone}
-                                    onChange={(e) => handleFilterChange('phone', e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Status</label>
-                                <Select
-                                    value={searchFilters.status_id || 'all'}
-                                    onValueChange={(value) => handleFilterChange('status_id', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All statuses" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All statuses</SelectItem>
-                                        {statuses.map((status) => (
-                                            <SelectItem key={status.id} value={status.id.toString()}>
-                                                {status.description}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Country</label>
-                                <Select
-                                    value={searchFilters.country_code || 'all'}
-                                    onValueChange={(value) => handleFilterChange('country_code', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="All countries" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All countries</SelectItem>
-                                        {countries.map((country) => (
-                                            <SelectItem key={country.code} value={country.code}>
-                                                {country.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                            <Button onClick={handleSearch}>
-                                <Search className="mr-2 h-4 w-4" />
-                                Search
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Users Table */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle>All Users</CardTitle>
-                                <CardDescription>
-                                    A list of all users including their name, email, and contact information.
-                                </CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted-foreground">Show:</span>
-                                <Select
-                                    value={users.meta.per_page.toString()}
-                                    onValueChange={handlePerPageChange}
-                                >
-                                    <SelectTrigger className="w-[80px]">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="10">10</SelectItem>
-                                        <SelectItem value="25">25</SelectItem>
-                                        <SelectItem value="50">50</SelectItem>
-                                        <SelectItem value="100">100</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>ID</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Phone</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Created At</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {users.data.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center">
-                                            No users found.
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    users.data.map((user) => (
-                                        <TableRow key={user.id}>
-                                            <TableCell className="font-medium">{user.id}</TableCell>
-                                            <TableCell>{user.name}</TableCell>
-                                            <TableCell>{user.email}</TableCell>
-                                            <TableCell>
-                                                {user.country_code && user.mobile_number
-                                                    ? `${user.country_code} ${user.mobile_number}`
-                                                    : '-'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant={getStatusVariant(user.status_id)}>
-                                                    {user.status.description}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(user.created_at).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/users/${user.id}`}>View</Link>
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                        {users.meta.links && users.meta.links.length > 0 && (
-                            <div className="mt-4">
-                                <Pagination
-                                    links={users.meta.links}
-                                    preserveQuery={{
-                                        per_page: users.meta.per_page,
-                                        ...Object.fromEntries(
-                                            Object.entries(searchFilters).filter(([, v]) => v !== '')
-                                        ),
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                {/* Data Table */}
+                <DataTable
+                    title="All Users"
+                    description="A list of all users including their name, email, and contact information."
+                    data={users}
+                    columns={columns}
+                    actions={actions}
+                    searchFilters={searchFilters}
+                    onPageSizeChange={handlePerPageChange}
+                    emptyMessage="No users found."
+                />
             </div>
         </AppLayout>
     );
