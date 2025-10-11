@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Constants\UserStatusConstants;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Notifications\UserCreatedNotification;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -75,32 +72,67 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(User $user): Response|ResponseFactory
     {
-        //
+        $user->load(['status', 'country']);
+
+        return inertia('users/show', [
+            'user' => (new UserResource($user))->resolve(),
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(User $user): Response|ResponseFactory
     {
-        //
+        $user->load(['status', 'country']);
+        $countries = $this->userService->getDistinctCountries();
+        $statuses = $this->userService->getAllStatuses();
+
+        return inertia('users/edit', [
+            'user' => (new UserResource($user))->resolve(),
+            'countries' => $countries,
+            'statuses' => $statuses,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        //
+        try {
+            $this->userService->update($user->id, $request->validated());
+
+            return redirect()->route('users.index')
+                ->with('success', 'User updated successfully.');
+        } catch (Exception $e) {
+            logger($e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update user: ' . $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $user): RedirectResponse
     {
-        //
+        try {
+            // Prevent deleting yourself
+            if ($user->id === auth()->id()) {
+                return back()->with('error', 'You cannot delete your own account.');
+            }
+
+            $this->userService->delete($user->id);
+
+            return redirect()->route('users.index')
+                ->with('success', 'User deleted successfully.');
+        } catch (Exception $e) {
+            logger($e->getMessage());
+            return back()->with('error', 'Failed to delete user: ' . $e->getMessage());
+        }
     }
 }
