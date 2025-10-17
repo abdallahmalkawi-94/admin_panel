@@ -19,9 +19,11 @@ abstract class BaseRepository
     /**
      * Get all records with optional pagination.
      */
-    public function paginate(int $perPage = 15): Collection|LengthAwarePaginator
+    public function paginate(int $perPage = 15, array $filters = []): Collection|LengthAwarePaginator
     {
-        return $this->getModel()->newQuery()->paginate($perPage);
+        return $this->getModel()->newQuery()
+            ->applyFilters($filters)
+            ->paginate($perPage);
     }
 
     protected function getModel(): Model

@@ -1,11 +1,16 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type PaginatedResourceCollection, type User, type UserStatus } from '@/types';
+import {
+    type BreadcrumbItem,
+    type PaginatedResourceCollection,
+    type User,
+    type UserStatus,
+} from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DataTable, type Column } from '@/components/data-table';
+import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
-import { UserPlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -44,7 +49,9 @@ interface IndexProps {
 }
 
 // Helper function to get badge variant based on status
-const getStatusVariant = (statusId: number): 'success' | 'dark' | 'info' | 'destructive' | 'secondary' => {
+const getStatusVariant = (
+    statusId: number,
+): 'success' | 'dark' | 'info' | 'destructive' | 'secondary' => {
     switch (statusId) {
         case USER_STATUS.ACTIVE:
             return 'success'; // Green
@@ -59,7 +66,12 @@ const getStatusVariant = (statusId: number): 'success' | 'dark' | 'info' | 'dest
     }
 };
 
-export default function Index({ users, filters, statuses, countries }: IndexProps) {
+export default function Index({
+    users,
+    filters,
+    statuses,
+    countries,
+}: IndexProps) {
     // Use the reusable filters hook
     const {
         filters: searchFilters,
@@ -80,7 +92,7 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
             {
                 preserveState: true,
                 preserveScroll: true,
-            }
+            },
         );
     };
 
@@ -181,14 +193,16 @@ export default function Index({ users, filters, statuses, countries }: IndexProp
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Users
+                        </h1>
                         <p className="text-muted-foreground">
                             Manage and view all users in the system
                         </p>
                     </div>
                     <Button asChild>
                         <Link href="/users/create">
-                            <UserPlus className="mr-2 h-4 w-4" />
+                            <Plus className="mr-2 h-4 w-4" />
                             Add User
                         </Link>
                     </Button>
