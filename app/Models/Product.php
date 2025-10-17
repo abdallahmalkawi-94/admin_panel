@@ -22,6 +22,10 @@ class Product extends Model
         "secret_key",
     ];
 
+    protected $casts = [
+        'signing_active' => 'boolean',
+    ];
+
     public function scopeFilterByName($query, ?string $name)
     {
         if (!empty($name)) {
