@@ -64,12 +64,7 @@ interface ShowProps {
 export default function Show({ user }: ShowProps) {
     const handleDelete = () => {
         if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-            router.delete(`/users/${user.id}`, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    router.visit('/users');
-                },
-            });
+            router.delete(`/users/${user.id}`);
         }
     };
 
@@ -104,6 +99,7 @@ export default function Show({ user }: ShowProps) {
                             type="button"
                             onClick={handleDelete}
                             variant="destructive"
+                            className={"cursor-pointer"}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete

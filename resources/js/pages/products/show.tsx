@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type User } from '@/types';
+import { type BreadcrumbItem, type Product } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,89 +13,63 @@ import { Badge } from '@/components/ui/badge';
 import {
     ArrowLeft,
     Edit,
-    Mail,
-    MapPin,
-    Phone,
     Trash2,
-    User as UserIcon,
+    Package,
+    Link as LinkIcon,
+    Key,
+    Activity,
+    Code,
 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
-        href: '/users',
+        title: 'Products',
+        href: '/products',
     },
     {
-        title: 'View User',
+        title: 'View Product',
         href: '#',
     },
 ];
 
-// User Status Constants (matching backend)
-const USER_STATUS = {
-    ACTIVE: 1,
-    IN_ACTIVE: 2,
-    PENDING_VERIFICATION: 3,
-    BLOCKED: 4,
-} as const;
-
-// Helper function to get badge variant based on status
-const getStatusVariant = (
-    statusId: number,
-): 'success' | 'dark' | 'info' | 'destructive' | 'secondary' => {
-    switch (statusId) {
-        case USER_STATUS.ACTIVE:
-            return 'success';
-        case USER_STATUS.IN_ACTIVE:
-            return 'dark';
-        case USER_STATUS.PENDING_VERIFICATION:
-            return 'info';
-        case USER_STATUS.BLOCKED:
-            return 'destructive';
-        default:
-            return 'secondary';
-    }
-};
-
 interface ShowProps {
-    user: User;
+    product: Product;
 }
 
-export default function Show({ user }: ShowProps) {
+export default function Show({ product }: ShowProps) {
     const handleDelete = () => {
-        if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-            router.delete(`/users/${user.id}`, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    router.visit('/users');
-                },
-            });
+        if (
+            confirm(
+                `Are you sure you want to delete product "${product.en_name}"?`,
+            )
+        ) {
+            router.delete(`/products/${product.id}`);
         }
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`View User - ${user.name}`} />
+            <Head title={`View Product - ${product.en_name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            User Details
+                            Product Details
                         </h1>
                         <p className="text-muted-foreground">
-                            View user information and account status
+                            View product information and configuration
                         </p>
                     </div>
                     <div className="flex gap-2">
                         <Button asChild variant="outline">
-                            <Link href="/users">
+                            <Link href="/products">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Users
+                                Back to Products
                             </Link>
                         </Button>
                         <Button asChild>
-                            <Link href={`/users/${user.id}/edit`}>
+                            <Link href={`/products/${product.id}/edit`}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                             </Link>
@@ -104,6 +78,7 @@ export default function Show({ user }: ShowProps) {
                             type="button"
                             onClick={handleDelete}
                             variant="destructive"
+                            className={"cursor-pointer"}
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -111,126 +86,262 @@ export default function Show({ user }: ShowProps) {
                     </div>
                 </div>
 
-                {/* User Information Card */}
+                {/* Product Information Card */}
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle className="text-2xl">
-                                    {user.name}
+                                    {product.en_name}
                                 </CardTitle>
                                 <CardDescription>
-                                    {user.email}
+                                    {product.ar_name}
                                 </CardDescription>
                             </div>
-                            <Badge variant={getStatusVariant(user.status_id)}>
-                                {user.status.description}
+                            <Badge
+                                variant={
+                                    product.signing_active
+                                        ? 'success'
+                                        : 'secondary'
+                                }
+                            >
+                                {product.signing_active
+                                    ? 'Signing Active'
+                                    : 'Signing Inactive'}
                             </Badge>
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-6 md:grid-cols-2">
-                            {/* Personal Information */}
+                            {/* Basic Information */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">
-                                    Personal Information
+                                    Basic Information
                                 </h3>
 
                                 <div className="flex items-start gap-3">
-                                    <UserIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
                                     <div>
                                         <p className="text-sm font-medium">
-                                            Full Name
+                                            English Name
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {user.name}
+                                            {product.en_name}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
                                     <div>
                                         <p className="text-sm font-medium">
-                                            Email Address
+                                            Arabic Name
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {user.email}
-                                        </p>
-                                        {user.email_verified_at ? (
-                                            <Badge
-                                                variant="success"
-                                                className="mt-1"
-                                            >
-                                                Verified
-                                            </Badge>
-                                        ) : (
-                                            <Badge
-                                                variant="secondary"
-                                                className="mt-1"
-                                            >
-                                                Not Verified
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Phone className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Mobile Number
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {user.country_code} {user.mobile_number}
+                                            {product.ar_name}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <MapPin className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <Activity className="mt-0.5 h-5 w-5 text-muted-foreground" />
                                     <div>
                                         <p className="text-sm font-medium">
-                                            Country
+                                            Signing Status
+                                        </p>
+                                        <Badge
+                                            variant={
+                                                product.signing_active
+                                                    ? 'success'
+                                                    : 'secondary'
+                                            }
+                                            className="mt-1"
+                                        >
+                                            {product.signing_active
+                                                ? 'Active'
+                                                : 'Inactive'}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <p className="text-sm font-medium">
+                                            Product ID
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {user.country_name || user.country_code}
+                                            #{product.id}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Account Information */}
+                            {/* API Configuration */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">
-                                    Account Information
+                                    API Configuration
                                 </h3>
 
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">
-                                        Account Status
-                                    </p>
-                                    <Badge variant={getStatusVariant(user.status_id)}>
-                                        {user.status.description}
-                                    </Badge>
+                                <div className="flex items-start gap-3">
+                                    <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium">
+                                            Callback URL
+                                        </p>
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {product.callback_url || 'N/A'}
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">
-                                        User ID
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        #{user.id}
-                                    </p>
+                                <div className="flex items-start gap-3">
+                                    <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium">
+                                            Webhook URL
+                                        </p>
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {product.webhook_url || 'N/A'}
+                                        </p>
+                                    </div>
                                 </div>
 
+                                <div className="flex items-start gap-3">
+                                    <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium">
+                                            Invoice Inquiry API
+                                        </p>
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {product.invoice_inquiry_api ||
+                                                'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                    <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-medium">
+                                            Invoice Creation API
+                                        </p>
+                                        <p className="truncate text-sm text-muted-foreground">
+                                            {product.invoice_creation_api ||
+                                                'N/A'}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Security Credentials Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Security Credentials</CardTitle>
+                        <CardDescription>
+                            API keys and security configuration
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-6 md:grid-cols-3">
+                            <div className="flex items-start gap-3">
+                                <Key className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        HMAC Key
+                                    </p>
+                                    <p className="truncate font-mono text-sm text-muted-foreground">
+                                        {product.hmac_key
+                                            ? '••••••••••••'
+                                            : 'N/A'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <Key className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Token Key
+                                    </p>
+                                    <p className="truncate font-mono text-sm text-muted-foreground">
+                                        {product.token_key
+                                            ? '••••••••••••'
+                                            : 'N/A'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <Key className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Secret Key
+                                    </p>
+                                    <p className="truncate font-mono text-sm text-muted-foreground">
+                                        {product.secret_key}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Timestamps Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Timestamps</CardTitle>
+                        <CardDescription>
+                            Product creation and update information
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-6 md:grid-cols-3">
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium">
+                                    Created At
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {new Date(
+                                        product.created_at,
+                                    ).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium">
+                                    Last Updated
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {new Date(
+                                        product.updated_at,
+                                    ).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
+                                </p>
+                            </div>
+
+                            {product.deleted_at && (
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">
-                                        Created At
+                                        Deleted At
                                     </p>
                                     <p className="text-sm text-muted-foreground">
                                         {new Date(
-                                            user.created_at,
+                                            product.deleted_at,
                                         ).toLocaleDateString('en-US', {
                                             year: 'numeric',
                                             month: 'long',
@@ -240,43 +351,7 @@ export default function Show({ user }: ShowProps) {
                                         })}
                                     </p>
                                 </div>
-
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">
-                                        Last Updated
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {new Date(
-                                            user.updated_at,
-                                        ).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
-                                    </p>
-                                </div>
-
-                                {user.email_verified_at && (
-                                    <div className="space-y-2">
-                                        <p className="text-sm font-medium">
-                                            Email Verified At
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {new Date(
-                                                user.email_verified_at,
-                                            ).toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

@@ -33,7 +33,7 @@ class ProductService
     public function create(array $data): Model
     {
         // TODO should be check if creation api not set, will be get from system setting
-        $data["invoice_creation_api"] = "https://malkawi-portal,classera.com/invoice/create";
+        $data["invoice_creation_api"] = "https://malkawi-portal.classera.com/invoice/create";
         // TODO Add webhook events
         return $this->productRepository->create($data);
     }

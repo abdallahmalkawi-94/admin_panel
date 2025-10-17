@@ -67,6 +67,23 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+export interface Product {
+    id: number;
+    en_name: string;
+    ar_name: string;
+    signing_active: boolean;
+    callback_url?: string | null;
+    webhook_url?: string | null;
+    invoice_inquiry_api?: string | null;
+    invoice_creation_api?: string | null;
+    hmac_key?: string | null;
+    token_key?: string | null;
+    secret_key?: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

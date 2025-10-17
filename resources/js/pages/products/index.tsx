@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import {
     type BreadcrumbItem,
     type PaginatedResourceCollection,
-    type User,
+    type Product,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ interface Filters {
     name?: string;
 }
 interface IndexProps {
-    products: PaginatedResourceCollection<User>;
+    products: PaginatedResourceCollection<Product>;
     filters: Filters;
 }
 
@@ -52,7 +52,7 @@ export default function Index({ products, filters }: IndexProps) {
     };
 
     // Define table columns
-    const columns: Column<User>[] = [
+    const columns: Column<Product>[] = [
         {
             key: 'id',
             label: 'ID',

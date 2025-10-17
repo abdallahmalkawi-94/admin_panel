@@ -62,7 +62,7 @@ export default function Create() {
             },
         });
     };
-console.log("Signing Active: ", data.signing_active)
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create a new product" />
@@ -328,7 +328,12 @@ console.log("Signing Active: ", data.signing_active)
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="secret_key">Secret Key</Label>
+                                <Label htmlFor="secret_key">
+                                    Secret Key{' '}
+                                    <span className="text-destructive">
+                                            *
+                                    </span>
+                                </Label>
                                 <div className="flex">
                                     <Input
                                         id="secret_key"
