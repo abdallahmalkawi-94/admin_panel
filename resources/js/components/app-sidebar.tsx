@@ -10,30 +10,58 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
+import { type NavGroup } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
     Building2Icon,
+    DollarSign,
+    Globe,
+    Languages,
     LayoutGrid,
     UsersIcon,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const navigationGroups: NavGroup[] = [
     {
-        title: 'Dashboard',
-        href: "/",
-        icon: LayoutGrid,
+        title: 'Platform',
+        items: [
+            {
+                title: 'Dashboard',
+                href: "/",
+                icon: LayoutGrid,
+            },
+            {
+                title: 'User Management',
+                href: "/users",
+                icon: UsersIcon,
+            },
+            {
+                title: 'Product Management',
+                href: "/products",
+                icon: Building2Icon,
+            },
+        ],
     },
     {
-        title: 'User Management',
-        href: "/users",
-        icon: UsersIcon,
-    },
-    {
-        title: 'Product Management',
-        href: "/products",
-        icon: Building2Icon,
+        title: 'Lookup',
+        items: [
+            {
+                title: 'Countries',
+                href: "/countries",
+                icon: Globe,
+            },
+            {
+                title: 'Currencies',
+                href: "/currencies",
+                icon: DollarSign,
+            },
+            {
+                title: 'Languages',
+                href: "/languages",
+                icon: Languages,
+            },
+        ],
     },
 ];
 
@@ -66,7 +94,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain groups={navigationGroups} />
             </SidebarContent>
 
             <SidebarFooter>

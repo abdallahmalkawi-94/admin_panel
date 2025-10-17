@@ -15,10 +15,12 @@ use Illuminate\Support\Str;
 class UserService
 {
     protected UserRepository $userRepository;
+    protected CountryService $countryService;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, CountryService $countryService)
     {
         $this->userRepository = $userRepository;
+        $this->countryService = $countryService;
     }
 
     public function paginate($perPage = 10, array $filters = []): Collection|LengthAwarePaginator
@@ -78,11 +80,10 @@ class UserService
     }
 
     /**
-     * Get distinct countries from users
+     * Get distinct countries from users (now using cached country service)
      */
     public function getDistinctCountries(): array
     {
-        // TODO will be move to countries service and use cache
-        return $this->userRepository->getDistinctCountries();
+        return $this->countryService->getCountriesForDropdown();
     }
 }

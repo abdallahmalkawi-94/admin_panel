@@ -84,6 +84,38 @@ export interface Product {
     deleted_at?: string | null;
 }
 
+export interface Country {
+    id: number;
+    iso2: string;
+    iso3?: string | null;
+    name: string;
+    phone_code?: string | null;
+    region?: string | null;
+    subregion?: string | null;
+    status: number;
+}
+
+export interface Currency {
+    id: number;
+    country_id: number;
+    country_name?: string | null;
+    name: string;
+    code: string;
+    precision: number;
+    symbol: string;
+    symbol_native: string;
+    symbol_first: boolean;
+    decimal_mark: string;
+    thousands_separator: string;
+}
+
+export interface Language {
+    code: string;
+    name: string;
+    name_native: string;
+    dir: string;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

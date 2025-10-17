@@ -25,10 +25,13 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
-import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
+import { type BreadcrumbItem, type NavGroup, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     Building2Icon,
+    DollarSign,
+    Globe,
+    Languages,
     LayoutGrid,
     Menu,
     Search,
@@ -37,21 +40,46 @@ import {
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-const mainNavItems: NavItem[] = [
+const navigationGroups: NavGroup[] = [
     {
-        title: 'Dashboard',
-        href: "/",
-        icon: LayoutGrid,
+        title: 'Platform',
+        items: [
+            {
+                title: 'Dashboard',
+                href: "/",
+                icon: LayoutGrid,
+            },
+            {
+                title: 'User Management',
+                href: "/users",
+                icon: UsersIcon,
+            },
+            {
+                title: 'Product Management',
+                href: "/products",
+                icon: Building2Icon,
+            },
+        ],
     },
     {
-        title: 'User Management',
-        href: "/users",
-        icon: UsersIcon,
-    },
-    {
-        title: 'Product Management',
-        href: "/products",
-        icon: Building2Icon,
+        title: 'Lookup',
+        items: [
+            {
+                title: 'Countries',
+                href: "/countries",
+                icon: Globe,
+            },
+            {
+                title: 'Currencies',
+                href: "/currencies",
+                icon: DollarSign,
+            },
+            {
+                title: 'Languages',
+                href: "/languages",
+                icon: Languages,
+            },
+        ],
     },
 ];
 
@@ -107,21 +135,30 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
-                                            {mainNavItems.map((item) => (
-                                                <Link
-                                                    key={item.title}
-                                                    href={item.href}
-                                                    className="flex items-center space-x-2 font-medium"
-                                                >
-                                                    {item.icon && (
-                                                        <Icon
-                                                            iconNode={item.icon}
-                                                            className="h-5 w-5"
-                                                        />
-                                                    )}
-                                                    <span>{item.title}</span>
-                                                </Link>
+                                        <div className="flex flex-col space-y-6">
+                                            {navigationGroups.map((group) => (
+                                                <div key={group.title} className="flex flex-col space-y-3">
+                                                    <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                        {group.title}
+                                                    </h3>
+                                                    <div className="flex flex-col space-y-1">
+                                                        {group.items.map((item) => (
+                                                            <Link
+                                                                key={item.title}
+                                                                href={item.href}
+                                                                className="flex items-center space-x-2 px-2 py-1.5 rounded-md hover:bg-accent font-medium"
+                                                            >
+                                                                {item.icon && (
+                                                                    <Icon
+                                                                        iconNode={item.icon}
+                                                                        className="h-5 w-5"
+                                                                    />
+                                                                )}
+                                                                <span>{item.title}</span>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
 
@@ -167,7 +204,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
                         <NavigationMenu className="flex h-full items-stretch">
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
-                                {mainNavItems.map((item, index) => (
+                                {navigationGroups.flatMap((group) => group.items).map((item, index) => (
                                     <NavigationMenuItem
                                         key={index}
                                         className="relative flex h-full items-center"

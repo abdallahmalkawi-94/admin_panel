@@ -18,3 +18,6 @@ require __DIR__.'/auth.php';
 
 require __DIR__.'/users.php';
 require __DIR__.'/products.php';
+require __DIR__.'/countries.php';
+require __DIR__.'/currencies.php';
+require __DIR__.'/languages.php';
