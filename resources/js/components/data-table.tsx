@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
+    TableBodyRow,
     TableCell,
     TableHead,
     TableHeader,
-    TableRow,
+    TableHeadRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -97,7 +98,7 @@ export function DataTable<T extends Record<string, any>>({
             <CardContent>
                 <Table>
                     <TableHeader>
-                        <TableRow>
+                        <TableHeadRow>
                             {columns.map((column) => (
                                 <TableHead key={column.key} className={column.className}>
                                     {column.label}
@@ -106,18 +107,18 @@ export function DataTable<T extends Record<string, any>>({
                             {hasActions && (
                                 <TableHead className="text-right">Actions</TableHead>
                             )}
-                        </TableRow>
+                        </TableHeadRow>
                     </TableHeader>
                     <TableBody>
                         {data.data.length === 0 ? (
-                            <TableRow>
+                            <TableBodyRow>
                                 <TableCell colSpan={totalColumns} className="h-24 text-center">
                                     {emptyMessage}
                                 </TableCell>
-                            </TableRow>
+                            </TableBodyRow>
                         ) : (
                             data.data.map((item, index) => (
-                                <TableRow key={item.id || index}>
+                                <TableBodyRow key={item.id || index}>
                                     {columns.map((column) => (
                                         <TableCell key={column.key} className={column.className}>
                                             {column.render
@@ -158,7 +159,7 @@ export function DataTable<T extends Record<string, any>>({
                                             </div>
                                         </TableCell>
                                     )}
-                                </TableRow>
+                                </TableBodyRow>
                             ))
                         )}
                     </TableBody>

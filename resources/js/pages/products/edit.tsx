@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { type BreadcrumbItem, type User, type UserStatus } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -19,7 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import users from '@/routes/users';
@@ -30,8 +30,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/users',
     },
     {
-        title: 'Create a new user',
-        href: '/users/create',
+        title: 'Edit User',
+        href: '#',
     },
 ];
 
@@ -40,16 +40,19 @@ interface Country {
     name: string;
 }
 
-interface CreateProps {
+interface EditProps {
+    user: User;
     countries: Country[];
+    statuses: UserStatus[];
 }
 
-export default function Create({ countries }: CreateProps) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        country_code: '',
-        mobile_number: '',
+export default function Edit({ user, countries, statuses }: EditProps) {
+    const { data, setData, patch, processing, errors } = useForm({
+        name: user.name || '',
+        email: user.email || '',
+        country_code: user.country_code || '',
+        mobile_number: user.mobile_number || '',
+        status_id: user.status_id.toString() || '',
     });
 
     const [phoneValidationError, setPhoneValidationError] = useState<
@@ -81,9 +84,8 @@ export default function Create({ countries }: CreateProps) {
             return;
         }
 
-        post(users.store.url(), {
+        patch(users.update.url(user.id), {
             onSuccess: () => {
-                reset();
                 setPhoneValidationError(null);
             },
         });
@@ -91,18 +93,24 @@ export default function Create({ countries }: CreateProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create a new user" />
+            <Head title={`Edit User - ${user.name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            Create a new user
+                            Edit User
                         </h1>
                         <p className="text-muted-foreground">
-                            Add a new user to the system
+                            Update user information
                         </p>
                     </div>
+                    <Button asChild variant="outline">
+                        <Link href="/users">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Users
+                        </Link>
+                    </Button>
                 </div>
 
                 {/* Form */}
@@ -110,7 +118,7 @@ export default function Create({ countries }: CreateProps) {
                     <CardHeader>
                         <CardTitle>User Information</CardTitle>
                         <CardDescription>
-                            Enter the details for the new user
+                            Update the details for this user
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -230,6 +238,42 @@ export default function Create({ countries }: CreateProps) {
                                 )}
                             </div>
 
+                            {/* Status */}
+                            <div className="space-y-2">
+                                <Label htmlFor="status_id">
+                                    Status{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <Select
+                                    value={data.status_id}
+                                    onValueChange={(value) =>
+                                        setData('status_id', value)
+                                    }
+                                >
+                                    <SelectTrigger
+                                        id="status_id"
+                                        aria-invalid={!!errors.status_id}
+                                    >
+                                        <SelectValue placeholder="Select a status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {statuses.map((status) => (
+                                            <SelectItem
+                                                key={status.id}
+                                                value={status.id.toString()}
+                                            >
+                                                {status.description}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.status_id && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.status_id}
+                                    </p>
+                                )}
+                            </div>
+
                             {/* Submit Buttons */}
                             <div className="flex items-center justify-end gap-4 pt-4">
                                 <Button
@@ -241,7 +285,9 @@ export default function Create({ countries }: CreateProps) {
                                 </Button>
                                 <Button type="submit" disabled={processing}>
                                     <Save className="mr-2 h-4 w-4" />
-                                    {processing ? 'Creating...' : 'Create'}
+                                    {processing
+                                        ? 'Updating...'
+                                        : 'Update User'}
                                 </Button>
                             </div>
                         </form>
@@ -251,3 +297,4 @@ export default function Create({ countries }: CreateProps) {
         </AppLayout>
     );
 }
+

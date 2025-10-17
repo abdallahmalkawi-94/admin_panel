@@ -125,9 +125,9 @@ class {$name}Service
         \$this->{$camel}Repository = \${$camel}Repository;
     }
 
-    public function paginate(\$perPage = 10): Collection|LengthAwarePaginator
+    public function paginate(\$perPage = 10, array \$filters = []): Collection|LengthAwarePaginator
     {
-        return \$this->{$camel}Repository->paginate(\$perPage);
+        return \$this->{$camel}Repository->paginate(\$perPage, \$filters);
     }
 
     public function find(\$id): ?Model
