@@ -30,35 +30,10 @@ class UserRepository extends BaseRepository
 
 
     /**
-     * Get all user statuses
+     * Get all user statuses (cached)
      */
     public function getAllStatuses(): array
     {
-        return \App\Models\UserStatus::all(['id', 'description'])
-            ->map(function ($status) {
-                return [
-                    'id' => $status->id,
-                    'description' => $status->description,
-                ];
-            })
-            ->toArray();
-    }
-
-    /**
-     * Get distinct countries from users
-     */
-    public function getDistinctCountries(): array
-    {
-        return DB::table('countries')
-            ->select(['iso2', 'name'])
-            ->distinct()
-            ->get()
-            ->map(function ($country) {
-                return [
-                    'code' => $country->iso2,
-                    'name' => $country->name,
-                ];
-            })
-            ->toArray();
+        return \App\Models\UserStatus::dropdown();
     }
 }

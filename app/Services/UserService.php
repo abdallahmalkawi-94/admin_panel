@@ -15,12 +15,10 @@ use Illuminate\Support\Str;
 class UserService
 {
     protected UserRepository $userRepository;
-    protected CountryService $countryService;
 
-    public function __construct(UserRepository $userRepository, CountryService $countryService)
+    public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
-        $this->countryService = $countryService;
     }
 
     public function paginate($perPage = 10, array $filters = []): Collection|LengthAwarePaginator
@@ -71,19 +69,4 @@ class UserService
         return $this->userRepository->delete($id, $force);
     }
 
-    /**
-     * Get all user statuses
-     */
-    public function getAllStatuses(): array
-    {
-        return $this->userRepository->getAllStatuses();
-    }
-
-    /**
-     * Get distinct countries from users (now using cached country service)
-     */
-    public function getDistinctCountries(): array
-    {
-        return $this->countryService->getCountriesForDropdown();
-    }
 }

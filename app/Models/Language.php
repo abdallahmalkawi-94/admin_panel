@@ -2,10 +2,56 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Nnjeim\World\Models\Language as WorldLanguage;
 
 class Language extends WorldLanguage
 {
+    // Cache constants
+    const CACHE_KEY_ALL = 'languages:all';
+    const CACHE_KEY_DROPDOWN = 'languages:all:dropdown';
+    const CACHE_TTL = 86400; // 24 hours
+
+    /**
+     * Get all cached languages
+     * Usage: Language::cached()
+     */
+    public static function cached(): Collection
+    {
+        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+            return self::query()->get();
+        });
+    }
+
+    /**
+     * Get cached languages for dropdown
+     * Usage: Language::dropdown()
+     */
+    public static function dropdown(): array
+    {
+        return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
+            return self::query()
+                ->get(['code', 'name', 'name_native'])
+                ->map(fn($language) => [
+                    'code' => $language->code,
+                    'name' => $language->name,
+                    'name_native' => $language->name_native,
+                ])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Clear all language caches
+     * Usage: Language::clearCache()
+     */
+    public static function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY_ALL);
+        Cache::forget(self::CACHE_KEY_DROPDOWN);
+    }
+
     /**
      * Scope a query to filter by name.
      */
@@ -51,4 +97,5 @@ class Language extends WorldLanguage
             ->filterByDir($filters['dir'] ?? null);
     }
 }
+
 

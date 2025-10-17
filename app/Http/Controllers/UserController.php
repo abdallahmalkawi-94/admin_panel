@@ -32,25 +32,13 @@ class UserController extends Controller
         $filters = $request->only(['name', 'email', 'phone', 'status_id', 'country_code']);
 
         $users = $this->userService->paginate($perPage, $filters);
-        $statuses = $this->userService->getAllStatuses();
-        $countries = $this->userService->getDistinctCountries();
+        $statuses = UserStatusesDropDown();
+        $countries = CountriesDropDown();
 
         return inertia('users/index', [
             'users' => UserResource::collection($users),
             'filters' => $filters,
             'statuses' => $statuses,
-            'countries' => $countries,
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $countries = $this->userService->getDistinctCountries();
-
-        return inertia('users/create', [
             'countries' => $countries,
         ]);
     }
@@ -67,6 +55,18 @@ class UserController extends Controller
             logger($e->getMessage());
             return back()->withInput()->with('error', 'Failed to create user: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): Response|ResponseFactory
+    {
+        $countries = CountriesDropDown();
+
+        return inertia('users/create', [
+            'countries' => $countries,
+        ]);
     }
 
     /**
@@ -87,8 +87,8 @@ class UserController extends Controller
     public function edit(User $user): Response|ResponseFactory
     {
         $user->load(['status', 'country']);
-        $countries = $this->userService->getDistinctCountries();
-        $statuses = $this->userService->getAllStatuses();
+        $countries = CountriesDropDown();
+        $statuses = UserStatusesDropDown();
 
         return inertia('users/edit', [
             'user' => (new UserResource($user))->resolve(),

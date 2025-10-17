@@ -35,55 +35,6 @@ class CountryRepository extends BaseRepository
     }
 
     /**
-     * Get all countries (cached) - used for dropdowns
-     */
-    public function getAllCountries(): Collection
-    {
-        return Cache::remember(self::CACHE_KEY_ALL_COUNTRIES, self::CACHE_TTL, function () {
-            return $this->getModel()->newQuery()
-                ->where('status', 1) // Only active countries
-                ->get(['id', 'iso2', 'iso3', 'name', 'phone_code', 'region', 'subregion', 'status']);
-        });
-    }
-
-    /**
-     * Get countries list for dropdowns (iso2 and name only)
-     */
-    public function getCountriesForDropdown(): array
-    {
-        return Cache::remember(self::CACHE_KEY_ALL_COUNTRIES . ':dropdown', self::CACHE_TTL, function () {
-            return $this->getModel()->newQuery()
-                ->where('status', 1)
-                ->get(['iso2', 'name'])
-                ->map(function ($country) {
-                    return [
-                        'code' => $country->iso2,
-                        'name' => $country->name,
-                    ];
-                })
-                ->toArray();
-        });
-    }
-
-    /**
-     * Get distinct regions from countries (cached)
-     */
-    public function getDistinctRegions(): array
-    {
-        return Cache::remember(self::CACHE_KEY_REGIONS, self::CACHE_TTL, function () {
-            return DB::table('countries')
-                ->select('region')
-                ->distinct()
-                ->whereNotNull('region')
-                ->where('region', '!=', '')
-                ->where('status', 1)
-                ->get()
-                ->pluck('region')
-                ->toArray();
-        });
-    }
-
-    /**
      * Find a country by iso2 code (cached)
      */
     public function findByIso2(string $iso2): ?Model
@@ -91,34 +42,6 @@ class CountryRepository extends BaseRepository
         return Cache::remember(self::CACHE_KEY_COUNTRY_BY_ISO2 . $iso2, self::CACHE_TTL, function () use ($iso2) {
             return $this->getModel()->newQuery()->where('iso2', $iso2)->first();
         });
-    }
-
-    /**
-     * Clear all country caches
-     */
-    public function clearCache(): void
-    {
-        Cache::forget(self::CACHE_KEY_ALL_COUNTRIES);
-        Cache::forget(self::CACHE_KEY_ALL_COUNTRIES . ':dropdown');
-        Cache::forget(self::CACHE_KEY_REGIONS);
-
-        // Clear all iso2 caches (this is a simple approach, could be optimized)
-        $countries = $this->getModel()->newQuery()->get(['iso2']);
-        foreach ($countries as $country) {
-            Cache::forget(self::CACHE_KEY_COUNTRY_BY_ISO2 . $country->iso2);
-        }
-    }
-
-    /**
-     * Clear cache for a specific country
-     */
-    public function clearCountryCache(string $iso2): void
-    {
-        Cache::forget(self::CACHE_KEY_COUNTRY_BY_ISO2 . $iso2);
-        // Also clear the main caches as the list has changed
-        Cache::forget(self::CACHE_KEY_ALL_COUNTRIES);
-        Cache::forget(self::CACHE_KEY_ALL_COUNTRIES . ':dropdown');
-        Cache::forget(self::CACHE_KEY_REGIONS);
     }
 }
 

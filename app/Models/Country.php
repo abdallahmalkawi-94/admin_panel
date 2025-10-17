@@ -2,10 +2,81 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Nnjeim\World\Models\Country as WorldCountry;
 
 class Country extends WorldCountry
 {
+    // Cache constants
+    const CACHE_KEY_ALL = 'countries:all';
+    const CACHE_KEY_DROPDOWN = 'countries:all:dropdown';
+    const CACHE_KEY_REGIONS = 'countries:regions';
+    const CACHE_TTL = 86400; // 24 hours
+
+    /**
+     * Get all cached countries
+     * Usage: Country::cached()
+     */
+    public static function cached(): Collection
+    {
+        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+            return self::query()
+                ->where('status', 1)
+                ->orderBy('name')
+                ->get(['id', 'iso2', 'iso3', 'name', 'phone_code', 'region', 'subregion', 'status']);
+        });
+    }
+
+    /**
+     * Get cached countries for dropdown
+     * Usage: Country::dropdown()
+     */
+    public static function dropdown(): array
+    {
+        return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
+            return self::query()
+                ->where('status', 1)
+                ->orderBy('name')
+                ->get(['iso2', 'name'])
+                ->map(fn($country) => [
+                    'code' => $country->iso2,
+                    'name' => $country->name,
+                ])
+                ->toArray();
+        });
+    }
+
+    /**
+     * Get cached distinct regions
+     * Usage: Country::regions()
+     */
+    public static function regions(): array
+    {
+        return Cache::remember(self::CACHE_KEY_REGIONS, self::CACHE_TTL, function () {
+            return self::query()
+                ->select('region')
+                ->distinct()
+                ->whereNotNull('region')
+                ->where('region', '!=', '')
+                ->where('status', 1)
+                ->orderBy('region')
+                ->pluck('region')
+                ->toArray();
+        });
+    }
+
+    /**
+     * Clear all country caches
+     * Usage: Country::clearCache()
+     */
+    public static function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY_ALL);
+        Cache::forget(self::CACHE_KEY_DROPDOWN);
+        Cache::forget(self::CACHE_KEY_REGIONS);
+    }
+
     /**
      * Scope a query to filter by name.
      */
@@ -62,4 +133,5 @@ class Country extends WorldCountry
             ->filterByStatus($filters['status'] ?? null);
     }
 }
+
 

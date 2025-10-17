@@ -32,7 +32,7 @@ class CountryController extends Controller
         $filters = $request->only(['name', 'region', 'iso2', 'status']);
 
         $countries = $this->countryService->paginate($perPage, $filters);
-        $regions = $this->countryService->getDistinctRegions();
+        $regions = Country::regions(); // Direct static call - cached
 
         return inertia('countries/index', [
             'countries' => CountryResource::collection($countries),
@@ -46,7 +46,7 @@ class CountryController extends Controller
      */
     public function create(): Response|ResponseFactory
     {
-        $regions = $this->countryService->getDistinctRegions();
+        $regions = Country::regions(); // Direct static call - cached
 
         return inertia('countries/create', [
             'regions' => $regions,
@@ -83,7 +83,7 @@ class CountryController extends Controller
      */
     public function edit(Country $country): Response|ResponseFactory
     {
-        $regions = $this->countryService->getDistinctRegions();
+        $regions = Country::regions(); // Direct static call - cached
 
         return inertia('countries/edit', [
             'country' => (new CountryResource($country))->resolve(),
