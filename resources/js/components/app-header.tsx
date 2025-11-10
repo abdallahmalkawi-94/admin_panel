@@ -31,10 +31,12 @@ import {
     Building2Icon,
     DollarSign,
     Globe,
+    Landmark,
     Languages,
     LayoutGrid,
     Menu,
     Search,
+    Store,
     UsersIcon,
 } from 'lucide-react';
 import AppLogo from './app-logo';
@@ -59,6 +61,11 @@ const navigationGroups: NavGroup[] = [
                 href: "/products",
                 icon: Building2Icon,
             },
+            {
+                title: 'Merchant Management',
+                href: "/merchants",
+                icon: Store,
+            },
         ],
     },
     {
@@ -78,6 +85,11 @@ const navigationGroups: NavGroup[] = [
                 title: 'Languages',
                 href: "/languages",
                 icon: Languages,
+            },
+            {
+                title: 'Bank',
+                href: "/banks",
+                icon: Landmark,
             },
         ],
     },

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Nnjeim\World\Models\Country as WorldCountry;
 
@@ -64,6 +65,14 @@ class Country extends WorldCountry
                 ->pluck('region')
                 ->toArray();
         });
+    }
+
+    /**
+     * Get the merchant settings for the terms and condition.
+     */
+    public function merchantSettings(): HasMany
+    {
+        return $this->hasMany(MerchantSetting::class);
     }
 
     /**

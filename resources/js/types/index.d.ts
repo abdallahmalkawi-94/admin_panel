@@ -116,6 +116,103 @@ export interface Language {
     dir: string;
 }
 
+export interface MerchantStatus {
+    id: number;
+    description: string;
+}
+
+export interface Bank {
+    id: number;
+    en_name: string;
+    ar_name: string;
+    logo_url?: string | null;
+    swift_code?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TermsAndCondition {
+    id: number;
+    content?: string | null;
+    version: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MerchantSettings {
+    id: number;
+    payout_model: number;
+    bank_id?: number | null;
+    bank?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    iban?: string | null;
+    bank_account_no?: string | null;
+    supported_order_type: number;
+    has_custom_urls: boolean;
+    urls_settings?: {
+        callback_url?: string;
+        webhook_url?: string;
+        invoice_inquiry_url?: string;
+        invoice_creation_url?: string;
+        token_key?: string;
+    } | null;
+    attachment?: string | null;
+    terms_and_condition_id: number;
+    terms_and_condition?: {
+        id: number;
+        version: string;
+    } | null;
+    is_enable_sms_notification: boolean;
+    monthly_sms: number;
+    monthly_sms_counter: number;
+    daily_sms: number;
+    daily_sms_counter: number;
+    is_enable_email_notification: boolean;
+    is_enable_auto_redirect: boolean;
+    country_code?: string | null;
+    country?: {
+        code: string;
+        name: string;
+    } | null;
+    currency_code?: string | null;
+    currency?: {
+        code: string;
+        name: string;
+        symbol?: string;
+    } | null;
+}
+
+export interface Merchant {
+    id: number;
+    en_name: string;
+    ar_name: string;
+    commercial_registry_name?: string | null;
+    product_id: number;
+    product?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    referral_id: number;
+    parent_merchant_id: number;
+    parent_merchant?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    status_id: number;
+    status?: MerchantStatus | null;
+    is_live: boolean;
+    logo_url?: string | null;
+    settings?: MerchantSettings | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

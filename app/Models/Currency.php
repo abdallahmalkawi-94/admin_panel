@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Nnjeim\World\Models\Currency as WorldCurrency;
 
@@ -33,13 +34,23 @@ class Currency extends WorldCurrency
         return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
             return self::query()
                 ->get(['code', 'name', 'symbol'])
+                ->groupBy('code')
                 ->map(fn($currency) => [
-                    'code' => $currency->code,
-                    'name' => $currency->name,
-                    'symbol' => $currency->symbol,
+                    'code' => $currency->first()->code,
+                    'name' => $currency->first()->name,
+                    'symbol' => $currency->first()->symbol,
                 ])
+                ->values()
                 ->toArray();
         });
+    }
+
+    /**
+     * Get the merchant settings for the terms and condition.
+     */
+    public function merchantSettings(): HasMany
+    {
+        return $this->hasMany(MerchantSetting::class);
     }
 
     /**
