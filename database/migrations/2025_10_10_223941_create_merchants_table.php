@@ -18,10 +18,10 @@ return new class extends Migration
             $table->string("commercial_registry_name")->nullable();
             $table->foreignId("product_id")->references("id")->on("products");
             $table->integer("referral_id");
-            $table->foreignId("parent_merchant_id")->references("id")->on("merchants");
+            $table->foreignId("parent_merchant_id")->nullable()->references("id")->on("merchants");
             $table->foreignId("status_id")->references("id")->on("merchant_statuses");
             $table->boolean("is_live")->default(false);
-            $table->string("logo_url");
+            $table->string("logo_url")->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
