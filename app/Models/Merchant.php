@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -44,6 +46,10 @@ class Merchant extends Model
         return $this->belongsTo(Merchant::class, 'parent_merchant_id');
     }
 
+    public function childMerchants(): HasMany
+    {
+        return $this->hasMany(Merchant::class, 'parent_merchant_id', 'id');
+    }
     /**
      * Get the status for the merchant.
      */
@@ -58,6 +64,17 @@ class Merchant extends Model
     public function settings(): HasOne
     {
         return $this->hasOne(MerchantSetting::class);
+    }
+
+    /**
+     * Get the invoice types for the merchant.
+     */
+    public function invoiceTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(InvoiceType::class, 'merchant_invoices')
+            ->withTimestamps()
+            ->withPivot('deleted_at')
+            ->wherePivot('deleted_at', null);
     }
 
     /**

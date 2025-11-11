@@ -39,6 +39,18 @@ class MerchantResource extends JsonResource
             ],
             'is_live' => $this->is_live,
             'logo_url' => $this->logo_url ? asset('storage/' . $this->logo_url) : null,
+            'invoice_types' => $this->when($this->relationLoaded('invoiceTypes'), function () {
+                return $this->invoiceTypes->map(function ($invoiceType) {
+                    return [
+                        'id' => $invoiceType->id,
+                        'code' => $invoiceType->code,
+                        'description' => $invoiceType->description,
+                    ];
+                });
+            }),
+            'invoice_type_ids' => $this->when($this->relationLoaded('invoiceTypes'), function () {
+                return $this->invoiceTypes->pluck('id')->toArray();
+            }),
             'settings' => $this->when($this->relationLoaded('settings'), function () {
                 return [
                     'id' => $this->settings?->id,

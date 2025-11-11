@@ -4,6 +4,7 @@
 use App\Models\Bank;
 use App\Models\Country;
 use App\Models\Currency;
+use App\Models\InvoiceType;
 use App\Models\Language;
 use App\Models\Merchant;
 use App\Models\MerchantStatus;
@@ -87,6 +88,20 @@ function TermsAndConditionsDropDown(): array
             ->map(fn($terms) => [
                 'id' => $terms->id,
                 'version' => $terms->version,
+            ])
+            ->toArray();
+    });
+}
+
+function InvoiceTypesDropDown(): array
+{
+    return Cache::remember('invoice_types:dropdown', 86400, function () {
+        return InvoiceType::query()
+            ->get(['id', 'code', 'description'])
+            ->map(fn($invoiceType) => [
+                'id' => $invoiceType->id,
+                'code' => $invoiceType->code,
+                'description' => $invoiceType->description,
             ])
             ->toArray();
     });

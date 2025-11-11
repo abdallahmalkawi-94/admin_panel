@@ -120,6 +120,11 @@ export default function Index({
             label: 'Arabic Name',
         },
         {
+            key: 'parent_merchant',
+            label: 'Parent Merchant',
+            render: (merchant) => merchant.parent_merchant?.en_name || 'N/A',
+        },
+        {
             key: 'product',
             label: 'Product',
             render: (merchant) => merchant.product?.en_name || '-',

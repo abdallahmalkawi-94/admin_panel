@@ -186,6 +186,12 @@ export interface MerchantSettings {
     } | null;
 }
 
+export interface InvoiceType {
+    id: number;
+    code: string;
+    description: string;
+}
+
 export interface Merchant {
     id: number;
     en_name: string;
@@ -209,6 +215,8 @@ export interface Merchant {
     is_live: boolean;
     logo_url?: string | null;
     settings?: MerchantSettings | null;
+    invoice_types: InvoiceType[];
+    invoice_type_ids: number[];
     created_at: string;
     updated_at: string;
 }
