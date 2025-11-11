@@ -40,7 +40,7 @@ class MerchantController extends Controller
         $merchants = $this->merchantService->paginate($perPage, $filters);
         $statuses = MerchantStatusesDropDown();
         $products = ProductsDropDown();
-
+//dd($merchants);
         return inertia('merchants/index', [
             'merchants' => MerchantResource::collection($merchants),
             'filters' => $filters,
@@ -54,11 +54,12 @@ class MerchantController extends Controller
      */
     public function getParentMerchantsByProduct(Request $request): JsonResponse
     {
-        $productId = $request->input('product_id');
+        // Validate the request
+        $validated = $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+        ]);
 
-        if (!$productId) {
-            return response()->json(['error' => 'Product ID is required'], 400);
-        }
+        $productId = (int) $validated['product_id'];
 
         $merchants = $this->merchantService->getParentMerchantsByProduct($productId);
 
@@ -83,6 +84,7 @@ class MerchantController extends Controller
         $merchants = MerchantsDropDown();
         $countries = CountriesDropDown();
         $currencies = CurrenciesDropDown();
+        $invoiceTypes = InvoiceTypesDropDown();
 
         return inertia('merchants/create', [
             'products' => $products,
@@ -92,6 +94,7 @@ class MerchantController extends Controller
             'merchants' => $merchants,
             'countries' => $countries,
             'currencies' => $currencies,
+            'invoiceTypes' => $invoiceTypes,
         ]);
     }
 
@@ -114,7 +117,7 @@ class MerchantController extends Controller
      */
     public function show(Merchant $merchant): Response|ResponseFactory
     {
-        $merchant->load(['status', 'product', 'parentMerchant', 'settings.bank', 'settings.termsAndCondition', 'settings.currency', 'settings.country']);
+        $merchant->load(['status', 'product', 'parentMerchant', 'settings.bank', 'settings.termsAndCondition', 'settings.currency', 'settings.country', 'invoiceTypes']);
 
         return inertia('merchants/show', [
             'merchant' => (new MerchantResource($merchant))->resolve(),
@@ -126,7 +129,7 @@ class MerchantController extends Controller
      */
     public function edit(Merchant $merchant): Response|ResponseFactory
     {
-        $merchant->load(['status', 'product', 'parentMerchant', 'settings.bank', 'settings.termsAndCondition', 'settings.currency', 'settings.country']);
+        $merchant->load(['status', 'product', 'parentMerchant', 'settings.bank', 'settings.termsAndCondition', 'settings.currency', 'settings.country', 'invoiceTypes']);
 
         $products = ProductsDropDown();
         $statuses = MerchantStatusesDropDown();
@@ -135,6 +138,7 @@ class MerchantController extends Controller
         $merchants = MerchantsDropDown();
         $countries = CountriesDropDown();
         $currencies = CurrenciesDropDown();
+        $invoiceTypes = InvoiceTypesDropDown();
 
         return inertia('merchants/edit', [
             'merchant' => (new MerchantResource($merchant))->resolve(),
@@ -145,6 +149,7 @@ class MerchantController extends Controller
             'merchants' => $merchants,
             'countries' => $countries,
             'currencies' => $currencies,
+            'invoiceTypes' => $invoiceTypes,
         ]);
     }
 

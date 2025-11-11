@@ -41,6 +41,7 @@ const ORDER_TYPES: { [key: number]: string } = {
 };
 
 export default function Show({ merchant }: ShowProps) {
+    console.log(merchant);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Merchant: ${merchant.en_name}`} />
@@ -430,28 +431,24 @@ export default function Show({ merchant }: ShowProps) {
                         </>
                     )}
 
-                    {/* Timestamps */}
+                     {/*Invoice Types*/}
                     <Card className="md:col-span-2">
                         <CardHeader>
-                            <CardTitle>Timestamps</CardTitle>
+                            <CardTitle>Invoice Types</CardTitle>
+                            <CardDescription>
+                                Supported invoice types for this merchant
+                            </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex gap-8">
-                            <div className="grid gap-2">
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Created At
-                                </dt>
-                                <dd className="text-sm">
-                                    {merchant.created_at}
-                                </dd>
-                            </div>
-                            <div className="grid gap-2">
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Updated At
-                                </dt>
-                                <dd className="text-sm">
-                                    {merchant.updated_at}
-                                </dd>
-                            </div>
+                        <CardContent className="flex flex-wrap gap-2">
+                            {merchant.invoice_types && merchant.invoice_types.length > 0 ? (
+                                merchant.invoice_types.map((invoice_type) => (
+                                    <Badge key={invoice_type.id} variant="outline">
+                                        {invoice_type.description}
+                                    </Badge>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No invoice types assigned</p>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

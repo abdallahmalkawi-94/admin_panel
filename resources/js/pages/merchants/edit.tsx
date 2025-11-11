@@ -19,6 +19,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Save } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
 import axios from 'axios';
@@ -72,15 +73,21 @@ interface Currency {
     name: string;
 }
 
+interface InvoiceType {
+    id: number;
+    code: string;
+    description: string;
+}
+
 interface EditProps {
     merchant: Merchant;
     products: Product[];
     statuses: MerchantStatus[];
     banks: Bank[];
     termsAndConditions: TermsAndCondition[];
-    merchants: MerchantItem[];
     countries: Country[];
     currencies: Currency[];
+    invoiceTypes: InvoiceType[];
 }
 
 export default function Edit({
@@ -89,9 +96,9 @@ export default function Edit({
     statuses,
     banks,
     termsAndConditions,
-    merchants,
     countries,
     currencies,
+    invoiceTypes,
 }: EditProps) {
     const [availableParentMerchants, setAvailableParentMerchants] = useState<MerchantItem[]>([]);
     const [loadingMerchants, setLoadingMerchants] = useState(false);
@@ -107,6 +114,7 @@ export default function Edit({
         is_live: merchant.is_live || false,
         logo: null as File | null,
         attachment: null as File | null,
+        invoice_type_ids: (merchant.invoice_type_ids || []) as number[],
         // Settings - Nested structure to match create form
         settings: {
             payout_model: merchant.settings?.payout_model?.toString() || '1',
@@ -356,10 +364,10 @@ export default function Edit({
                                             }
                                         >
                                             <SelectValue placeholder={
-                                                !data.product_id 
-                                                    ? "Select a product first" 
-                                                    : loadingMerchants 
-                                                    ? "Loading..." 
+                                                !data.product_id
+                                                    ? "Select a product first"
+                                                    : loadingMerchants
+                                                    ? "Loading..."
                                                     : "Select parent merchant"
                                             } />
                                         </SelectTrigger>
@@ -438,6 +446,33 @@ export default function Edit({
                                     )}
                                 </div>
                             </div>
+
+                            {/* Invoice Types */}
+                            {!data.parent_merchant_id && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="invoice_types">
+                                        Invoice Types{' '}
+                                        <span className="text-destructive">*</span>
+                                    </Label>
+                                    <MultiSelect
+                                        options={invoiceTypes.map((type) => ({
+                                            id: type.id,
+                                            label: type.description,
+                                        }))}
+                                        selected={data.invoice_type_ids}
+                                        onChange={(values) =>
+                                            setData('invoice_type_ids', values)
+                                        }
+                                        placeholder="Select invoice types..."
+                                        error={!!errors.invoice_type_ids}
+                                    />
+                                    {errors.invoice_type_ids && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.invoice_type_ids}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Mode and Status */}
                             <div className="grid gap-6 md:grid-cols-2">
@@ -880,7 +915,6 @@ export default function Edit({
                     </Card>
 
                     {/* Financial Settings */}
-                    {!data.parent_merchant_id && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Financial Settings</CardTitle>
@@ -967,55 +1001,54 @@ export default function Edit({
 
                             {/* Bank, IBAN, Account No - Hidden if payout model is Manual */}
                             {data.settings.payout_model !== '1' && (
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="iban">IBAN</Label>
-                                    <Input
-                                        id="iban"
-                                        type="text"
-                                        value={data.settings.iban}
-                                        onChange={(e) =>
-                                            setData('settings.iban', e.target.value)
-                                        }
-                                        placeholder="SA0000000000000000000000"
-                                        aria-invalid={!!errors['settings.iban']}
-                                    />
-                                    {errors['settings.iban'] && (
-                                        <p className="text-sm text-destructive">
-                                            {errors['settings.iban']}
-                                        </p>
-                                    )}
-                                </div>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="iban">IBAN</Label>
+                                        <Input
+                                            id="iban"
+                                            type="text"
+                                            value={data.settings.iban}
+                                            onChange={(e) =>
+                                                setData('settings.iban', e.target.value)
+                                            }
+                                            placeholder="SA0000000000000000000000"
+                                            aria-invalid={!!errors['settings.iban']}
+                                        />
+                                        {errors['settings.iban'] && (
+                                            <p className="text-sm text-destructive">
+                                                {errors['settings.iban']}
+                                            </p>
+                                        )}
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="bank_account_no">
-                                        Bank Account Number{' '}
-                                        {data.settings.payout_model !== '1' && <span className="text-destructive">*</span>}
-                                    </Label>
-                                    <Input
-                                        id="bank_account_no"
-                                        type="text"
-                                        value={data.settings.bank_account_no}
-                                        onChange={(e) =>
-                                            setData(
-                                                'settings.bank_account_no',
-                                                e.target.value,
-                                            )
-                                        }
-                                        placeholder="1234567890"
-                                        aria-invalid={!!errors['settings.bank_account_no']}
-                                    />
-                                    {errors['settings.bank_account_no'] && (
-                                        <p className="text-sm text-destructive">
-                                            {errors['settings.bank_account_no']}
-                                        </p>
-                                    )}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="bank_account_no">
+                                            Bank Account Number{' '}
+                                            {data.settings.payout_model !== '1' && <span className="text-destructive">*</span>}
+                                        </Label>
+                                        <Input
+                                            id="bank_account_no"
+                                            type="text"
+                                            value={data.settings.bank_account_no}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'settings.bank_account_no',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="1234567890"
+                                            aria-invalid={!!errors['settings.bank_account_no']}
+                                        />
+                                        {errors['settings.bank_account_no'] && (
+                                            <p className="text-sm text-destructive">
+                                                {errors['settings.bank_account_no']}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
                             )}
                         </CardContent>
                     </Card>
-                    )}
 
                     {/* Submit Buttons */}
                     <div className="flex items-center justify-end gap-4">

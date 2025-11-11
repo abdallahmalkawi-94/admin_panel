@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Repositories\MerchantInvoiceRepository;
 use App\Repositories\MerchantRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Storage;
 class MerchantService
 {
     protected MerchantRepository $merchantRepository;
+    protected MerchantInvoiceRepository $merchantInvoiceRepository;
 
-    public function __construct(MerchantRepository $merchantRepository)
+    public function __construct(MerchantRepository $merchantRepository, MerchantInvoiceRepository $merchantInvoiceRepository)
     {
         $this->merchantRepository = $merchantRepository;
+        $this->merchantInvoiceRepository = $merchantInvoiceRepository;
     }
 
     public function paginate($perPage = 10, array $filters = []): Collection|LengthAwarePaginator
@@ -86,8 +89,13 @@ class MerchantService
                 }
             }
 
+            // Sync invoice types if provided
+            if (isset($data['invoice_type_ids']) && is_array($data['invoice_type_ids'])) {
+                $this->syncInvoiceTypes($merchant, $data['invoice_type_ids']);
+            }
+
             DB::commit();
-            return $merchant->load(['settings', 'status', 'product']);
+            return $merchant->load(['settings', 'status', 'product', 'invoiceTypes']);
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -98,8 +106,20 @@ class MerchantService
     {
         $merchant = $this->merchantRepository->findById($id);
 
-        if ($merchant && $merchant->logo_url) {
-            Storage::disk('public')->delete($merchant->logo_url);
+        if ($merchant) {
+            // Soft delete all invoice types relationships
+            $this->merchantInvoiceRepository->DeleteBulk([], $merchant->id);
+            DB::table('merchant_invoices')
+                ->where('merchant_id', $id)
+                ->whereNull('deleted_at')
+                ->update([
+                    'deleted_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            if ($merchant->logo_url) {
+                Storage::disk('public')->delete($merchant->logo_url);
+            }
         }
 
         return $this->merchantRepository->delete($id, $force);
@@ -176,12 +196,65 @@ class MerchantService
             $settingsData['merchant_id'] = $merchant->id;
             $merchant->settings()->create($settingsData);
 
+            // Sync invoice types if provided
+            $this->syncInvoiceTypes($merchant, $data['invoice_type_ids']);
+
             DB::commit();
-            return $merchant->load(['settings', 'status', 'product']);
+            return $merchant->load(['settings', 'status', 'product', 'invoiceTypes']);
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Sync invoice types with soft delete support
+     */
+    private function syncMerchantInvoices(array $merchantInvoices, array $invoiceTypeIds,  int|array $merchantIds): void
+    {
+        $this->merchantInvoiceRepository->Upsert($merchantInvoices);
+        $this->merchantInvoiceRepository->DeleteBulk($invoiceTypeIds, $merchantIds);
+    }
+
+
+    private function syncInvoiceTypes($merchant, array $invoiceTypeIds): void
+    {
+        DB::transaction(function () use ($merchant, $invoiceTypeIds) {
+            $merchantInvoices = [];
+            $allMerchants = [];
+
+            if (!isset($merchant->parent_merchant_id)) {
+                // Parent merchant → sync to itself + children
+                $merchant->load(['childMerchants']);
+                $allMerchants = $merchant->childMerchants->pluck('id')->toArray();
+                $allMerchants[] = $merchant->id; // include parent
+
+                foreach ($allMerchants as $merchantId) {
+                    foreach ($invoiceTypeIds as $invoiceTypeId) {
+                        $merchantInvoices[] = [
+                            'merchant_id' => $merchantId,
+                            'invoice_type_id' => $invoiceTypeId,
+                            'deleted_at' => null,
+                        ];
+                    }
+                }
+            } else {
+                // Child merchant → copy from parent
+                $parentId = $merchant->parent_merchant_id;
+                $invoiceTypeIds = $this->merchantInvoiceRepository->GetByMerchantId($parentId)->pluck('invoice_type_id')->toArray();
+
+                foreach ($invoiceTypeIds as $invoiceTypeId) {
+                    $merchantInvoices[] = [
+                        'merchant_id' => $merchant->id,
+                        'invoice_type_id' => $invoiceTypeId,
+                        'deleted_at' => null,
+                    ];
+                }
+
+                $allMerchants[] = $merchant->id;
+            }
+            $this->syncMerchantInvoices($merchantInvoices, $invoiceTypeIds, $allMerchants);
+        });
     }
 }
 

@@ -45,9 +45,24 @@ class StoreMerchantRequest extends FormRequest
             // Merchant settings
             'settings' => ['required', 'array'],
             'settings.payout_model' => ['required', 'integer', Rule::in($payoutModels)],
-            'settings.bank_id' => ['nullable', 'integer', 'exists:banks,id'],
-            'settings.iban' => ['nullable', 'string', 'max:255'],
-            'settings.bank_account_no' => ['nullable', 'string', 'max:255'],
+            'settings.bank_id' => [
+                'nullable',
+                'required_unless:settings.payout_model,' . MerchantConstants::PAYOUT_MODEL_MANUAL,
+                'integer',
+                'exists:banks,id'
+            ],
+            'settings.iban' => [
+                'nullable',
+                'required_unless:settings.payout_model,' . MerchantConstants::PAYOUT_MODEL_MANUAL,
+                'string',
+                'max:255'
+            ],
+            'settings.bank_account_no' => [
+                'nullable',
+                'required_unless:settings.payout_model,' . MerchantConstants::PAYOUT_MODEL_MANUAL,
+                'string',
+                'max:255'
+            ],
             'settings.supported_order_type' => ['required', 'integer', Rule::in($orderTypes)],
             'settings.has_custom_urls' => ['boolean'],
             'settings.urls_settings' => ['nullable', 'array'],
@@ -66,6 +81,17 @@ class StoreMerchantRequest extends FormRequest
             'settings.is_enable_auto_redirect' => ['boolean'],
             'settings.country_code' => ['required', 'string', 'max:2', 'exists:countries,iso2'],
             'settings.currency_code' => ['required', 'string', 'max:3', 'exists:currencies,code'],
+
+            // Invoice types
+            'invoice_type_ids' => [
+                'array',
+                function ($attribute, $value, $fail) {
+                    if (is_null(request('parent_merchant_id')) && empty($value)) {
+                        $fail(__('The :attribute field is required when parent merchant is not set.', ['attribute' => $attribute]));
+                    }
+                },
+            ],
+            'invoice_type_ids.*' => ['integer', 'exists:invoice_types,id'],
         ];
     }
 
@@ -104,6 +130,16 @@ class StoreMerchantRequest extends FormRequest
             'settings.daily_sms' => 'daily SMS limit',
             'settings.is_enable_email_notification' => 'email notifications',
             'settings.is_enable_auto_redirect' => 'auto redirect',
+            'invoice_type_ids' => 'invoice types',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'settings.bank_id.required_unless' => __("The :attribute is required when payout model not manual") ,
+            'settings.iban.required_unless' => __("The :attribute is required when payout model not manual") ,
+            'settings.bank_account_no.required_unless' => __("The :attribute is required when payout model not manual") ,
         ];
     }
 }

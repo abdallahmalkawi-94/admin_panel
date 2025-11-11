@@ -68,6 +68,10 @@ class UpdateMerchantRequest extends FormRequest
             'settings.is_enable_auto_redirect' => ['boolean'],
             'settings.country_code' => ['required', 'string', 'max:2', 'exists:countries,iso2'],
             'settings.currency_code' => ['required', 'string', 'max:3', 'exists:currencies,code'],
+
+            // Invoice types
+            'invoice_type_ids' => ['required', 'array', 'min:1'],
+            'invoice_type_ids.*' => ['integer', 'exists:invoice_types,id'],
         ];
     }
 
@@ -93,6 +97,7 @@ class UpdateMerchantRequest extends FormRequest
             'bank_account_no' => 'bank account number',
             'supported_order_type' => 'supported order type',
             'terms_and_condition_id' => 'terms and conditions',
+            'invoice_type_ids' => 'invoice types',
         ];
     }
 }
