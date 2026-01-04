@@ -40,7 +40,6 @@ class MerchantController extends Controller
         $merchants = $this->merchantService->paginate($perPage, $filters);
         $statuses = MerchantStatusesDropDown();
         $products = ProductsDropDown();
-//dd($merchants);
         return inertia('merchants/index', [
             'merchants' => MerchantResource::collection($merchants),
             'filters' => $filters,

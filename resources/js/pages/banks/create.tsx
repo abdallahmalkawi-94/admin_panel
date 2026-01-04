@@ -171,7 +171,7 @@ export default function Create() {
                                 </Button>
                                 <Button type="submit" disabled={processing}>
                                     <Save className="mr-2 h-4 w-4" />
-                                    {processing ? 'Creating...' : 'Create Bank'}
+                                    {processing ? 'Creating...' : 'Create'}
                                 </Button>
                             </div>
                         </form>

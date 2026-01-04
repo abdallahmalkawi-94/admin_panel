@@ -23,6 +23,16 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { Save } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+    BankDropDown,
+    CountryDropDown,
+    CurrencyDropDown,
+    InvoiceTypeDropDown,
+    MerchantDropDown,
+    MerchantStatusDropDown,
+    ProductDropDown,
+    TermsAndConditionDropDown,
+} from '@/types/dropdown';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,58 +45,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Product {
-    id: number;
-    en_name: string;
-    ar_name: string;
-}
-
-interface MerchantStatus {
-    id: number;
-    description: string;
-}
-
-interface Bank {
-    id: number;
-    en_name: string;
-    ar_name: string;
-}
-
-interface TermsAndCondition {
-    id: number;
-    version: string;
-}
-
-interface Merchant {
-    id: number;
-    en_name: string;
-    ar_name: string;
-}
-
-interface Country {
-    code: string;
-    name: string;
-}
-
-interface Currency {
-    code: string;
-    name: string;
-}
-
-interface InvoiceType {
-    id: number;
-    code: string;
-    description: string;
-}
-
 interface CreateProps {
-    products: Product[];
-    statuses: MerchantStatus[];
-    banks: Bank[];
-    termsAndConditions: TermsAndCondition[];
-    countries: Country[];
-    currencies: Currency[];
-    invoiceTypes: InvoiceType[];
+    products: ProductDropDown[];
+    statuses: MerchantStatusDropDown[];
+    banks: BankDropDown[];
+    termsAndConditions: TermsAndConditionDropDown[];
+    countries: CountryDropDown[];
+    currencies: CurrencyDropDown[];
+    invoiceTypes: InvoiceTypeDropDown[];
 }
 
 export default function Create({
@@ -98,7 +64,7 @@ export default function Create({
     currencies,
     invoiceTypes,
 }: CreateProps) {
-    const [availableParentMerchants, setAvailableParentMerchants] = useState<Merchant[]>([]);
+    const [availableParentMerchants, setAvailableParentMerchants] = useState<MerchantDropDown[]>([]);
     const [loadingMerchants, setLoadingMerchants] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -1055,7 +1021,7 @@ export default function Create({
                         </Button>
                         <Button type="submit" disabled={processing}>
                             <Save className="mr-2 h-4 w-4" />
-                            {processing ? 'Creating...' : 'Create Merchant'}
+                            {processing ? 'Creating...' : 'Create'}
                         </Button>
                     </div>
                 </form>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Constants;
 
-class MerchantStatusConstants
+class PspStatusConstants
 {
     const ACTIVE = 1;
     const INACTIVE = 2;

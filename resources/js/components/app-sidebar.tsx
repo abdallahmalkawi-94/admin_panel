@@ -48,6 +48,11 @@ const navigationGroups: NavGroup[] = [
                 href: "/merchants",
                 icon: Store,
             },
+            {
+                title: 'Psp Management',
+                href: "/psps",
+                icon: Building2Icon,
+            },
 
         ],
     },

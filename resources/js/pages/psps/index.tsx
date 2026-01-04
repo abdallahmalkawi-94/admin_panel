@@ -1,9 +1,10 @@
 import AppLayout from '@/layouts/app-layout';
 import {
     type BreadcrumbItem,
+    type Psp,
+    type PspStatus,
+    type Country,
     type PaginatedResourceCollection,
-    type User,
-    type UserStatus,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
@@ -12,58 +13,30 @@ import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
-import { CountryDropDown } from '@/types/dropdown';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
-        href: '/users',
+        title: 'PSPs',
+        href: '/psps',
     },
 ];
 
-// User Status Constants (matching backend)
-const USER_STATUS = {
-    ACTIVE: 1,
-    IN_ACTIVE: 2,
-    PENDING_VERIFICATION: 3,
-    BLOCKED: 4,
-} as const;
-
 interface Filters {
     name?: string;
-    email?: string;
-    phone?: string;
-    status_id?: string;
-    country_code?: string;
+    code?: string;
+    country_id?: string;
+    psp_status_id?: string;
 }
 
 interface IndexProps {
-    users: PaginatedResourceCollection<User>;
+    psps: PaginatedResourceCollection<Psp>;
     filters: Filters;
-    statuses: UserStatus[];
-    countries: CountryDropDown[];
+    statuses: PspStatus[];
+    countries: Country[];
 }
 
-// Helper function to get badge variant based on status
-const getStatusVariant = (
-    statusId: number,
-): 'success' | 'dark' | 'info' | 'destructive' | 'secondary' => {
-    switch (statusId) {
-        case USER_STATUS.ACTIVE:
-            return 'success'; // Green
-        case USER_STATUS.IN_ACTIVE:
-            return 'dark'; // Black
-        case USER_STATUS.PENDING_VERIFICATION:
-            return 'info'; // Blue
-        case USER_STATUS.BLOCKED:
-            return 'destructive'; // Red
-        default:
-            return 'secondary';
-    }
-};
-
 export default function Index({
-    users,
+    psps,
     filters,
     statuses,
     countries,
@@ -76,14 +49,14 @@ export default function Index({
         clearFilters,
         hasActiveFilters,
     } = useFilters<Filters>({
-        route: '/users',
+        route: '/psps',
         initialFilters: filters,
-        perPage: users.meta.per_page,
+        perPage: psps.meta.per_page,
     });
 
     const handlePerPageChange = (value: string) => {
         router.get(
-            '/users',
+            '/psps',
             { per_page: value, ...searchFilters },
             {
                 preserveState: true,
@@ -93,17 +66,17 @@ export default function Index({
     };
 
     // Define table columns
-    const columns: Column<User>[] = [
+    const columns: Column<Psp>[] = [
         {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (user) => (
+            render: (psp) => (
                 <Link
-                    href={`/users/${user.id}`}
+                    href={`/psps/${psp.id}`}
                     className="text-blue-600 hover:text-blue-800 hover:underline"
                 >
-                    {user.id}
+                    {psp.id}
                 </Link>
             ),
         },
@@ -112,23 +85,45 @@ export default function Index({
             label: 'Name',
         },
         {
-            key: 'email',
-            label: 'Email',
+            key: 'code',
+            label: 'Code',
+            render: (psp) => (
+                <code className="rounded bg-muted px-2 py-1 text-sm">
+                    {psp.code}
+                </code>
+            ),
         },
         {
-            key: 'phone',
-            label: 'Phone',
-            render: (user) =>
-                user.country_code && user.mobile_number
-                    ? `${user.country_code} ${user.mobile_number}`
+            key: 'country',
+            label: 'Country',
+            render: (psp) => psp.country?.name || '-',
+        },
+        {
+            key: 'settlement_currency',
+            label: 'Currency',
+            render: (psp) =>
+                psp.settlement_currency
+                    ? `${psp.settlement_currency.code} (${psp.settlement_currency.symbol})`
                     : '-',
+        },
+        {
+            key: 'monthly_fees',
+            label: 'Monthly Fees',
+            render: (psp) => `${psp.monthly_fees}`,
         },
         {
             key: 'status',
             label: 'Status',
-            render: (user) => (
-                <Badge variant={getStatusVariant(user.status_id)}>
-                    {user.status.description}
+            render: (psp) => (
+                <Badge variant="info">{psp.status?.description}</Badge>
+            ),
+        },
+        {
+            key: 'support_money_splitting',
+            label: 'Money Splitting',
+            render: (psp) => (
+                <Badge variant={psp.support_money_splitting ? 'success' : 'secondary'}>
+                    {psp.support_money_splitting ? 'Yes' : 'No'}
                 </Badge>
             ),
         },
@@ -143,19 +138,26 @@ export default function Index({
             placeholder: 'Search by name...',
         },
         {
-            key: 'email',
-            label: 'Email',
+            key: 'code',
+            label: 'Code',
             type: 'text',
-            placeholder: 'Search by email...',
+            placeholder: 'Search by code...',
         },
         {
-            key: 'phone',
-            label: 'Phone',
-            type: 'text',
-            placeholder: 'Search by phone...',
+            key: 'country_id',
+            label: 'Country',
+            type: 'select',
+            placeholder: 'All countries',
+            options: [
+                { value: 'all', label: 'All countries' },
+                ...countries.map((country) => ({
+                    value: country?.id?.toString(),
+                    label: country.name,
+                })),
+            ],
         },
         {
-            key: 'status_id',
+            key: 'psp_status_id',
             label: 'Status',
             type: 'select',
             placeholder: 'All statuses',
@@ -167,39 +169,26 @@ export default function Index({
                 })),
             ],
         },
-        {
-            key: 'country_code',
-            label: 'Country',
-            type: 'select',
-            placeholder: 'All countries',
-            options: [
-                { value: 'all', label: 'All countries' },
-                ...countries.map((country) => ({
-                    value: country.code,
-                    label: country.name,
-                })),
-            ],
-        },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Users" />
+            <Head title="PSPs" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            Users
+                            Payment Service Providers
                         </h1>
                         <p className="text-muted-foreground">
-                            Manage and view all users in the system
+                            Manage and view all PSPs in the system
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href="/users/create">
+                        <Link href="/psps/create">
                             <Plus className="mr-2 h-4 w-4" />
-                            Add User
+                            Add PSP
                         </Link>
                     </Button>
                 </div>
@@ -216,15 +205,16 @@ export default function Index({
 
                 {/* Data Table */}
                 <DataTable
-                    title="All Users"
-                    description="A list of all users including their name, email, and contact information."
-                    data={users}
+                    title="All PSPs"
+                    description="A list of all payment service providers including their details."
+                    data={psps}
                     columns={columns}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
-                    emptyMessage="No users found."
+                    emptyMessage="No PSPs found."
                 />
             </div>
         </AppLayout>
     );
 }
+

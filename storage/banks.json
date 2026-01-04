@@ -1,0 +1,572 @@
+[
+    {
+        "en_name": "Arab Bank",
+        "ar_name": "البنك العربي",
+        "swift_code": "ARABJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Arab Banking Corporation(Jordan)",
+        "ar_name": "المؤسسة العربية المصرفية",
+        "swift_code": "ABCJJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Bank of Jordan",
+        "ar_name": "بنك الأردن",
+        "swift_code": "BJORJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Cairo Amman Bank",
+        "ar_name": "بنك القاهرة عمان",
+        "swift_code": "CAABJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Capital Bank of Jordan",
+        "ar_name": "بنك المال الأردني",
+        "swift_code": "EFBKJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Jordan Commercial Bank",
+        "ar_name": "البنك التجاري الأردني",
+        "swift_code": "JGBAJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Jordan Kuwait Bank",
+        "ar_name": "البنك الأردني الكويتي",
+        "swift_code": "JKBAJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Jordan Ahli Bank",
+        "ar_name": "البنك الأهلي الأردني",
+        "swift_code": "JONBJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Housing Bank for Trade & Finance",
+        "ar_name": "بنك الإسكان للتجارة والتمويل",
+        "swift_code": "HBHOJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Arab Jordan Investment Bank",
+        "ar_name": "بنك الاستثمار العربي الأردني",
+        "swift_code": "AJIBJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "INVESTBANK",
+        "ar_name": "البنك الاستثماري",
+        "swift_code": "JIFBJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Société Générale de Banque Jordanie",
+        "ar_name": "بنك سوسيته جنرال (الأردن)",
+        "swift_code": "SGMEJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Bank al Etihad",
+        "ar_name": "بنك الاتحاد",
+        "swift_code": "UBSIJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Islamic International Arab Bank",
+        "ar_name": "البنك العربي الإسلامي الدولي",
+        "swift_code": "IIBAJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Jordan Islamic Bank",
+        "ar_name": "البنك الإسلامي الأردني",
+        "swift_code": "JIBAJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Safwa Islamic Bank",
+        "ar_name": "بنك صفوة الإسلامي",
+        "swift_code": "JDIBJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Standard Chartered",
+        "ar_name": "ستاندرد تشارترد",
+        "swift_code": "SCBLJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Egyptian Arab Land Bank",
+        "ar_name": "البنك العقاري المصري العربي",
+        "swift_code": "ARLBJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Citibank",
+        "ar_name": "سيتي بنك",
+        "swift_code": "CITIJOAX",
+        "code": "JO"
+    },
+    {
+        "en_name": "Rafidain Bank",
+        "ar_name": "مصرف الرافدين",
+        "swift_code": "RAFBJOA1",
+        "code": "JO"
+    },
+    {
+        "en_name": "National Bank of Kuwait",
+        "ar_name": "بنك الكويت الوطني",
+        "swift_code": "NBOKJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "BLOM Bank",
+        "ar_name": "بنك لبنان والمهجر",
+        "swift_code": "BLOMJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Bank Audi",
+        "ar_name": "بنك عود-مجموعة عوده سرادار",
+        "swift_code": "AUDBJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Rajhi Bank",
+        "ar_name": "مصرف الراجحي",
+        "swift_code": "RJHIJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Saudi National Bank",
+        "ar_name": "البنك الأهلي السعودي",
+        "swift_code": "NCBKSAJE",
+        "code": "SA"
+    },
+    {
+        "en_name": "The Saudi British Bank (SABB)",
+        "ar_name": "(البنك السعودي البريطاني (ساب))",
+        "swift_code": "SABBSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Saudi Investment Bank",
+        "ar_name": "البنك السعودي للاستثمار",
+        "swift_code": "SIBCSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Alinma bank",
+        "ar_name": "مصرف الإنماء",
+        "swift_code": "INMASARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Banque Saudi Fransi",
+        "ar_name": "البنك السعودي الفرنسي",
+        "swift_code": "BSFRSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Riyad Bank",
+        "ar_name": "بنك الرياض",
+        "swift_code": "RIBLSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Al Rajhi Bank",
+        "ar_name": "مصرف الراجحي",
+        "swift_code": "RJHISARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Arab National Bank",
+        "ar_name": "البنك العربي الوطني",
+        "swift_code": "ARNBSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Bank AlBilad",
+        "ar_name": "بنك البلاد",
+        "swift_code": "ALBISARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Bank AlJazira",
+        "ar_name": "بنك الجزيرة",
+        "swift_code": "BJAZSAJE",
+        "code": "SA"
+    },
+    {
+        "en_name": "Gulf International Bank Saudi Arabia (GIB-SA)",
+        "ar_name": "بنك الخليج الدولي - السعودية",
+        "swift_code": "GULFSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Emirates NBD",
+        "ar_name": "بنك الإمارات دبي الوطني",
+        "swift_code": "EBILSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "National Bank of Bahrain (NBB)",
+        "ar_name": "بنك البحرين الوطني (NBB)",
+        "swift_code": "NBOBSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "National Bank of Kuwait (NBK)",
+        "ar_name": "بنك الكويت الوطني (NBK)",
+        "swift_code": "NBOKSAJE",
+        "code": "SA"
+    },
+    {
+        "en_name": "Bank Muscat",
+        "ar_name": "بنك مسقط",
+        "swift_code": "BMUSSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Deutsche Bank",
+        "ar_name": "دويتشه بنك",
+        "swift_code": "DEUTSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "BNP Paribas",
+        "ar_name": "بي إن بي باريبا",
+        "swift_code": "BNPASARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "J.P. Morgan Chase N.A",
+        "ar_name": "جي بي مورغان تشيس N.A",
+        "swift_code": "CHASSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "National Bank of Pakistan (NBP)",
+        "ar_name": "البنك الوطني الباكستاني (NBP)",
+        "swift_code": "NBPASARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "T.C.ZIRAAT BANKASI A.S.",
+        "ar_name": "T.C.ZIRAAT BANKASI A.S.",
+        "swift_code": "TCZBSAJE",
+        "code": "SA"
+    },
+    {
+        "en_name": "Industrial and Commercial Bank of China (ICBC)",
+        "ar_name": "البنك الصناعي والتجاري الصيني",
+        "swift_code": "ICBKSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Qatar National Bank (QNB)",
+        "ar_name": "بنك قطر الوطني (QNB)",
+        "swift_code": "QNBASARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "MUFG Bank, Ltd.",
+        "ar_name": "بنك إم يو أف جي",
+        "swift_code": "BOTKSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "First Abu Dhabi Bank (FAB)",
+        "ar_name": "بنك أبوظبي الأول (FAB)",
+        "swift_code": "FABMSARI",
+        "code": "SA"
+    },
+    {
+        "en_name": "Al Ahli Bank of Kuwait - Egypt (ABK-Egypt)",
+        "ar_name": "البنك الأهلي الكويتي - مصر (البنك الأهلي الكويتي- مصر)",
+        "swift_code": "ECBAEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Banque du Caire",
+        "ar_name": "بنك القاهرة",
+        "swift_code": "BCAIEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "The united bank of Egypt",
+        "ar_name": "بنك مصر المتحد",
+        "swift_code": "UBOEEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "National Bank of Egypt",
+        "ar_name": "البنك الأهلي المصري",
+        "swift_code": "NBEGEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Agricultural Bank of Egypt",
+        "ar_name": "البنك الزراعي المصريي",
+        "swift_code": "BDACEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Bank of Alexandria",
+        "ar_name": "بنك الاسكندرية",
+        "swift_code": "ALEXEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Commercial International Bank (CIB)",
+        "ar_name": "البنك التجاري الدولي (CIB)",
+        "swift_code": "CIBEEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Industrial Development Bank of Egypt",
+        "ar_name": "بنك التنمية الصناعية المصري",
+        "swift_code": "DIBBEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Société Arabe Internationale de Banque (SAIB)",
+        "ar_name": "Société Arabe Internationale de Banque (SAIB)",
+        "swift_code": "SBNKEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Credit Agricole Egypt",
+        "ar_name": "بنك كريدي أجريكول مصر",
+        "swift_code": "AGRIEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Suez Canal Bank",
+        "ar_name": "بنك قناة السويس",
+        "swift_code": "SUCAEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Qatar National Bank Al Ahli (QNB Alahli)",
+        "ar_name": "بنك قطر الوطني الأهلي (QNB Alahli)",
+        "swift_code": "QNBAEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Banque Misr",
+        "ar_name": "بنك مصر",
+        "swift_code": "BMISEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Ahli United Bank",
+        "ar_name": "البنك الأهلي المتحد",
+        "swift_code": "DEIBEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Faisal Islamic Bank of Egypt",
+        "ar_name": "بنك فيصل الاسلامي المصري",
+        "swift_code": "FIEGEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Housing and Development Bank",
+        "ar_name": "بنك الاسكان والتعمير",
+        "swift_code": "HDBKEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Al Baraka Bank of Egypt",
+        "ar_name": "بنك البركة مصر",
+        "swift_code": "ABRKEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "National Bank of Kuwait - Egypt (NBK-Egypt)",
+        "ar_name": "بنك الكويت الوطني - مصر (NBK- مصر)",
+        "swift_code": "WABAEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Abu Dhabi Islamic Bank (ADIB)",
+        "ar_name": "مصرف أبو ظبي الإسلامي (ADIB)",
+        "swift_code": "ABDIEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Abu Dhabi Commercial Bank - Egypt",
+        "ar_name": "بنك أبو ظبي التجاري - مصر",
+        "swift_code": "ADCBEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Egyptian Gulf Bank (EG BANK)",
+        "ar_name": "البنك المصري الخليجي (EG BANK)",
+        "swift_code": "EGGBEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Arab African International Bank",
+        "ar_name": "البنك العربي الأفريقي الدولي",
+        "swift_code": "ARAIEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "HSBC Bank Egypt",
+        "ar_name": "بنك HSBC مصر",
+        "swift_code": "EBBKEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Arab Banking Corporation (Bank ABC)",
+        "ar_name": "المؤسسة العربية المصرفية (بنك ABC)",
+        "swift_code": "EAABEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Export Development Bank of Egypt",
+        "ar_name": "البنك المصري لتنمية الصادرات",
+        "swift_code": "EXDEEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Arab Bank Plc.",
+        "ar_name": "البنك العربي",
+        "swift_code": "ARABEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Arab International Bank",
+        "ar_name": "البنك العربي الدولي",
+        "swift_code": "ARIBEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Arab Investment Bank (AIBK)",
+        "ar_name": "بنك الاستثمار العربي (AIBK)",
+        "swift_code": "AINBEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Attijariwafa Bank Egypt",
+        "ar_name": "بنك التجاري وفا مصر",
+        "swift_code": "BCBIEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Mashreq Bank",
+        "ar_name": "بنك المشرق",
+        "swift_code": "MSHQEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "National Bank of Abu Dhabi (NBAD) Jordan",
+        "ar_name": "بنك أبو ظبي الوطني",
+        "swift_code": "NBADJOAM",
+        "code": "JO"
+    },
+    {
+        "en_name": "Egyptian Arab Land Bank - Egypt",
+        "ar_name": "البنك العقاري المصري العربي",
+        "swift_code": "ARLBEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Blom Bank - Egypt",
+        "ar_name": "بنك لبنان والمهجر)",
+        "swift_code": "MRBAEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Emirates NBD - Egypt",
+        "ar_name": "بنك الإمارات دبي الوطني",
+        "swift_code": "EBILEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Bank Audi - Egypt",
+        "ar_name": "بنك عودة - مصر",
+        "swift_code": "AUDBEGCA ",
+        "code": "EG"
+    },
+    {
+        "en_name": "First Abu Dhabi Bank (FAB) - Egypt",
+        "ar_name": "بنك أبوظبي الأول (FAB)",
+        "swift_code": "NBADEGCA",
+        "code": "EG"
+    },
+    {
+        "en_name": "Citibank - Egypt",
+        "ar_name": "سيتي بنك",
+        "swift_code": "CITIEGCX",
+        "code": "EG"
+    },
+    {
+        "en_name": "Absa Group Limited",
+        "ar_name": "Absa Group Limited",
+        "swift_code": "ABSAZAJJ",
+        "code": "ZA"
+    },
+    {
+        "en_name": "African Bank Limited",
+        "ar_name": "African Bank Limited",
+        "swift_code": "AFRCZAJJ",
+        "code": "ZA"
+    },
+    {
+        "en_name": "Bidvest Bank Limited",
+        "ar_name": "Bidvest Bank Limited",
+        "swift_code": "BIDBZAJJ",
+        "code": "ZA"
+    },
+    {
+        "en_name": "Capitec Bank Limited",
+        "ar_name": "Capitec Bank Limited",
+        "swift_code": "CABLZAJJ",
+        "code": "ZA"
+    },
+    {
+        "en_name": "FirstRand Bank Limited",
+        "ar_name": "FirstRand Bank Limited",
+        "swift_code": "FIRNZAJJ",
+        "code": "ZA"
+    },
+    {
+        "en_name": "Bank of Kigali",
+        "ar_name": "بنك كيغالي",
+        "swift_code": "BKIGRWRW",
+        "code": "RW"
+    },
+    {
+        "en_name": "I&M Bank Rwanda",
+        "ar_name": "بنك I&M رواندا",
+        "swift_code": "IMRWRWRW",
+        "code": "RW"
+    },
+    {
+        "en_name": "WARBA BANK",
+        "ar_name": "بنك وربة",
+        "swift_code": "WRBAKWKW",
+        "code": "KW"
+    },
+    {
+        "en_name": "Boubyan Bank",
+        "ar_name": "بنك بوبيان",
+        "swift_code": "BBYNKWKW",
+        "code": "KW"
+    },
+    {
+        "en_name": "HSBC Bank Middle East Limited",
+        "ar_name": "بنك إتش بي سي الشرق الاوسط المحدود",
+        "swift_code": "BBMEAEAD",
+        "code": "AE"
+    }
+]
