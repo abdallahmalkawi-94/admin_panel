@@ -23,6 +23,15 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { Save } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+    BankDropDown,
+    CountryDropDown,
+    CurrencyDropDown,
+    InvoiceTypeDropDown,
+    MerchantStatusDropDown,
+    ProductDropDown,
+    TermsAndConditionDropDown,
+} from '@/types/dropdown';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,59 +44,21 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Product {
-    id: number;
-    en_name: string;
-    ar_name: string;
-}
-
-interface MerchantStatus {
-    id: number;
-    description: string;
-}
-
-interface Bank {
-    id: number;
-    en_name: string;
-    ar_name: string;
-}
-
-interface TermsAndCondition {
-    id: number;
-    version: string;
-}
-
 interface MerchantItem {
     id: number;
     en_name: string;
     ar_name: string;
 }
 
-interface Country {
-    code: string;
-    name: string;
-}
-
-interface Currency {
-    code: string;
-    name: string;
-}
-
-interface InvoiceType {
-    id: number;
-    code: string;
-    description: string;
-}
-
 interface EditProps {
     merchant: Merchant;
-    products: Product[];
-    statuses: MerchantStatus[];
-    banks: Bank[];
-    termsAndConditions: TermsAndCondition[];
-    countries: Country[];
-    currencies: Currency[];
-    invoiceTypes: InvoiceType[];
+    products: ProductDropDown[];
+    statuses: MerchantStatusDropDown[];
+    banks: BankDropDown[];
+    termsAndConditions: TermsAndConditionDropDown[];
+    countries: CountryDropDown[];
+    currencies: CurrencyDropDown[];
+    invoiceTypes: InvoiceTypeDropDown[];
 }
 
 export default function Edit({

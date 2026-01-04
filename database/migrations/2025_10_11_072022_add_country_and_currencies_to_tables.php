@@ -18,6 +18,8 @@ return new class extends Migration {
         Schema::table("banks", function (Blueprint $table) {
             $table->string("country_code", 2);
             $table->foreign("country_code")->references("iso2")->on("countries");
+
+            $table->unique(['swift_code', 'country_code']);
         });
 
         Schema::table("merchant_settings", function (Blueprint $table) {

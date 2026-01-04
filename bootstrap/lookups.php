@@ -9,6 +9,7 @@ use App\Models\Language;
 use App\Models\Merchant;
 use App\Models\MerchantStatus;
 use App\Models\Product;
+use App\Models\PspStatus;
 use App\Models\TermsAndCondition;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\Cache;
@@ -105,5 +106,10 @@ function InvoiceTypesDropDown(): array
             ])
             ->toArray();
     });
+}
+
+function PspStatusesDropDown(): array
+{
+    return PspStatus::dropdown();
 }
 

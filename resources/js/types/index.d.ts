@@ -221,6 +221,57 @@ export interface Merchant {
     updated_at: string;
 }
 
+export interface PspStatus {
+    id: number;
+    code: string;
+    description: string;
+}
+
+export interface Psp {
+    id: number;
+    name: string;
+    code: string;
+    country_code: string;
+    country?: {
+        id: number;
+        name: string;
+        iso2: string;
+    } | null;
+    settlement_currency_code: string;
+    settlement_currency?: {
+        id: number;
+        name: string;
+        code: string;
+        symbol: string;
+    } | null;
+    monthly_fees: string | number;
+    psp_status_id: number;
+    status?: PspStatus | null;
+    contact_person?: string | null;
+    contact_email?: string | null;
+    base_url?: string | null;
+    sdk_version?: string | null;
+    dashboard_url?: string | null;
+    support_money_splitting: boolean;
+    notes?: string | null;
+    attachment?: string | null;
+    password?: string | null;
+    bank_account_number?: string | null;
+    bank_id?: number | null;
+    bank?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+        swift_code: string;
+    };
+    iban?: string | null;
+    enable_auto_transfer: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+    swift_code?: string | null;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

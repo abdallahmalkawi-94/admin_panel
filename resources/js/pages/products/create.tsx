@@ -15,6 +15,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { Save, RefreshCw } from 'lucide-react';
 import { FormEventHandler } from 'react';
+import { handleGeneratePassword } from '@/helpers/helpers';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,18 +42,6 @@ export default function Create() {
         token_key: '',
         secret_key: '',
     });
-
-    const generateSecretKey = () => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const array = new Uint8Array(20);
-        window.crypto.getRandomValues(array);
-        return Array.from(array, (num) => characters[num % characters.length]).join('');
-    };
-
-    const handleGenerateSecretKey = () => {
-        const newSecretKey = generateSecretKey();
-        setData('secret_key', newSecretKey);
-    };
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -345,7 +334,7 @@ export default function Create() {
                                     />
                                     <Button
                                         type="button"
-                                        onClick={handleGenerateSecretKey}
+                                        onClick={() => handleGeneratePassword(setData, "secret_key")}
                                         className="rounded-l-none border border-l-0 cursor-pointer"
                                         variant="secondary"
                                     >
