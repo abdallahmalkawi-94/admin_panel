@@ -29,6 +29,7 @@ import { type BreadcrumbItem, type NavGroup, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     Building2Icon,
+    CreditCard,
     DollarSign,
     Globe,
     Landmark,
@@ -90,6 +91,26 @@ const navigationGroups: NavGroup[] = [
                 title: 'Bank',
                 href: "/banks",
                 icon: Landmark,
+            },
+            {
+                title: 'Payment Methods',
+                href: "/payment-methods",
+                icon: CreditCard,
+            },
+            {
+                title: 'Payment Networks',
+                href: "/payment-networks",
+                icon: CreditCard,
+            },
+            {
+                title: 'Message Types',
+                href: "/message-types",
+                icon: CreditCard,
+            },
+            {
+                title: 'Invoice Types',
+                href: "/invoice-types",
+                icon: CreditCard,
             },
         ],
     },

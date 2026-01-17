@@ -24,3 +24,7 @@ require __DIR__.'/languages.php';
 require __DIR__.'/merchants.php';
 require __DIR__.'/banks.php';
 require __DIR__.'/psps.php';
+require __DIR__.'/payment-methods.php';
+require __DIR__.'/payment-networks.php';
+require __DIR__.'/message-types.php';
+require __DIR__.'/invoice-types.php';

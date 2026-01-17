@@ -9,16 +9,17 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavGroup } from '@/types';
-import { Link } from '@inertiajs/react';
 import {
     Building2Icon,
+    CreditCard,
     DollarSign,
-    Globe,
+    EarthIcon,
     Landmark,
     Languages,
     LayoutGrid,
+    MessagesSquare,
+    ReceiptIcon,
     Store,
     UsersIcon,
 } from 'lucide-react';
@@ -30,30 +31,29 @@ const navigationGroups: NavGroup[] = [
         items: [
             {
                 title: 'Dashboard',
-                href: "/",
+                href: '/',
                 icon: LayoutGrid,
             },
             {
                 title: 'User Management',
-                href: "/users",
+                href: '/users',
                 icon: UsersIcon,
             },
             {
                 title: 'Product Management',
-                href: "/products",
+                href: '/products',
                 icon: Building2Icon,
             },
             {
                 title: 'Merchant Management',
-                href: "/merchants",
+                href: '/merchants',
                 icon: Store,
             },
             {
                 title: 'Psp Management',
-                href: "/psps",
+                href: '/psps',
                 icon: Building2Icon,
             },
-
         ],
     },
     {
@@ -61,23 +61,43 @@ const navigationGroups: NavGroup[] = [
         items: [
             {
                 title: 'Countries',
-                href: "/countries",
-                icon: Globe,
+                href: '/countries',
+                icon: EarthIcon,
             },
             {
                 title: 'Currencies',
-                href: "/currencies",
+                href: '/currencies',
                 icon: DollarSign,
             },
             {
                 title: 'Languages',
-                href: "/languages",
+                href: '/languages',
                 icon: Languages,
             },
             {
                 title: 'Banks',
-                href: "/banks",
+                href: '/banks',
                 icon: Landmark,
+            },
+            {
+                title: 'Payment Methods',
+                href: '/payment-methods',
+                icon: CreditCard,
+            },
+            {
+                title: 'Payment Networks',
+                href: '/payment-networks',
+                icon: CreditCard,
+            },
+            {
+                title: 'Message Types',
+                href: '/message-types',
+                icon: MessagesSquare,
+            },
+            {
+                title: 'Invoice Types',
+                href: '/invoice-types',
+                icon: ReceiptIcon,
             },
         ],
     },

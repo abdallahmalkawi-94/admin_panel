@@ -3,27 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class InvoiceType extends Model
+class MessageType extends Model
 {
-    protected $table = 'invoice_types';
-
     protected $fillable = [
         'code',
         'description',
+        'message_direction',
     ];
-
-    /**
-     * Get the merchants that have this invoice type.
-     */
-    public function merchants(): BelongsToMany
-    {
-        return $this->belongsToMany(Merchant::class, 'merchant_invoices')
-            ->withTimestamps()
-            ->withPivot('deleted_at')
-            ->wherePivot('deleted_at', null);
-    }
 
     /**
      * Scope a query to filter by description.
@@ -43,7 +30,7 @@ class InvoiceType extends Model
     public function scopeFilterByCode($query, ?string $code)
     {
         if (!empty($code)) {
-            return $query->where('code', 'like', '%' . $code . '%');
+            return $query->where('code', $code);
         }
 
         return $query;

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Constants\invoice_types;
 use App\Models\InvoiceType;
 use Illuminate\Database\Seeder;
 
@@ -12,50 +13,50 @@ class InvoiceTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::TUITION_FEES,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::TUITION_FEES,
         ], [
             'description' => 'Tuition Fees',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::SCHOOL_CLUB,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::SCHOOL_CLUB,
         ], [
             'description' => 'School Club',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::E_COMMERCE,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::E_COMMERCE,
         ], [
             'description' => 'E-commerce',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::ONLINE_COURSE,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::ONLINE_COURSE,
         ], [
             'description' => 'Online Course',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::REGISTRATION_FEES,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::REGISTRATION_FEES,
         ], [
             'description' => 'Registration Fees',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::CANTEEN_POINTS,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::CANTEEN_POINTS,
         ], [
             'description' => 'Canteen Points',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::ERP_PAYMENT,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::ERP_PAYMENT,
         ], [
             'description' => 'ERP Payment',
         ]);
 
-        InvoiceType::firstOrCreate([
-            'code' => InvoiceType::CWALLET_MONEY_IN,
+        InvoiceType::query()->firstOrCreate([
+            'code' => invoice_types::CWALLET_MONEY_IN,
         ], [
             'description' => 'CWallet Money In',
         ]);

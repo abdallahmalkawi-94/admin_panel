@@ -131,6 +131,34 @@ export interface Bank {
     updated_at: string;
 }
 
+export interface PaymentMethod {
+    id: number;
+    description: string;
+    code: string;
+    logo_url?: string | null;
+    is_one_time_payment: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PaymentNetwork {
+    id: number;
+    name: string;
+    tags: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface MessageType {
+    id: number;
+    code: number;
+    description: string;
+    message_direction: number;
+    message_direction_label: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface TermsAndCondition {
     id: number;
     content?: string | null;
@@ -190,6 +218,8 @@ export interface InvoiceType {
     id: number;
     code: string;
     description: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Merchant {
