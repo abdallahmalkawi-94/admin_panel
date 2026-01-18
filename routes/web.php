@@ -28,3 +28,4 @@ require __DIR__.'/payment-methods.php';
 require __DIR__.'/payment-networks.php';
 require __DIR__.'/message-types.php';
 require __DIR__.'/invoice-types.php';
+require __DIR__.'/psp-payment-methods.php';

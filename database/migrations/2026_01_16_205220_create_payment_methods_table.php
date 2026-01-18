@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('description', '100');
             $table->string('code', '100')->unique();
+            $table->string('info')->default('');
             $table->string('logo_url')->nullable();
             $table->boolean('is_one_time_payment')->default(false);
             $table->softDeletes();

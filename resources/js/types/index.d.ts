@@ -302,6 +302,60 @@ export interface Psp {
     swift_code?: string | null;
 }
 
+export interface PspPaymentMethod {
+    id: number;
+    psp_id: number;
+    psp?: {
+        id: number;
+        name: string;
+        code: string;
+    } | null;
+    payment_method_id: number;
+    payment_method?: {
+        id: number;
+        description: string;
+        code: string;
+    } | null;
+    merchant_id?: number | null;
+    merchant?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    invoice_type_id?: number | null;
+    invoice_type?: {
+        id: number;
+        code: string;
+        description: string;
+    } | null;
+    refund_option_id: number;
+    refund_option?: {
+        id: number;
+        description: string;
+    } | null;
+    payout_model_id: number;
+    payout_model?: {
+        id: number;
+        description: string;
+    } | null;
+    support_tokenization: boolean;
+    subscription_model: number;
+    is_active: boolean;
+    shown_in_checkout: boolean;
+    support_international_payment: boolean;
+    post_fees_to_psp: boolean;
+    fees_type: number;
+    priority: number;
+    max_allowed_amount: number;
+    min_allowed_amount: number;
+    config?: Record<string, unknown> | null;
+    test_config?: Record<string, unknown> | null;
+    created_by?: number | null;
+    updated_by?: number | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

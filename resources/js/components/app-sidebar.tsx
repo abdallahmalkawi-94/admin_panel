@@ -54,6 +54,11 @@ const navigationGroups: NavGroup[] = [
                 href: '/psps',
                 icon: Building2Icon,
             },
+            {
+                title: 'Psp Payment Method',
+                href: '/psp-payment-methods',
+                icon: Building2Icon,
+            },
         ],
     },
     {
