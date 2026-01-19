@@ -11,8 +11,6 @@ class Currency extends WorldCurrency
 {
     // Cache constants
     const CACHE_KEY_ALL = 'currencies:all';
-    const CACHE_KEY_DROPDOWN = 'currencies:all:dropdown';
-    const CACHE_TTL = 86400; // 24 hours
 
     /**
      * Get all cached currencies
@@ -20,7 +18,7 @@ class Currency extends WorldCurrency
      */
     public static function cached(): Collection
     {
-        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+        return Cache::rememberForever(self::CACHE_KEY_ALL, function () {
             return self::query()->get();
         });
     }
@@ -31,18 +29,24 @@ class Currency extends WorldCurrency
      */
     public static function dropdown(): array
     {
-        return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
-            return self::query()
-                ->get(['code', 'name', 'symbol'])
-                ->groupBy('code')
-                ->map(fn($currency) => [
-                    'code' => $currency->first()->code,
-                    'name' => $currency->first()->name,
-                    'symbol' => $currency->first()->symbol,
-                ])
-                ->values()
-                ->toArray();
-        });
+        return self::cached()
+            ->groupBy('code')
+            ->map(fn($currency) => [
+                'code' => $currency->first()->code,
+                'name' => $currency->first()->name,
+                'symbol' => $currency->first()->symbol,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Find a currency by code from the cached collection.
+     * Usage: Currency::findByCodeCached('USD')
+     */
+    public static function findByCodeCached(string $code): ?self
+    {
+        return self::cached()->firstWhere('code', $code);
     }
 
     /**
@@ -60,7 +64,6 @@ class Currency extends WorldCurrency
     public static function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY_ALL);
-        Cache::forget(self::CACHE_KEY_DROPDOWN);
     }
 
     /**
@@ -95,5 +98,3 @@ class Currency extends WorldCurrency
             ->filterByCode($filters['code'] ?? null);
     }
 }
-
-

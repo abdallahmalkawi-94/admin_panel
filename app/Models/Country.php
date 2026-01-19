@@ -11,9 +11,7 @@ class Country extends WorldCountry
 {
     // Cache constants
     const CACHE_KEY_ALL = 'countries:all';
-    const CACHE_KEY_DROPDOWN = 'countries:all:dropdown';
     const CACHE_KEY_REGIONS = 'countries:regions';
-    const CACHE_TTL = 86400; // 24 hours
 
     /**
      * Get all cached countries
@@ -21,7 +19,7 @@ class Country extends WorldCountry
      */
     public static function cached(): Collection
     {
-        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+        return Cache::rememberForever(self::CACHE_KEY_ALL, function () {
             return self::query()
                 ->where('status', 1)
                 ->orderBy('name')
@@ -35,17 +33,12 @@ class Country extends WorldCountry
      */
     public static function dropdown(): array
     {
-        return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
-            return self::query()
-                ->where('status', 1)
-                ->orderBy('name')
-                ->get(['iso2', 'name'])
-                ->map(fn($country) => [
-                    'code' => $country->iso2,
-                    'name' => $country->name,
-                ])
-                ->toArray();
-        });
+        return self::cached()
+            ->map(fn($country) => [
+                'code' => $country->iso2,
+                'name' => $country->name,
+            ])
+            ->toArray();
     }
 
     /**
@@ -54,7 +47,7 @@ class Country extends WorldCountry
      */
     public static function regions(): array
     {
-        return Cache::remember(self::CACHE_KEY_REGIONS, self::CACHE_TTL, function () {
+        return Cache::rememberForever(self::CACHE_KEY_REGIONS, function () {
             return self::query()
                 ->select('region')
                 ->distinct()
@@ -65,6 +58,15 @@ class Country extends WorldCountry
                 ->pluck('region')
                 ->toArray();
         });
+    }
+
+    /**
+     * Find a country by iso2 code from the cached collection.
+     * Usage: Country::findByIso2Cached('US')
+     */
+    public static function findByIso2Cached(string $iso2): ?self
+    {
+        return self::cached()->firstWhere('iso2', $iso2);
     }
 
     /**
@@ -82,7 +84,6 @@ class Country extends WorldCountry
     public static function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY_ALL);
-        Cache::forget(self::CACHE_KEY_DROPDOWN);
         Cache::forget(self::CACHE_KEY_REGIONS);
     }
 
@@ -142,5 +143,3 @@ class Country extends WorldCountry
             ->filterByStatus($filters['status'] ?? null);
     }
 }
-
-

@@ -10,6 +10,7 @@ use App\Services\PspService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -30,15 +31,23 @@ class PspController extends Controller
         $perPage = $request->input('per_page', 10);
         $filters = $request->only(['name', 'code', 'country_id', 'psp_status_id']);
 
-        $psps = $this->pspService->paginate($perPage, $filters);
-        $statuses = PspStatusesDropDown();
-        $countries = CountriesDropDown();
+        $cacheVersion = Cache::get('psps.index.version', 1);
+        $cacheKey = 'psps.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
+
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'psps' => $this->pspService->paginate($perPage, $filters),
+                'statuses' => PspStatusesDropDown(),
+                'countries' => CountriesDropDown(),
+            ];
+        });
 
         return inertia('psps/index', [
-            'psps' => PspResource::collection($psps),
+            'psps' => PspResource::collection($payload['psps']),
             'filters' => $filters,
-            'statuses' => $statuses,
-            'countries' => $countries,
+            'statuses' => $payload['statuses'],
+            'countries' => $payload['countries'],
         ]);
     }
 

@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -53,6 +54,8 @@ class UserService
             logger($e->getMessage());
         }
 
+        $this->bumpIndexCacheVersion();
+
         return $user;
     }
 
@@ -61,12 +64,22 @@ class UserService
      */
     public function update($id, array $data): ?Model
     {
-        return $this->userRepository->update($data, $id);
+        $user = $this->userRepository->update($data, $id);
+        $this->bumpIndexCacheVersion();
+        return $user;
     }
 
     public function delete($id, $force = false): bool
     {
-        return $this->userRepository->delete($id, $force);
+        $deleted = $this->userRepository->delete($id, $force);
+        $this->bumpIndexCacheVersion();
+        return $deleted;
+    }
+
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('users.index.version', 1);
+        Cache::put('users.index.version', $currentVersion + 1);
     }
 
 }

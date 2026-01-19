@@ -9,6 +9,7 @@ use App\Services\ProductService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 use Inertia\ResponseFactory;
@@ -31,10 +32,18 @@ class ProductController extends Controller
 
         $filters = $request->only(['name']);
 
-        $products = $this->productService->paginate($perPage, $filters);
+        $cacheVersion = Cache::get('products.index.version', 1);
+        $cacheKey = 'products.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
+
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'products' => $this->productService->paginate($perPage, $filters),
+            ];
+        });
 
         return inertia('products/index', [
-            'products' => ProductResource::collection($products),
+            'products' => ProductResource::collection($payload['products']),
             'filters' => $filters,
         ]);
     }

@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,6 +47,7 @@ class PspService
             $psp = $this->pspRepository->create($data);
 
             DB::commit();
+            $this->bumpIndexCacheVersion();
             return $psp->load(['status', 'country', 'settlementCurrency']);
         } catch (Exception $e) {
             DB::rollBack();
@@ -83,6 +85,7 @@ class PspService
             $psp = $this->pspRepository->update($data, $id);
 
             DB::commit();
+            $this->bumpIndexCacheVersion();
             return $psp->load(['status', 'country', 'settlementCurrency']);
         } catch (Exception $e) {
             DB::rollBack();
@@ -92,6 +95,14 @@ class PspService
 
     public function delete($id, $force = false): bool
     {
-        return $this->pspRepository->delete($id, $force);
+        $deleted = $this->pspRepository->delete($id, $force);
+        $this->bumpIndexCacheVersion();
+        return $deleted;
+    }
+
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('psps.index.version', 1);
+        Cache::put('psps.index.version', $currentVersion + 1);
     }
 }

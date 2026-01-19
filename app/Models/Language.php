@@ -10,8 +10,6 @@ class Language extends WorldLanguage
 {
     // Cache constants
     const CACHE_KEY_ALL = 'languages:all';
-    const CACHE_KEY_DROPDOWN = 'languages:all:dropdown';
-    const CACHE_TTL = 86400; // 24 hours
 
     /**
      * Get all cached languages
@@ -19,7 +17,7 @@ class Language extends WorldLanguage
      */
     public static function cached(): Collection
     {
-        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+        return Cache::rememberForever(self::CACHE_KEY_ALL, function () {
             return self::query()->get();
         });
     }
@@ -30,16 +28,22 @@ class Language extends WorldLanguage
      */
     public static function dropdown(): array
     {
-        return Cache::remember(self::CACHE_KEY_DROPDOWN, self::CACHE_TTL, function () {
-            return self::query()
-                ->get(['code', 'name', 'name_native'])
-                ->map(fn($language) => [
-                    'code' => $language->code,
-                    'name' => $language->name,
-                    'name_native' => $language->name_native,
-                ])
-                ->toArray();
-        });
+        return self::cached()
+            ->map(fn($language) => [
+                'code' => $language->code,
+                'name' => $language->name,
+                'name_native' => $language->name_native,
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Find a language by code from the cached collection.
+     * Usage: Language::findByCodeCached('en')
+     */
+    public static function findByCodeCached(string $code): ?self
+    {
+        return self::cached()->firstWhere('code', $code);
     }
 
     /**
@@ -49,7 +53,6 @@ class Language extends WorldLanguage
     public static function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY_ALL);
-        Cache::forget(self::CACHE_KEY_DROPDOWN);
     }
 
     /**
@@ -97,5 +100,3 @@ class Language extends WorldLanguage
             ->filterByDir($filters['dir'] ?? null);
     }
 }
-
-
