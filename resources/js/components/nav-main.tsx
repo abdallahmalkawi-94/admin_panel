@@ -19,7 +19,7 @@ import {
 import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function NavMain({ groups = [] }: { groups: NavGroup[] }) {
     const page = usePage();
@@ -73,10 +73,23 @@ export function NavMain({ groups = [] }: { groups: NavGroup[] }) {
 function CollapsibleNavItem({ item, page }: { item: NavItem; page: ReturnType<typeof usePage> }) {
     const { state } = useSidebar();
     const isCollapsed = state === 'collapsed';
-    const isActive = item.items?.some((subItem: NavItem) => 
-        subItem.href && (page.url === subItem.href || page.url.startsWith(subItem.href as string, 1))
-    );
+    
+    // Check if any sub-item is active (including nested routes like /psps/create, /psps/123/edit, etc.)
+    const isActive = item.items?.some((subItem: NavItem) => {
+        if (!subItem.href) return false;
+        const href = subItem.href as string;
+        // Exact match or starts with the href (handles /psps, /psps/create, /psps/123, /psps/123/edit, etc.)
+        return page.url === href || page.url.startsWith(href + '/') || page.url.startsWith(href + '?');
+    });
+    
     const [open, setOpen] = useState(isActive || false);
+    
+    // Update open state when isActive changes (when navigating between pages)
+    useEffect(() => {
+        if (isActive) {
+            setOpen(true);
+        }
+    }, [isActive, page.url]);
 
     // When sidebar is collapsed, use DropdownMenu
     if (isCollapsed) {
@@ -144,7 +157,11 @@ function CollapsibleNavItem({ item, page }: { item: NavItem; page: ReturnType<ty
                                 {subItem.href && (
                                     <SidebarMenuSubButton
                                         asChild
-                                        isActive={page.url === subItem.href || page.url.startsWith(subItem.href as string, 1)}
+                                        isActive={
+                                            page.url === subItem.href || 
+                                            page.url.startsWith((subItem.href as string) + '/') ||
+                                            page.url.startsWith((subItem.href as string) + '?')
+                                        }
                                     >
                                         <Link href={subItem.href} prefetch>
                                             {subItem.icon && <subItem.icon />}
