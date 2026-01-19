@@ -14,6 +14,7 @@ class PaymentMethod extends Model
         'code',
         'logo_url',
         'is_one_time_payment',
+        'info',
     ];
 
     protected $casts = [

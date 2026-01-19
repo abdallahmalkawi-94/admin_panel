@@ -13,6 +13,7 @@ import { type NavGroup } from '@/types';
 import {
     Building2Icon,
     CreditCard,
+    CreditCardIcon,
     DollarSign,
     EarthIcon,
     Landmark,
@@ -51,8 +52,19 @@ const navigationGroups: NavGroup[] = [
             },
             {
                 title: 'Psp Management',
-                href: '/psps',
                 icon: Building2Icon,
+                items: [
+                    {
+                        title: 'Psp Profile',
+                        href: '/psps',
+                        icon: Building2Icon,
+                    },
+                    {
+                        title: 'Payment Method',
+                        href: '/psp-payment-methods',
+                        icon: CreditCardIcon,
+                    },
+                ],
             },
         ],
     },

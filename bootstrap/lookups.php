@@ -8,8 +8,12 @@ use App\Models\InvoiceType;
 use App\Models\Language;
 use App\Models\Merchant;
 use App\Models\MerchantStatus;
+use App\Models\PaymentMethod;
+use App\Models\PayoutModel;
 use App\Models\Product;
+use App\Models\Psp;
 use App\Models\PspStatus;
+use App\Models\RefundOption;
 use App\Models\TermsAndCondition;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\Cache;
@@ -113,3 +117,56 @@ function PspStatusesDropDown(): array
     return PspStatus::dropdown();
 }
 
+function PspsDropDown(): array
+{
+    return Cache::remember('psps:dropdown', 86400, function () {
+        return Psp::query()
+            ->get(['id', 'name', 'code'])
+            ->map(fn($psp) => [
+                'id' => $psp->id,
+                'name' => $psp->name,
+                'code' => $psp->code,
+            ])
+            ->toArray();
+    });
+}
+
+function PaymentMethodsDropDown(): array
+{
+    return Cache::remember('payment_methods:dropdown', 86400, function () {
+        return PaymentMethod::query()
+            ->get(['id', 'description', 'code'])
+            ->map(fn($paymentMethod) => [
+                'id' => $paymentMethod->id,
+                'description' => $paymentMethod->description,
+                'code' => $paymentMethod->code,
+            ])
+            ->toArray();
+    });
+}
+
+function RefundOptionsDropDown(): array
+{
+    return Cache::remember('refund_options:dropdown', 86400, function () {
+        return RefundOption::query()
+            ->get(['id', 'description'])
+            ->map(fn($refundOption) => [
+                'id' => $refundOption->id,
+                'description' => $refundOption->description,
+            ])
+            ->toArray();
+    });
+}
+
+function PayoutModelsDropDown(): array
+{
+    return Cache::remember('payout_models:dropdown', 86400, function () {
+        return PayoutModel::query()
+            ->get(['id', 'description'])
+            ->map(fn($payoutModel) => [
+                'id' => $payoutModel->id,
+                'description' => $payoutModel->description,
+            ])
+            ->toArray();
+    });
+}

@@ -51,6 +51,15 @@ function useSidebar() {
   return context
 }
 
+// Helper function to read cookie value
+function getCookieValue(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null
+  return null
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -67,9 +76,18 @@ function SidebarProvider({
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
 
+  // Read the cookie on initialization to get the persisted state
+  const getInitialState = React.useCallback(() => {
+    const cookieValue = getCookieValue(SIDEBAR_COOKIE_NAME)
+    if (cookieValue !== null) {
+      return cookieValue === 'true'
+    }
+    return defaultOpen
+  }, [defaultOpen])
+
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen)
+  const [_open, _setOpen] = React.useState(getInitialState)
   const open = openProp ?? _open
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -90,6 +108,20 @@ function SidebarProvider({
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
+
+  // When using controlled mode (openProp), the parent (AppShell) handles cookie reading
+  // When using uncontrolled mode, sync with cookie on mount
+  React.useEffect(() => {
+    if (openProp === undefined) {
+      const cookieValue = getCookieValue(SIDEBAR_COOKIE_NAME)
+      if (cookieValue !== null) {
+        const shouldBeOpen = cookieValue === 'true'
+        if (shouldBeOpen !== _open) {
+          _setOpen(shouldBeOpen)
+        }
+      }
+    }
+  }, []) // Only run on mount
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {

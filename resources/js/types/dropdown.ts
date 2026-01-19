@@ -40,3 +40,25 @@ export interface MerchantDropDown {
     en_name: string;
     ar_name: string;
 }
+
+export interface PspDropDown {
+    id: number;
+    name: string;
+    code: string;
+}
+
+export interface PaymentMethodDropDown {
+    id: number;
+    description: string;
+    code: string;
+}
+
+export interface RefundOptionDropDown {
+    id: number;
+    description: string;
+}
+
+export interface PayoutModelDropDown {
+    id: number;
+    description: string;
+}
