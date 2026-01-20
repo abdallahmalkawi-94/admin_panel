@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Language;
 use App\Repositories\LanguageRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -52,7 +53,6 @@ class LanguageService
      */
     public function clearCache(): void
     {
-        $this->languageRepository->clearCache();
+        Language::clearCache();
     }
 }
-

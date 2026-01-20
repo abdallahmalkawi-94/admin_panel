@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class BankService
@@ -39,7 +40,9 @@ class BankService
             unset($data['logo']);
         }
 
-        return $this->bankRepository->create($data);
+        $bank = $this->bankRepository->create($data);
+        $this->bumpIndexCacheVersion();
+        return $bank;
     }
 
     /**
@@ -63,7 +66,9 @@ class BankService
             unset($data['logo']);
         }
 
-        return $this->bankRepository->update($data, $id);
+        $updatedBank = $this->bankRepository->update($data, $id);
+        $this->bumpIndexCacheVersion();
+        return $updatedBank;
     }
 
     public function delete($id, $force = false): bool
@@ -74,7 +79,14 @@ class BankService
             Storage::disk('public')->delete($bank->logo_url);
         }
 
-        return $this->bankRepository->delete($id, $force);
+        $deleted = $this->bankRepository->delete($id, $force);
+        $this->bumpIndexCacheVersion();
+        return $deleted;
+    }
+
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('banks.index.version', 1);
+        Cache::put('banks.index.version', $currentVersion + 1);
     }
 }
-

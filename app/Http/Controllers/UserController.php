@@ -10,6 +10,7 @@ use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -31,15 +32,23 @@ class UserController extends Controller
 
         $filters = $request->only(['name', 'email', 'phone', 'status_id', 'country_code']);
 
-        $users = $this->userService->paginate($perPage, $filters);
-        $statuses = UserStatusesDropDown();
-        $countries = CountriesDropDown();
+        $cacheVersion = Cache::get('users.index.version', 1);
+        $cacheKey = 'users.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
+
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'users' => $this->userService->paginate($perPage, $filters),
+                'statuses' => UserStatusesDropDown(),
+                'countries' => CountriesDropDown(),
+            ];
+        });
 
         return inertia('users/index', [
-            'users' => UserResource::collection($users),
+            'users' => UserResource::collection($payload['users']),
             'filters' => $filters,
-            'statuses' => $statuses,
-            'countries' => $countries,
+            'statuses' => $payload['statuses'],
+            'countries' => $payload['countries'],
         ]);
     }
 

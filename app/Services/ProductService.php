@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class ProductService
 {
@@ -35,7 +36,9 @@ class ProductService
         // TODO should be check if creation api not set, will be get from system setting
         $data["invoice_creation_api"] = "https://malkawi-portal.classera.com/invoice/create";
         // TODO Add webhook events
-        return $this->productRepository->create($data);
+        $product = $this->productRepository->create($data);
+        $this->bumpIndexCacheVersion();
+        return $product;
     }
 
     /**
@@ -43,11 +46,21 @@ class ProductService
      */
     public function update($id, array $data): ?Model
     {
-        return $this->productRepository->update($data, $id);
+        $product = $this->productRepository->update($data, $id);
+        $this->bumpIndexCacheVersion();
+        return $product;
     }
 
     public function delete($id, $force = false): bool
     {
-        return $this->productRepository->delete($id, $force);
+        $deleted = $this->productRepository->delete($id, $force);
+        $this->bumpIndexCacheVersion();
+        return $deleted;
+    }
+
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('products.index.version', 1);
+        Cache::put('products.index.version', $currentVersion + 1);
     }
 }

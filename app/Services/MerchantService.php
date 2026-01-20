@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -95,6 +96,7 @@ class MerchantService
             }
 
             DB::commit();
+            $this->bumpIndexCacheVersion();
             return $merchant->load(['settings', 'status', 'product', 'invoiceTypes']);
         } catch (Exception $e) {
             DB::rollBack();
@@ -122,7 +124,9 @@ class MerchantService
             }
         }
 
-        return $this->merchantRepository->delete($id, $force);
+        $deleted = $this->merchantRepository->delete($id, $force);
+        $this->bumpIndexCacheVersion();
+        return $deleted;
     }
 
     /**
@@ -200,6 +204,7 @@ class MerchantService
             $this->syncInvoiceTypes($merchant, $data['invoice_type_ids']);
 
             DB::commit();
+            $this->bumpIndexCacheVersion();
             return $merchant->load(['settings', 'status', 'product', 'invoiceTypes']);
         } catch (Exception $e) {
             DB::rollBack();
@@ -256,5 +261,10 @@ class MerchantService
             $this->syncMerchantInvoices($merchantInvoices, $invoiceTypeIds, $allMerchants);
         });
     }
-}
 
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('merchants.index.version', 1);
+        Cache::put('merchants.index.version', $currentVersion + 1);
+    }
+}

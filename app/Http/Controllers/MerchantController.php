@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -37,14 +38,23 @@ class MerchantController extends Controller
         $perPage = $request->input('per_page', 10);
         $filters = $request->only(['name', 'status_id', 'product_id', 'is_live']);
 
-        $merchants = $this->merchantService->paginate($perPage, $filters);
-        $statuses = MerchantStatusesDropDown();
-        $products = ProductsDropDown();
+        $cacheVersion = Cache::get('merchants.index.version', 1);
+        $cacheKey = 'merchants.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
+
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'merchants' => $this->merchantService->paginate($perPage, $filters),
+                'statuses' => MerchantStatusesDropDown(),
+                'products' => ProductsDropDown(),
+            ];
+        });
+
         return inertia('merchants/index', [
-            'merchants' => MerchantResource::collection($merchants),
+            'merchants' => MerchantResource::collection($payload['merchants']),
             'filters' => $filters,
-            'statuses' => $statuses,
-            'products' => $products,
+            'statuses' => $payload['statuses'],
+            'products' => $payload['products'],
         ]);
     }
 
@@ -185,4 +195,3 @@ class MerchantController extends Controller
         }
     }
 }
-

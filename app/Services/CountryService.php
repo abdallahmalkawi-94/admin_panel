@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class CountryService
 {
@@ -42,6 +43,7 @@ class CountryService
         
         // Clear cache after creating a country
         Country::clearCache();
+        $this->bumpIndexCacheVersion();
         
         return $country;
     }
@@ -55,6 +57,7 @@ class CountryService
         
         // Clear cache after updating a country
         Country::clearCache();
+        $this->bumpIndexCacheVersion();
         
         return $updatedCountry;
     }
@@ -65,8 +68,14 @@ class CountryService
         
         // Clear cache after deleting a country
         Country::clearCache();
+        $this->bumpIndexCacheVersion();
         
         return $result;
     }
-}
 
+    private function bumpIndexCacheVersion(): void
+    {
+        $currentVersion = Cache::get('countries.index.version', 1);
+        Cache::put('countries.index.version', $currentVersion + 1);
+    }
+}

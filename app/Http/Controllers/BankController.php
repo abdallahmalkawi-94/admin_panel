@@ -10,6 +10,7 @@ use App\Services\BankService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -30,10 +31,18 @@ class BankController extends Controller
         $perPage = $request->input('per_page', 10);
         $filters = $request->only(['name']);
 
-        $banks = $this->bankService->paginate($perPage, $filters);
+        $cacheVersion = Cache::get('banks.index.version', 1);
+        $cacheKey = 'banks.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
+
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'banks' => $this->bankService->paginate($perPage, $filters),
+            ];
+        });
 
         return inertia('banks/index', [
-            'banks' => BankResource::collection($banks),
+            'banks' => BankResource::collection($payload['banks']),
             'filters' => $filters,
         ]);
     }
@@ -114,4 +123,3 @@ class BankController extends Controller
         }
     }
 }
-

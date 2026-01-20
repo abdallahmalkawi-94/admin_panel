@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Currency;
 use App\Repositories\CurrencyRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -52,7 +53,6 @@ class CurrencyService
      */
     public function clearCache(): void
     {
-        $this->currencyRepository->clearCache();
+        Currency::clearCache();
     }
 }
-

@@ -10,6 +10,7 @@ use App\Services\CountryService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -30,14 +31,21 @@ class CountryController extends Controller
         $perPage = $request->input('per_page', 10);
 
         $filters = $request->only(['name', 'region', 'iso2', 'status']);
+        $cacheVersion = Cache::get('countries.index.version', 1);
+        $cacheKey = 'countries.index.v' . $cacheVersion . '.' . md5(json_encode($request->query()));
+        $cacheTtlSeconds = 300;
 
-        $countries = $this->countryService->paginate($perPage, $filters);
-        $regions = Country::regions(); // Direct static call - cached
+        $payload = Cache::remember($cacheKey, $cacheTtlSeconds, function () use ($perPage, $filters) {
+            return [
+                'countries' => $this->countryService->paginate($perPage, $filters),
+                'regions' => Country::regions(),
+            ];
+        });
 
         return inertia('countries/index', [
-            'countries' => CountryResource::collection($countries),
+            'countries' => CountryResource::collection($payload['countries']),
             'filters' => $filters,
-            'regions' => $regions,
+            'regions' => $payload['regions'],
         ]);
     }
 
@@ -125,4 +133,3 @@ class CountryController extends Controller
         }
     }
 }
-
