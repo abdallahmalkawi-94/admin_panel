@@ -59,10 +59,10 @@ export function DataFilters({
     };
 
     return (
-        <Card>
-            <CardHeader>
+        <Card className="border-muted/60 bg-muted/20">
+            <CardHeader className="border-b bg-muted/40">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 py-3">
                         <Search className="h-5 w-5 text-muted-foreground" />
                         <CardTitle>{title}</CardTitle>
                     </div>
@@ -114,7 +114,7 @@ export function DataFilters({
                         </div>
                     ))}
                 </div>
-                <div className="mt-4 flex justify-end">
+                <div className="my-4 flex justify-end">
                     <Button onClick={onSearch}>
                         <Search className="mr-2 h-4 w-4" />
                         Search
@@ -124,4 +124,3 @@ export function DataFilters({
         </Card>
     );
 }
-
