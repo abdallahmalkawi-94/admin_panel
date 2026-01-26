@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoice_types', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->string('code')->unique()->index();
             $table->string('description');
             $table->timestamps();
         });
