@@ -9,9 +9,10 @@ import {
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus } from 'lucide-react';
+import { Plus, Banknote, ShieldCheck, Split, Globe } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -41,6 +42,10 @@ export default function Index({
     statuses,
     countries,
 }: IndexProps) {
+    const activeCount = psps.data.filter((psp) => psp.status?.description?.toLowerCase().includes('active')).length;
+    const splittingCount = psps.data.filter((psp) => psp.support_money_splitting).length;
+    const autoTransferCount = psps.data.filter((psp) => psp.enable_auto_transfer).length;
+
     // Use the reusable filters hook
     const {
         filters: searchFilters,
@@ -175,26 +180,89 @@ export default function Index({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="PSPs" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Payment Service Providers
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manage and view all PSPs in the system
-                        </p>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Banknote className="h-4 w-4" />
+                                PSP Directory
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Payment Service Providers
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Track status, settlement, and configuration.
+                            </p>
+                        </div>
+                        <Button asChild>
+                            <Link href="/psps/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add PSP
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/psps/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add PSP
-                        </Link>
-                    </Button>
                 </div>
 
-                {/* Filters */}
+                {/* Snapshot */}
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Total PSPs
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {psps.meta.total}
+                                </p>
+                            </div>
+                            <Globe className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Active (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {activeCount}
+                                </p>
+                            </div>
+                            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Money Splitting
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {splittingCount}
+                                </p>
+                            </div>
+                            <Split className="h-5 w-5 text-sky-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Auto Transfer
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {autoTransferCount}
+                                </p>
+                            </div>
+                            <Banknote className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <DataFilters
+                    title="Filter PSPs"
                     fields={filterFields}
                     values={searchFilters}
                     onChange={handleFilterChange}
@@ -217,4 +285,3 @@ export default function Index({
         </AppLayout>
     );
 }
-
