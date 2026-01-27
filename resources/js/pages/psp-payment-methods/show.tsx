@@ -24,8 +24,11 @@ import {
     IdCard,
     Key,
     Layers,
+    Lock,
 } from 'lucide-react';
 import { useClipboard } from '@/hooks/use-clipboard';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -69,6 +72,11 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
 
     const testConfigPairs = extractKeyValuePairs(testConfig);
     const liveConfigPairs = extractKeyValuePairs(liveConfig);
+    const hasTestKeys = testConfigPairs.length > 0;
+    const hasLiveKeys = liveConfigPairs.length > 0;
+    const [activeKeyTab, setActiveKeyTab] = useState<'test' | 'live'>(
+        hasTestKeys ? 'test' : 'live',
+    );
     const statusBadge = pspPaymentMethod.is_active ? 'success' : 'secondary';
     const checkoutBadge = pspPaymentMethod.shown_in_checkout
         ? 'success'
@@ -255,202 +263,267 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid gap-6 space-y-2 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Fees Type
-                                    </dt>
-                                    <dd className="text-sm">
-                                        {pspPaymentMethod.fees_type}
-                                    </dd>
+                            <div className="grid gap-6 lg:grid-cols-2">
+                                <div className="rounded-xl border bg-muted/30 p-4">
+                                    <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                                        Fee Rules
+                                    </p>
+                                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                        <div className="space-y-1">
+                                            <dt className="text-xs text-muted-foreground">
+                                                Fees Type
+                                            </dt>
+                                            <dd className="text-sm font-semibold">
+                                                {pspPaymentMethod.fees_type_description}
+                                            </dd>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <dt className="text-xs text-muted-foreground">
+                                                Post Fees to PSP
+                                            </dt>
+                                            <dd className="text-sm font-semibold">
+                                                <Badge
+                                                    variant={
+                                                        pspPaymentMethod.post_fees_to_psp
+                                                            ? 'success'
+                                                            : 'secondary'
+                                                    }
+                                                >
+                                                    {pspPaymentMethod.post_fees_to_psp
+                                                        ? 'Enabled'
+                                                        : 'Disabled'}
+                                                </Badge>
+                                            </dd>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="grid gap-6 space-y-2 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Priority
-                                    </dt>
-                                    <dd className="text-sm">
-                                        {pspPaymentMethod.priority}
-                                    </dd>
-                                </div>
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Min Amount
-                                    </dt>
-                                    <dd className="text-sm">
-                                        {pspPaymentMethod.min_allowed_amount?.toLocaleString()}
-                                    </dd>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-6 space-y-2 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Max Amount
-                                    </dt>
-                                    <dd className="text-sm">
-                                        {pspPaymentMethod.max_allowed_amount?.toLocaleString()}
-                                    </dd>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-6 space-y-2 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Post Fees to PSP
-                                    </dt>
-                                    <dd className="text-sm">
-                                        <span
-                                            className={
-                                                pspPaymentMethod.post_fees_to_psp
-                                                    ? 'text-green-600'
-                                                    : 'text-gray-500'
-                                            }
-                                        >
-                                            {pspPaymentMethod.post_fees_to_psp
-                                                ? 'Yes'
-                                                : 'No'}
-                                        </span>
-                                    </dd>
+                                <div className="rounded-xl border bg-muted/30 p-4">
+                                    <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                                        Limits
+                                    </p>
+                                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                        <div className="space-y-1">
+                                            <dt className="text-xs text-muted-foreground">
+                                                Min Amount
+                                            </dt>
+                                            <dd className="text-sm font-semibold">
+                                                {pspPaymentMethod.min_allowed_amount?.toLocaleString()}
+                                            </dd>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <dt className="text-xs text-muted-foreground">
+                                                Max Amount
+                                            </dt>
+                                            <dd className="text-sm font-semibold">
+                                                {pspPaymentMethod.max_allowed_amount?.toLocaleString()}
+                                            </dd>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* API Keys Configuration */}
-                    {(testConfigPairs.length > 0 ||
-                        liveConfigPairs.length > 0) && (
+                    {(hasTestKeys || hasLiveKeys) && (
                         <Card className="py-6 md:col-span-2">
                             <CardHeader>
-                                <CardTitle>API Keys</CardTitle>
-                                <CardDescription>
-                                    Test and live API keys configuration
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="grid gap-6 md:grid-cols-2">
-                                {/* Test API Keys */}
-                                {testConfigPairs.length > 0 && (
-                                    <div className="space-y-2">
-                                        <Label className="text-base font-semibold">
-                                            Test API Keys
-                                        </Label>
-
-                                        {testConfigPairs.map((pair) => (
-                                            <div
-                                                key={pair.key}
-                                                className="space-y-2"
+                                <div className="flex flex-wrap items-start justify-between gap-4">
+                                    <div className="space-y-1">
+                                        <CardTitle>API Keys Configuration</CardTitle>
+                                        <CardDescription>
+                                            Manage credentials for sandbox testing and
+                                            production traffic.
+                                        </CardDescription>
+                                    </div>
+                                    {hasTestKeys && hasLiveKeys && (
+                                        <div className="flex flex-wrap gap-2 rounded-lg bg-muted/40 p-1 text-foreground">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setActiveKeyTab('test')
+                                                }
+                                                className={cn(
+                                                    'flex flex-1 items-center justify-center rounded-md px-4 py-2 text-xs font-semibold transition-colors',
+                                                    activeKeyTab === 'test'
+                                                        ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
+                                                        : 'text-muted-foreground hover:bg-background/70',
+                                                )}
                                             >
-                                                <Label className="text-sm font-normal text-muted-foreground capitalize">
-                                                    {pair.key.replace(
-                                                        /_/g,
-                                                        ' ',
-                                                    )}
-                                                </Label>
-                                                <div className="flex items-center gap-2 rounded-lg border border-border bg-background">
-                                                    <Input
-                                                        type="text"
-                                                        value={pair.value}
-                                                        readOnly
-                                                        className="border-0 bg-transparent focus-visible:ring-0"
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="mr-2"
-                                                        onClick={() =>
-                                                            copy(pair.value)
-                                                        }
-                                                    >
-                                                        {copiedText ===
-                                                        pair.value ? (
-                                                            <Check className="h-4 w-4 text-green-600" />
-                                                        ) : (
-                                                            <Copy className="h-4 w-4" />
-                                                        )}
-                                                    </Button>
+                                                Test Config
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setActiveKeyTab('live')
+                                                }
+                                                className={cn(
+                                                    'flex items-center justify-center rounded-md px-4 py-2 text-xs font-semibold transition-colors',
+                                                    activeKeyTab === 'live'
+                                                        ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
+                                                        : 'text-muted-foreground hover:bg-background/70',
+                                                )}
+                                            >
+                                                Live Config
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {(hasTestKeys &&
+                                    (!hasLiveKeys ||
+                                        activeKeyTab === 'test')) && (
+                                    <div className="rounded-2xl border bg-background">
+                                        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-sm font-semibold">
+                                                    Test Credentials
+                                                </h4>
+                                                <Badge variant="secondary">
+                                                    Sandbox
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-6 px-6 py-5">
+                                            {testConfigPairs.map((pair) => (
+                                                <div
+                                                    key={pair.key}
+                                                    className="grid gap-3 md:grid-cols-[240px_1fr]"
+                                                >
+                                                    <div className="space-y-1">
+                                                        <Label className="text-sm font-semibold capitalize">
+                                                            {pair.key.replace(
+                                                                /_/g,
+                                                                ' ',
+                                                            )}
+                                                        </Label>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3">
+                                                        <Input
+                                                            type="text"
+                                                            value={pair.value}
+                                                            readOnly
+                                                            className="border-0 bg-transparent font-mono text-xs focus-visible:ring-0"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-muted-foreground"
+                                                            onClick={() =>
+                                                                copy(pair.value)
+                                                            }
+                                                        >
+                                                            {copiedText ===
+                                                            pair.value ? (
+                                                                <Check className="h-4 w-4 text-emerald-600" />
+                                                            ) : (
+                                                                <Copy className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="border-t bg-amber-50/60 px-6 py-4 text-sm text-amber-700">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                                                    <Lock className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold">
+                                                        Security Best Practices
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-amber-700/90">
+                                                        Never share sandbox keys in
+                                                        client-side code or public
+                                                        repositories.
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
                                 )}
 
-                                {/* Live API Keys */}
-                                {liveConfigPairs.length > 0 && (
-                                    <div className="space-y-2">
-                                        <Label className="text-base font-semibold">
-                                            Live API Keys
-                                        </Label>
-
-                                        {liveConfigPairs.map((pair) => (
-                                            <div
-                                                key={pair.key}
-                                                className="space-y-2"
-                                            >
-                                                <Label className="text-sm font-normal text-muted-foreground capitalize">
-                                                    {pair.key.replace(
-                                                        /_/g,
-                                                        ' ',
-                                                    )}
-                                                </Label>
-                                                <div className="flex items-center gap-2 rounded-lg border border-border bg-background">
-                                                    <Input
-                                                        type="text"
-                                                        value={pair.value}
-                                                        readOnly
-                                                        className="border-0 bg-transparent focus-visible:ring-0"
-                                                    />
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="mr-2"
-                                                        onClick={() =>
-                                                            copy(pair.value)
-                                                        }
-                                                    >
-                                                        {copiedText ===
-                                                        pair.value ? (
-                                                            <Check className="h-4 w-4 text-green-600" />
-                                                        ) : (
-                                                            <Copy className="h-4 w-4" />
-                                                        )}
-                                                    </Button>
+                                {(hasLiveKeys &&
+                                    (!hasTestKeys ||
+                                        activeKeyTab === 'live')) && (
+                                    <div className="rounded-2xl border bg-background">
+                                        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-sm font-semibold">
+                                                    Production Credentials
+                                                </h4>
+                                                <Badge className="bg-emerald-500/10 text-emerald-700">
+                                                    Production
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-6 px-6 py-5">
+                                            {liveConfigPairs.map((pair) => (
+                                                <div
+                                                    key={pair.key}
+                                                    className="grid gap-3 md:grid-cols-[240px_1fr]"
+                                                >
+                                                    <div className="space-y-1">
+                                                        <Label className="text-sm font-semibold capitalize">
+                                                            {pair.key.replace(
+                                                                /_/g,
+                                                                ' ',
+                                                            )}
+                                                        </Label>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/20 px-3">
+                                                        <Input
+                                                            type="text"
+                                                            value={pair.value}
+                                                            readOnly
+                                                            className="border-0 bg-transparent font-mono text-xs focus-visible:ring-0"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-muted-foreground"
+                                                            onClick={() =>
+                                                                copy(pair.value)
+                                                            }
+                                                        >
+                                                            {copiedText ===
+                                                            pair.value ? (
+                                                                <Check className="h-4 w-4 text-emerald-600" />
+                                                            ) : (
+                                                                <Copy className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="border-t bg-amber-50/60 px-6 py-4 text-sm text-amber-700">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100">
+                                                    <Lock className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold">
+                                                        Security Best Practices
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-amber-700/90">
+                                                        Never expose production keys in
+                                                        client-side code or unsecured
+                                                        channels.
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
                                 )}
                             </CardContent>
                         </Card>
                     )}
-
-                    {/* Timestamps */}
-                    {/*<Card>*/}
-                    {/*    <CardHeader>*/}
-                    {/*        <CardTitle>Timestamps</CardTitle>*/}
-                    {/*    </CardHeader>*/}
-                    {/*    <CardContent className="space-y-4">*/}
-                    {/*        <div className="grid gap-2">*/}
-                    {/*            <dt className="text-sm font-medium text-muted-foreground">*/}
-                    {/*                Created At*/}
-                    {/*            </dt>*/}
-                    {/*            <dd className="text-sm">*/}
-                    {/*                {pspPaymentMethod.created_at}*/}
-                    {/*            </dd>*/}
-                    {/*        </div>*/}
-                    {/*        <div className="grid gap-2">*/}
-                    {/*            <dt className="text-sm font-medium text-muted-foreground">*/}
-                    {/*                Updated At*/}
-                    {/*            </dt>*/}
-                    {/*            <dd className="text-sm">*/}
-                    {/*                {pspPaymentMethod.updated_at}*/}
-                    {/*            </dd>*/}
-                    {/*        </div>*/}
-                    {/*    </CardContent>*/}
-                    {/*</Card>*/}
                 </div>
             </div>
         </AppLayout>

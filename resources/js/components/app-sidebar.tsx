@@ -20,6 +20,7 @@ import {
     Languages,
     LayoutGrid,
     MessagesSquare,
+    PackageIcon,
     ReceiptIcon,
     Store,
     UsersIcon,
@@ -43,7 +44,7 @@ const navigationGroups: NavGroup[] = [
             {
                 title: 'Product Management',
                 href: '/products',
-                icon: Building2Icon,
+                icon: PackageIcon,
             },
             {
                 title: 'Merchant Management',
