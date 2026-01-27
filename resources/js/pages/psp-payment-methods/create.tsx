@@ -1,12 +1,12 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import {
-    type PspDropDown,
     type PaymentMethodDropDown,
-    type RefundOptionDropDown,
     type PayoutModelDropDown,
+    type PspDropDown,
+    type RefundOptionDropDown,
 } from '@/types/dropdown';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -33,19 +33,19 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-    Save,
-    Plus,
-    X,
-    ChevronRight,
-    ChevronLeft,
     ChevronDown,
-    Sparkles,
+    ChevronLeft,
+    ChevronRight,
     CreditCard,
-    Layers,
-    ShieldCheck,
     Eye,
+    Layers,
+    Plus,
+    Save,
+    ShieldCheck,
+    Sparkles,
+    X,
 } from 'lucide-react';
-import { FormEventHandler, useState, useEffect } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -95,8 +95,12 @@ export default function Create({
     payoutModels,
 }: CreateProps) {
     const [step, setStep] = useState(1);
-    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<number[]>([]);
-    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<Record<number, PaymentMethodConfig>>({});
+    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<
+        number[]
+    >([]);
+    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<
+        Record<number, PaymentMethodConfig>
+    >({});
     const [openCards, setOpenCards] = useState<Record<number, boolean>>({});
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -119,7 +123,6 @@ export default function Create({
         payment_methods_config: [] as any[],
     });
 
-
     // Initialize payment method configs when payment methods are selected
     useEffect(() => {
         const newConfigs: Record<number, PaymentMethodConfig> = {};
@@ -135,7 +138,8 @@ export default function Create({
                     subscription_model: data.subscription_model || '1',
                     is_active: data.is_active ?? true,
                     shown_in_checkout: data.shown_in_checkout ?? true,
-                    support_international_payment: data.support_international_payment || false,
+                    support_international_payment:
+                        data.support_international_payment || false,
                     post_fees_to_psp: data.post_fees_to_psp || false,
                     fees_type: data.fees_type || '0',
                     priority: data.priority || '0',
@@ -155,7 +159,7 @@ export default function Create({
             }
         });
         setPaymentMethodConfigs(newConfigs);
-        setOpenCards(prev => ({ ...prev, ...newOpenCards }));
+        setOpenCards((prev) => ({ ...prev, ...newOpenCards }));
     }, [selectedPaymentMethodIds]);
 
     const handlePaymentMethodChange = (paymentMethodIds: number[]) => {
@@ -163,28 +167,40 @@ export default function Create({
         setData('payment_method_id', paymentMethodIds);
     };
 
-    const updatePaymentMethodConfig = (pmId: number, field: keyof PaymentMethodConfig, value: any) => {
-        setPaymentMethodConfigs(prev => ({
+    const updatePaymentMethodConfig = (
+        pmId: number,
+        field: keyof PaymentMethodConfig,
+        value: any,
+    ) => {
+        setPaymentMethodConfigs((prev) => ({
             ...prev,
             [pmId]: {
                 ...prev[pmId],
                 [field]: value,
-            }
+            },
         }));
     };
 
     // Helper function to sync keys between config and testConfig
-    const syncConfigKeys = (configPairs: KeyValuePair[], testConfigPairs: KeyValuePair[], preserveEmpty: boolean = false) => {
+    const syncConfigKeys = (
+        configPairs: KeyValuePair[],
+        testConfigPairs: KeyValuePair[],
+        preserveEmpty: boolean = false,
+    ) => {
         // Get all unique keys (excluding empty keys)
-        const configKeys = configPairs.map(p => p.key.trim()).filter(k => k);
-        const testKeys = testConfigPairs.map(p => p.key.trim()).filter(k => k);
+        const configKeys = configPairs
+            .map((p) => p.key.trim())
+            .filter((k) => k);
+        const testKeys = testConfigPairs
+            .map((p) => p.key.trim())
+            .filter((k) => k);
         const allKeys = Array.from(new Set([...configKeys, ...testKeys]));
 
         // Create maps for value lookup (use original key for lookup, not trimmed)
         const configValueMap = new Map<string, string>();
         const testValueMap = new Map<string, string>();
 
-        configPairs.forEach(p => {
+        configPairs.forEach((p) => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
                 // If key already exists, prefer the one with a value
@@ -194,7 +210,7 @@ export default function Create({
             }
         });
 
-        testConfigPairs.forEach(p => {
+        testConfigPairs.forEach((p) => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
                 // If key already exists, prefer the one with a value
@@ -205,14 +221,14 @@ export default function Create({
         });
 
         // Build synchronized arrays with same keys
-        const syncedConfigPairs: KeyValuePair[] = allKeys.map(key => ({
+        const syncedConfigPairs: KeyValuePair[] = allKeys.map((key) => ({
             key: key,
-            value: configValueMap.get(key) || ''
+            value: configValueMap.get(key) || '',
         }));
 
-        const syncedTestConfigPairs: KeyValuePair[] = allKeys.map(key => ({
+        const syncedTestConfigPairs: KeyValuePair[] = allKeys.map((key) => ({
             key: key,
-            value: testValueMap.get(key) || ''
+            value: testValueMap.get(key) || '',
         }));
 
         // If preserving empty pairs, add only one empty pair at the end if there are no keys
@@ -223,8 +239,16 @@ export default function Create({
                 syncedTestConfigPairs.push({ key: '', value: '' });
             } else {
                 // Check if there's already an empty pair being edited
-                const hasEmptyInConfig = configPairs.some(p => !p.key.trim() && p === configPairs[configPairs.length - 1]);
-                const hasEmptyInTest = testConfigPairs.some(p => !p.key.trim() && p === testConfigPairs[testConfigPairs.length - 1]);
+                const hasEmptyInConfig = configPairs.some(
+                    (p) =>
+                        !p.key.trim() &&
+                        p === configPairs[configPairs.length - 1],
+                );
+                const hasEmptyInTest = testConfigPairs.some(
+                    (p) =>
+                        !p.key.trim() &&
+                        p === testConfigPairs[testConfigPairs.length - 1],
+                );
 
                 // Only add one empty pair if both configs have an empty pair at the end
                 if (hasEmptyInConfig && hasEmptyInTest) {
@@ -248,25 +272,36 @@ export default function Create({
         const newPair = { key: '', value: '' };
 
         // Directly add pair to both configs without syncing (empty pairs will sync when key is entered)
-        setPaymentMethodConfigs(prev => ({
+        setPaymentMethodConfigs((prev) => ({
             ...prev,
             [pmId]: {
                 ...prev[pmId],
                 configPairs: [...config.configPairs, newPair],
                 testConfigPairs: [...config.testConfigPairs, newPair],
-            }
+            },
         }));
     };
 
-    const removeConfigPair = (pmId: number, type: 'config' | 'test', index: number) => {
+    const removeConfigPair = (
+        pmId: number,
+        type: 'config' | 'test',
+        index: number,
+    ) => {
         const config = paymentMethodConfigs[pmId];
-        const pairToRemove = type === 'config' ? config.configPairs[index] : config.testConfigPairs[index];
+        const pairToRemove =
+            type === 'config'
+                ? config.configPairs[index]
+                : config.testConfigPairs[index];
         const keyToRemove = pairToRemove.key.trim();
 
         // Remove from both configs if key is not empty (to keep keys in sync)
         if (keyToRemove) {
-            const newConfigPairs = config.configPairs.filter(p => p.key.trim() !== keyToRemove);
-            const newTestConfigPairs = config.testConfigPairs.filter(p => p.key.trim() !== keyToRemove);
+            const newConfigPairs = config.configPairs.filter(
+                (p) => p.key.trim() !== keyToRemove,
+            );
+            const newTestConfigPairs = config.testConfigPairs.filter(
+                (p) => p.key.trim() !== keyToRemove,
+            );
 
             // Ensure at least one empty pair exists
             if (newConfigPairs.length === 0) {
@@ -276,13 +311,13 @@ export default function Create({
                 newTestConfigPairs.push({ key: '', value: '' });
             }
 
-            setPaymentMethodConfigs(prev => ({
+            setPaymentMethodConfigs((prev) => ({
                 ...prev,
                 [pmId]: {
                     ...prev[pmId],
                     configPairs: newConfigPairs,
                     testConfigPairs: newTestConfigPairs,
-                }
+                },
             }));
         } else {
             // If removing empty pair, remove from both to keep them in sync
@@ -303,13 +338,13 @@ export default function Create({
                 newTestConfigPairs.push({ key: '', value: '' });
             }
 
-            setPaymentMethodConfigs(prev => ({
+            setPaymentMethodConfigs((prev) => ({
                 ...prev,
                 [pmId]: {
                     ...prev[pmId],
                     configPairs: newConfigPairs,
                     testConfigPairs: newTestConfigPairs,
-                }
+                },
             }));
         }
     };
@@ -317,89 +352,128 @@ export default function Create({
     const syncConfigPairsOnBlur = (pmId: number) => {
         const config = paymentMethodConfigs[pmId];
         // Sync keys to remove duplicates and ensure both configs have the same keys
-        const { syncedConfigPairs, syncedTestConfigPairs } = syncConfigKeys(config.configPairs, config.testConfigPairs, false);
+        const { syncedConfigPairs, syncedTestConfigPairs } = syncConfigKeys(
+            config.configPairs,
+            config.testConfigPairs,
+            false,
+        );
 
-        setPaymentMethodConfigs(prev => ({
+        setPaymentMethodConfigs((prev) => ({
             ...prev,
             [pmId]: {
                 ...prev[pmId],
                 configPairs: syncedConfigPairs,
                 testConfigPairs: syncedTestConfigPairs,
-            }
+            },
         }));
     };
 
-    const updateConfigPair = (pmId: number, type: 'config' | 'test', index: number, field: 'key' | 'value', value: string) => {
+    const updateConfigPair = (
+        pmId: number,
+        type: 'config' | 'test',
+        index: number,
+        field: 'key' | 'value',
+        value: string,
+    ) => {
         const config = paymentMethodConfigs[pmId];
 
         if (field === 'key') {
             // When updating a key, update it in both configs directly without syncing (to avoid duplicates while typing)
             let updatedConfigPairs = [...config.configPairs];
             let updatedTestConfigPairs = [...config.testConfigPairs];
-            const oldKey = type === 'config'
-                ? updatedConfigPairs[index].key.trim()
-                : updatedTestConfigPairs[index].key.trim();
+            const oldKey =
+                type === 'config'
+                    ? updatedConfigPairs[index].key.trim()
+                    : updatedTestConfigPairs[index].key.trim();
 
             // Update the key in the current config
             if (type === 'config') {
-                updatedConfigPairs[index] = { ...updatedConfigPairs[index], key: value };
+                updatedConfigPairs[index] = {
+                    ...updatedConfigPairs[index],
+                    key: value,
+                };
             } else {
-                updatedTestConfigPairs[index] = { ...updatedTestConfigPairs[index], key: value };
+                updatedTestConfigPairs[index] = {
+                    ...updatedTestConfigPairs[index],
+                    key: value,
+                };
             }
 
             // Update the corresponding pair in the other config
             // If typing in an empty pair, update the pair at the same index
             if (!oldKey) {
-                if (type === 'config' && index < updatedTestConfigPairs.length) {
-                    updatedTestConfigPairs[index] = { ...updatedTestConfigPairs[index], key: value };
-                } else if (type === 'test' && index < updatedConfigPairs.length) {
-                    updatedConfigPairs[index] = { ...updatedConfigPairs[index], key: value };
+                if (
+                    type === 'config' &&
+                    index < updatedTestConfigPairs.length
+                ) {
+                    updatedTestConfigPairs[index] = {
+                        ...updatedTestConfigPairs[index],
+                        key: value,
+                    };
+                } else if (
+                    type === 'test' &&
+                    index < updatedConfigPairs.length
+                ) {
+                    updatedConfigPairs[index] = {
+                        ...updatedConfigPairs[index],
+                        key: value,
+                    };
                 }
             } else {
                 // Key is being renamed, find and update it in the other config
                 if (type === 'config') {
-                    const testIndex = updatedTestConfigPairs.findIndex(p => p.key.trim() === oldKey);
+                    const testIndex = updatedTestConfigPairs.findIndex(
+                        (p) => p.key.trim() === oldKey,
+                    );
                     if (testIndex >= 0) {
-                        updatedTestConfigPairs[testIndex] = { ...updatedTestConfigPairs[testIndex], key: value };
+                        updatedTestConfigPairs[testIndex] = {
+                            ...updatedTestConfigPairs[testIndex],
+                            key: value,
+                        };
                     }
                 } else {
-                    const configIndex = updatedConfigPairs.findIndex(p => p.key.trim() === oldKey);
+                    const configIndex = updatedConfigPairs.findIndex(
+                        (p) => p.key.trim() === oldKey,
+                    );
                     if (configIndex >= 0) {
-                        updatedConfigPairs[configIndex] = { ...updatedConfigPairs[configIndex], key: value };
+                        updatedConfigPairs[configIndex] = {
+                            ...updatedConfigPairs[configIndex],
+                            key: value,
+                        };
                     }
                 }
             }
 
             // Update state directly without syncing (sync will happen on blur)
-            setPaymentMethodConfigs(prev => ({
+            setPaymentMethodConfigs((prev) => ({
                 ...prev,
                 [pmId]: {
                     ...prev[pmId],
                     configPairs: updatedConfigPairs,
                     testConfigPairs: updatedTestConfigPairs,
-                }
+                },
             }));
         } else {
             // When updating a value, only update the specific config
             if (type === 'config') {
                 const updated = [...config.configPairs];
                 updated[index] = { ...updated[index], value: value };
-                setPaymentMethodConfigs(prev => ({
+                setPaymentMethodConfigs((prev) => ({
                     ...prev,
                     [pmId]: {
                         ...prev[pmId],
                         configPairs: updated,
-                    }
+                    },
                 }));
             } else {
                 const updated = [...config.testConfigPairs];
                 updated[index] = { ...updated[index], value: value };
-                setPaymentMethodConfigs(prev => ({
+                setPaymentMethodConfigs((prev) => ({
                     ...prev,
                     [pmId]: {
                         ...prev[pmId],
                         testConfigPairs: updated,
-                    }
+                    },
                 }));
             }
         }
@@ -460,30 +534,46 @@ export default function Create({
             });
 
             // Handle refund_option_id and payout_model_id conversion
-            const refundOptionId = config.refund_option_id && config.refund_option_id !== '' && config.refund_option_id !== null
-                ? parseInt(config.refund_option_id.toString())
-                : null;
+            const refundOptionId =
+                config.refund_option_id &&
+                config.refund_option_id !== '' &&
+                config.refund_option_id !== null
+                    ? parseInt(config.refund_option_id.toString())
+                    : null;
 
-            const payoutModelId = config.payout_model_id && config.payout_model_id !== '' && config.payout_model_id !== null
-                ? parseInt(config.payout_model_id.toString())
-                : null;
+            const payoutModelId =
+                config.payout_model_id &&
+                config.payout_model_id !== '' &&
+                config.payout_model_id !== null
+                    ? parseInt(config.payout_model_id.toString())
+                    : null;
 
             return {
                 payment_method_id: parseInt(pmId.toString()),
                 refund_option_id: refundOptionId,
                 payout_model_id: payoutModelId,
                 support_tokenization: config.support_tokenization || false,
-                subscription_model: parseInt(config.subscription_model?.toString() || '1'),
+                subscription_model: parseInt(
+                    config.subscription_model?.toString() || '1',
+                ),
                 is_active: config.is_active ?? true,
                 shown_in_checkout: config.shown_in_checkout ?? true,
-                support_international_payment: config.support_international_payment || false,
+                support_international_payment:
+                    config.support_international_payment || false,
                 post_fees_to_psp: config.post_fees_to_psp || false,
                 fees_type: parseInt(config.fees_type?.toString() || '0'),
                 priority: parseInt(config.priority?.toString() || '0'),
-                max_allowed_amount: parseInt(config.max_allowed_amount?.toString() || '0'),
-                min_allowed_amount: parseInt(config.min_allowed_amount?.toString() || '0'),
+                max_allowed_amount: parseInt(
+                    config.max_allowed_amount?.toString() || '0',
+                ),
+                min_allowed_amount: parseInt(
+                    config.min_allowed_amount?.toString() || '0',
+                ),
                 config: Object.keys(configObj).length > 0 ? configObj : null,
-                test_config: Object.keys(testConfigObj).length > 0 ? testConfigObj : null,
+                test_config:
+                    Object.keys(testConfigObj).length > 0
+                        ? testConfigObj
+                        : null,
             };
         });
 
@@ -517,18 +607,21 @@ export default function Create({
     };
 
     const getPaymentMethodName = (pmId: number) => {
-        return paymentMethods.find(pm => pm.id === pmId)?.description || `Payment Method ${pmId}`;
+        return (
+            paymentMethods.find((pm) => pm.id === pmId)?.description ||
+            `Payment Method ${pmId}`
+        );
     };
 
     const selectedPsp = psps.find((psp) => psp.id.toString() === data.psp_id);
     const selectedPaymentMethods = paymentMethods.filter((pm) =>
         selectedPaymentMethodIds.includes(pm.id),
     );
-    const activeSelectedCount = selectedPaymentMethodIds.filter((pmId) =>
-        (paymentMethodConfigs[pmId]?.is_active ?? true),
+    const activeSelectedCount = selectedPaymentMethodIds.filter(
+        (pmId) => paymentMethodConfigs[pmId]?.is_active ?? true,
     ).length;
-    const shownSelectedCount = selectedPaymentMethodIds.filter((pmId) =>
-        (paymentMethodConfigs[pmId]?.shown_in_checkout ?? true),
+    const shownSelectedCount = selectedPaymentMethodIds.filter(
+        (pmId) => paymentMethodConfigs[pmId]?.shown_in_checkout ?? true,
     ).length;
 
     return (
@@ -544,35 +637,83 @@ export default function Create({
                                 <Sparkles className="h-4 w-4" />
                                 PSP Payment Methods
                             </div>
-                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
                                 Create a new PSP Payment Method
                             </h1>
-                            <p className="text-muted-foreground">
+                            <p className="mt-2 text-sm text-muted-foreground md:text-base">
                                 {step === 1
-                                    ? 'Select PSP and payment methods to configure.'
+                                    ? 'Select a PSP and payment methods to configure.'
                                     : 'Tune activation, limits, and API configuration.'}
                             </p>
                         </div>
-                        <Badge variant="secondary">Step {step} of 2</Badge>
+                        <div className="flex items-center gap-3">
+                            <Badge variant="secondary">Step {step} of 2</Badge>
+                        </div>
                     </div>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px]">
                     <div className="space-y-6">
                         {/* Step Indicator */}
-                        <div className="flex items-center gap-4">
-                            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                    1
-                                </div>
-                                <span className="font-medium">Basic Information</span>
+                        <div className="rounded-2xl border border-muted/60 bg-background/70 p-4 shadow-sm">
+                            <div className="flex items-center justify-between text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                                <span>Step {step} of 2</span>
+                                <span>
+                                    {step === 1 ? 'Select' : 'Configure'}
+                                </span>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-                                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                    2
+                            <div className="mt-4 grid gap-4 md:grid-cols-2">
+                                <div
+                                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${
+                                        step >= 1
+                                            ? 'border-emerald-500/40 bg-emerald-500/5 text-foreground'
+                                            : 'border-muted bg-background text-muted-foreground'
+                                    }`}
+                                >
+                                    <div
+                                        className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${
+                                            step >= 1
+                                                ? 'bg-emerald-500 text-white shadow-sm'
+                                                : 'bg-muted text-muted-foreground'
+                                        }`}
+                                    >
+                                        1
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-semibold">
+                                            Basic Info
+                                        </div>
+                                    </div>
                                 </div>
-                                <span className="font-medium">Configuration</span>
+                                <div
+                                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition ${
+                                        step >= 2
+                                            ? 'border-emerald-500/40 bg-emerald-500/5 text-foreground'
+                                            : 'border-muted bg-background text-muted-foreground'
+                                    }`}
+                                >
+                                    <div
+                                        className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${
+                                            step >= 2
+                                                ? 'bg-emerald-500 text-white shadow-sm'
+                                                : 'bg-muted text-muted-foreground'
+                                        }`}
+                                    >
+                                        2
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-semibold">
+                                            Configuration
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                                <div
+                                    className={`h-full rounded-full bg-emerald-500 transition-all duration-300 ${
+                                        step >= 2 ? 'w-full' : 'w-1/2'
+                                    }`}
+                                />
                             </div>
                         </div>
 
