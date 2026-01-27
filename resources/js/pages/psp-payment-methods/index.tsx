@@ -6,9 +6,10 @@ import {
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus } from 'lucide-react';
+import { Plus, CreditCard, ShieldCheck, Eye, Layers } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,6 +31,10 @@ interface IndexProps {
 }
 
 export default function Index({ pspPaymentMethods, filters }: IndexProps) {
+    const activeCount = pspPaymentMethods.data.filter((method) => method.is_active).length;
+    const shownCount = pspPaymentMethods.data.filter((method) => method.shown_in_checkout).length;
+    const uniquePspCount = new Set(pspPaymentMethods.data.map((method) => method.psp?.id).filter(Boolean)).size;
+
     // Use the reusable filters hook
     const {
         filters: searchFilters,
@@ -89,61 +94,130 @@ export default function Index({ pspPaymentMethods, filters }: IndexProps) {
         },
         {
             key: 'is_active',
-            label: 'Active',
+            label: 'Status',
             render: (pspPaymentMethod) => (
-                <span className={pspPaymentMethod.is_active ? 'text-green-600' : 'text-gray-500'}>
-                    {pspPaymentMethod.is_active ? 'Yes' : 'No'}
+                <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        pspPaymentMethod.is_active
+                            ? 'bg-green-600 text-white'
+                            : 'bg-red-600 text-white'
+                    }`}
+                >
+                    {pspPaymentMethod.is_active ? 'Active' : 'Inactive'}
                 </span>
             ),
         },
     ];
 
     // Define filter fields
-    // const filterFields: FilterField[] = [
-    //     {
-    //         key: 'is_active',
-    //         label: 'Active',
-    //         type: 'select',
-    //         placeholder: 'All',
-    //         options: [
-    //             { value: 'all', label: 'All' },
-    //             { value: '1', label: 'Yes' },
-    //             { value: '0', label: 'No' },
-    //         ],
-    //     },
-    // ];
+    const filterFields: FilterField[] = [
+        {
+            key: 'is_active',
+            label: 'Active',
+            type: 'select',
+            placeholder: 'All',
+            options: [
+                { value: 'all', label: 'All' },
+                { value: '1', label: 'Yes' },
+                { value: '0', label: 'No' },
+            ],
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="PSP Payment Methods" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            PSP Payment Methods
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manage and view all PSP payment methods in the system
-                        </p>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <CreditCard className="h-4 w-4" />
+                                PSP Payment Methods
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                PSP Payment Methods
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Manage activation, checkout visibility, and routing priority.
+                            </p>
+                        </div>
+                        <Button asChild>
+                            <Link href="/psp-payment-methods/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add PSP Payment Method
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/psp-payment-methods/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add PSP Payment Method
-                        </Link>
-                    </Button>
                 </div>
 
-                {/* Filters */}
-                {/*<DataFilters*/}
-                {/*    fields={filterFields}*/}
-                {/*    values={searchFilters}*/}
-                {/*    onChange={handleFilterChange}*/}
-                {/*    onSearch={handleSearch}*/}
-                {/*    onClear={clearFilters}*/}
-                {/*    hasActiveFilters={hasActiveFilters}*/}
-                {/*/>*/}
+                {/* Snapshot */}
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Total Methods
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {pspPaymentMethods.meta.total}
+                                </p>
+                            </div>
+                            <Layers className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Active (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {activeCount}
+                                </p>
+                            </div>
+                            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Shown in Checkout
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {shownCount}
+                                </p>
+                            </div>
+                            <Eye className="h-5 w-5 text-sky-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    PSP Coverage
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {uniquePspCount}
+                                </p>
+                            </div>
+                            <CreditCard className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <DataFilters
+                    title="Filter Payment Methods"
+                    fields={filterFields}
+                    values={searchFilters}
+                    onChange={handleFilterChange}
+                    onSearch={handleSearch}
+                    onClear={clearFilters}
+                    hasActiveFilters={hasActiveFilters}
+                />
 
                 {/* Data Table */}
                 <DataTable

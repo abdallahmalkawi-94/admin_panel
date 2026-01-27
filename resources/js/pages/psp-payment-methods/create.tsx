@@ -15,6 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -31,7 +32,19 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Save, Plus, X, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
+import {
+    Save,
+    Plus,
+    X,
+    ChevronRight,
+    ChevronLeft,
+    ChevronDown,
+    Sparkles,
+    CreditCard,
+    Layers,
+    ShieldCheck,
+    Eye,
+} from 'lucide-react';
 import { FormEventHandler, useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -170,7 +183,7 @@ export default function Create({
         // Create maps for value lookup (use original key for lookup, not trimmed)
         const configValueMap = new Map<string, string>();
         const testValueMap = new Map<string, string>();
-        
+
         configPairs.forEach(p => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
@@ -180,7 +193,7 @@ export default function Create({
                 }
             }
         });
-        
+
         testConfigPairs.forEach(p => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
@@ -212,7 +225,7 @@ export default function Create({
                 // Check if there's already an empty pair being edited
                 const hasEmptyInConfig = configPairs.some(p => !p.key.trim() && p === configPairs[configPairs.length - 1]);
                 const hasEmptyInTest = testConfigPairs.some(p => !p.key.trim() && p === testConfigPairs[testConfigPairs.length - 1]);
-                
+
                 // Only add one empty pair if both configs have an empty pair at the end
                 if (hasEmptyInConfig && hasEmptyInTest) {
                     syncedConfigPairs.push({ key: '', value: '' });
@@ -233,7 +246,7 @@ export default function Create({
     const addConfigPairToBoth = (pmId: number) => {
         const config = paymentMethodConfigs[pmId];
         const newPair = { key: '', value: '' };
-        
+
         // Directly add pair to both configs without syncing (empty pairs will sync when key is entered)
         setPaymentMethodConfigs(prev => ({
             ...prev,
@@ -305,7 +318,7 @@ export default function Create({
         const config = paymentMethodConfigs[pmId];
         // Sync keys to remove duplicates and ensure both configs have the same keys
         const { syncedConfigPairs, syncedTestConfigPairs } = syncConfigKeys(config.configPairs, config.testConfigPairs, false);
-        
+
         setPaymentMethodConfigs(prev => ({
             ...prev,
             [pmId]: {
@@ -318,13 +331,13 @@ export default function Create({
 
     const updateConfigPair = (pmId: number, type: 'config' | 'test', index: number, field: 'key' | 'value', value: string) => {
         const config = paymentMethodConfigs[pmId];
-        
+
         if (field === 'key') {
             // When updating a key, update it in both configs directly without syncing (to avoid duplicates while typing)
             let updatedConfigPairs = [...config.configPairs];
             let updatedTestConfigPairs = [...config.testConfigPairs];
-            const oldKey = type === 'config' 
-                ? updatedConfigPairs[index].key.trim() 
+            const oldKey = type === 'config'
+                ? updatedConfigPairs[index].key.trim()
                 : updatedTestConfigPairs[index].key.trim();
 
             // Update the key in the current config
@@ -447,12 +460,12 @@ export default function Create({
             });
 
             // Handle refund_option_id and payout_model_id conversion
-            const refundOptionId = config.refund_option_id && config.refund_option_id !== '' && config.refund_option_id !== null 
-                ? parseInt(config.refund_option_id.toString()) 
+            const refundOptionId = config.refund_option_id && config.refund_option_id !== '' && config.refund_option_id !== null
+                ? parseInt(config.refund_option_id.toString())
                 : null;
-            
-            const payoutModelId = config.payout_model_id && config.payout_model_id !== '' && config.payout_model_id !== null 
-                ? parseInt(config.payout_model_id.toString()) 
+
+            const payoutModelId = config.payout_model_id && config.payout_model_id !== '' && config.payout_model_id !== null
+                ? parseInt(config.payout_model_id.toString())
                 : null;
 
             return {
@@ -507,43 +520,66 @@ export default function Create({
         return paymentMethods.find(pm => pm.id === pmId)?.description || `Payment Method ${pmId}`;
     };
 
+    const selectedPsp = psps.find((psp) => psp.id.toString() === data.psp_id);
+    const selectedPaymentMethods = paymentMethods.filter((pm) =>
+        selectedPaymentMethodIds.includes(pm.id),
+    );
+    const activeSelectedCount = selectedPaymentMethodIds.filter((pmId) =>
+        (paymentMethodConfigs[pmId]?.is_active ?? true),
+    ).length;
+    const shownSelectedCount = selectedPaymentMethodIds.filter((pmId) =>
+        (paymentMethodConfigs[pmId]?.shown_in_checkout ?? true),
+    ).length;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create a new PSP Payment Method" />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Create a new PSP Payment Method
-                        </h1>
-                        <p className="text-muted-foreground">
-                            {step === 1 ? 'Select PSP and Payment Methods' : 'Configure each payment method'}
-                        </p>
+            <div className="flex h-full flex-1 flex-col gap-8 p-6">
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Sparkles className="h-4 w-4" />
+                                PSP Payment Methods
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Create a new PSP Payment Method
+                            </h1>
+                            <p className="text-muted-foreground">
+                                {step === 1
+                                    ? 'Select PSP and payment methods to configure.'
+                                    : 'Tune activation, limits, and API configuration.'}
+                            </p>
+                        </div>
+                        <Badge variant="secondary">Step {step} of 2</Badge>
                     </div>
                 </div>
 
-                {/* Step Indicator */}
-                <div className="flex items-center gap-4">
-                    <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                            1
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px]">
+                    <div className="space-y-6">
+                        {/* Step Indicator */}
+                        <div className="flex items-center gap-4">
+                            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+                                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                    1
+                                </div>
+                                <span className="font-medium">Basic Information</span>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+                                <div className={`h-8 w-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                    2
+                                </div>
+                                <span className="font-medium">Configuration</span>
+                            </div>
                         </div>
-                        <span className="font-medium">Basic Information</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                            2
-                        </div>
-                        <span className="font-medium">Configuration</span>
-                    </div>
-                </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-6">
                     {step === 1 && (
-                        <Card>
+                        <Card className="py-6">
                             <CardHeader>
                                 <CardTitle>Basic Information</CardTitle>
                                 <CardDescription>
@@ -667,7 +703,7 @@ export default function Create({
                                             setOpenCards((prev) => ({ ...prev, [pmId]: open }))
                                         }
                                     >
-                                        <Card>
+                                        <Card className="py-6">
                                             <CardHeader>
                                                 <CollapsibleTrigger asChild>
                                                     <div className="flex items-center justify-between cursor-pointer">
@@ -924,7 +960,7 @@ export default function Create({
                                                         Add Pair
                                                     </Button>
                                                 </div>
-                                                
+
                                                 {/* Production Config */}
                                                 <div className="space-y-4">
                                                     <Label>Production Config</Label>
@@ -1038,7 +1074,61 @@ export default function Create({
                             </div>
                         </>
                     )}
-                </form>
+                        </form>
+                    </div>
+
+                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                        <Card className="border-muted/60 bg-muted/30 py-6">
+                            <CardHeader>
+                                <CardTitle>Setup Snapshot</CardTitle>
+                                <CardDescription>
+                                    Track what will be configured.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                        PSP
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                        {selectedPsp?.name || 'No PSP selected'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {selectedPaymentMethods.length
+                                            ? `${selectedPaymentMethods.length} payment methods selected`
+                                            : 'Select payment methods to configure'}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <Badge variant={activeSelectedCount ? 'success' : 'secondary'}>
+                                        {activeSelectedCount} active
+                                    </Badge>
+                                    <Badge variant={shownSelectedCount ? 'success' : 'secondary'}>
+                                        {shownSelectedCount} shown in checkout
+                                    </Badge>
+                                </div>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <CreditCard className="h-4 w-4" />
+                                        <span>{selectedPaymentMethods.length || 0} selected methods</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Layers className="h-4 w-4" />
+                                        <span>{step === 2 ? 'Configuration in progress' : 'Awaiting configuration'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <ShieldCheck className="h-4 w-4" />
+                                        <span>{activeSelectedCount ? 'Active routing enabled' : 'Activation pending'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Eye className="h-4 w-4" />
+                                        <span>{shownSelectedCount ? 'Checkout visibility set' : 'Checkout visibility pending'}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
