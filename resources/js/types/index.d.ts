@@ -346,6 +346,7 @@ export interface PspPaymentMethod {
     support_international_payment: boolean;
     post_fees_to_psp: boolean;
     fees_type: number;
+    fees_type_description: string;
     priority: number;
     max_allowed_amount: number;
     min_allowed_amount: number;

@@ -8,9 +8,10 @@ import {
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus } from 'lucide-react';
+import { Plus, Store, Rocket, ShieldCheck, Users } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -72,6 +73,10 @@ export default function Index({
     statuses,
     products,
 }: IndexProps) {
+    const liveCount = merchants.data.filter((merchant) => merchant.is_live).length;
+    const testCount = merchants.data.filter((merchant) => !merchant.is_live).length;
+    const activeCount = merchants.data.filter((merchant) => merchant.status_id === MERCHANT_STATUS.ACTIVE).length;
+
     // Use the reusable filters hook
     const {
         filters: searchFilters,
@@ -200,26 +205,89 @@ export default function Index({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Merchants" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Merchants
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manage and view all merchants in the system
-                        </p>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Store className="h-4 w-4" />
+                                Merchant Directory
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Merchants
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Monitor onboarding, live status, and product alignment at a glance.
+                            </p>
+                        </div>
+                        <Button asChild>
+                            <Link href="/merchants/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Merchant
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/merchants/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Merchant
-                        </Link>
-                    </Button>
                 </div>
 
-                {/* Filters */}
+                {/* Snapshot */}
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Total Merchants
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {merchants.meta.total}
+                                </p>
+                            </div>
+                            <Users className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Live (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {liveCount}
+                                </p>
+                            </div>
+                            <Rocket className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Test (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {testCount}
+                                </p>
+                            </div>
+                            <ShieldCheck className="h-5 w-5 text-sky-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Active (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {activeCount}
+                                </p>
+                            </div>
+                            <Store className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <DataFilters
+                    title="Filter Merchants"
                     fields={filterFields}
                     values={searchFilters}
                     onChange={handleFilterChange}
@@ -242,4 +310,3 @@ export default function Index({
         </AppLayout>
     );
 }
-

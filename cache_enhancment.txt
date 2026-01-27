@@ -1,0 +1,29 @@
+1. CurrencyRepository.php and LanguageRepository.php: removed repository-level cache keys and used model cache helpers (Currency::cached()/dropdown(), Language::cached()/dropdown()), so caching is centralized and consistent.
+
+2. CountryRepository.php: removed repo cache keys and now uses Country::findByIso2Cached() so lookups reuse the model cache.
+Country.php, Currency.php, Language.php: added findBy*Cached() helpers that hit cached collections, reducing repeated DB lookups for lookups/filters.
+Response caching + invalidation
+
+3. CountryController.php: cached index response (countries list + regions) for 5 minutes; added versioned cache key.
+
+4. CountryService.php: bump cache version on create/update/delete so index cache is invalidated on data changes.
+
+5. UserController.php, BankController.php, MerchantController.php: same 5‑minute response caching for index pages with versioned keys.
+
+6. UserService.php, BankService.php, MerchantService.php: bump cache version on create/update/delete to invalidate index caches.
+Slow query visibility
+
+7. AppServiceProvider.php: added optional slow-query logging (enabled via DB_SLOW_QUERY_LOG=true, threshold configurable by DB_SLOW_QUERY_MS). Helps identify real hotspots in production.
+
+Index migration validation:
+
+1. 2025_10_17_155651_add_missing_indexes_for_optimization.php: added safe guards to only create/drop indexes if table/column/index exists, with DB‑driver aware checks (MySQL/Postgres/SQLite). Prevents migration failures in varied environments.
+
+Why these optimizations matter:
+1. Centralized caching avoids duplicate cache keys and inconsistent invalidation (lower bug risk + fewer DB hits).
+2. Response caching on index pages reduces repeated heavy queries and resource rendering when filters/pagination are the same.
+3. Versioned cache keys ensure the cache is safely invalidated after writes without expensive wildcard deletes.
+4. Slow-query logging surfaces real performance bottlenecks in production traffic.
+5. Index migration validation avoids errors and improves deploy safety.
+
+
