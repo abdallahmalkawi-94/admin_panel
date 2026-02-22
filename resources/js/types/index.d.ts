@@ -316,6 +316,7 @@ export interface PspPaymentMethod {
         id: number;
         description: string;
         code: string;
+        logo_url?: string | null;
     } | null;
     merchant_id?: number | null;
     merchant?: {

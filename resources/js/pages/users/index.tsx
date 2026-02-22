@@ -14,6 +14,9 @@ import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus, Users, ShieldCheck, AlertTriangle, Clock } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 import { CountryDropDown } from '@/types/dropdown';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useInitials } from '@/hooks/use-initials';
+import Flag from 'react-world-flags';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -69,6 +72,7 @@ export default function Index({
     statuses,
     countries,
 }: IndexProps) {
+    const getInitials = useInitials();
     const activeCount = users.data.filter(
         (user) => user.status_id === USER_STATUS.ACTIVE,
     ).length;
@@ -121,6 +125,17 @@ export default function Index({
         {
             key: 'name',
             label: 'Name',
+            render: (user) => (
+                <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            {getInitials(user.name)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <span>{user.name}</span>
+                </div>
+            ),
         },
         {
             key: 'email',
@@ -130,9 +145,19 @@ export default function Index({
             key: 'phone',
             label: 'Phone',
             render: (user) =>
-                user.country_code && user.mobile_number
-                    ? `${user.country_code} ${user.mobile_number}`
-                    : '-',
+                user.mobile_number ? (
+                    <div className="flex items-center gap-2">
+                        {user.country_code && (
+                            <Flag
+                                code={user.country_code}
+                                className="h-4 w-6 rounded object-cover"
+                            />
+                        )}
+                        <span>{user.mobile_number}</span>
+                    </div>
+                ) : (
+                    '-'
+                ),
         },
         {
             key: 'status',

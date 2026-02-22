@@ -85,7 +85,16 @@ export default function Index({ pspPaymentMethods, filters }: IndexProps) {
             key: 'payment_method',
             label: 'Payment Method',
             render: (pspPaymentMethod) => (
-                <span>{pspPaymentMethod.payment_method?.description || 'N/A'}</span>
+                <div className="flex items-center gap-2">
+                    {pspPaymentMethod.payment_method?.logo_url && (
+                        <img
+                            src={pspPaymentMethod.payment_method.logo_url}
+                            alt={pspPaymentMethod.payment_method.description || 'Payment method logo'}
+                            className="h-5 object-contain"
+                        />
+                    )}
+                    <span>{pspPaymentMethod.payment_method?.description || 'N/A'}</span>
+                </div>
             ),
         },
         {
