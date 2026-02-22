@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -64,9 +65,9 @@ export function DataTable<T extends Record<string, any>>({
     const totalColumns = columns.length + (hasActions ? 1 : 0);
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
+            <Card className="border-muted/60 bg-muted/10">
+                <CardHeader className="border-b bg-muted/40">
+                <div className="flex items-center justify-between py-3">
                     <div>
                         <CardTitle>{title}</CardTitle>
                         {description && <CardDescription>{description}</CardDescription>}
@@ -96,16 +97,22 @@ export function DataTable<T extends Record<string, any>>({
                 </div>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableHeadRow>
-                            {columns.map((column) => (
-                                <TableHead key={column.key} className={column.className}>
+                <div className="overflow-hidden rounded-lg border bg-background">
+                    <Table>
+                        <TableHeader className="bg-muted/60 text-foreground">
+                    <TableHeadRow>
+                        {columns.map((column) => (
+                                <TableHead
+                                    key={column.key}
+                                    className={cn('text-foreground/70 font-semibold', column.className)}
+                                >
                                     {column.label}
                                 </TableHead>
                             ))}
                             {hasActions && (
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right text-foreground/70 font-semibold">
+                                    Actions
+                                </TableHead>
                             )}
                         </TableHeadRow>
                     </TableHeader>
@@ -163,9 +170,10 @@ export function DataTable<T extends Record<string, any>>({
                             ))
                         )}
                     </TableBody>
-                </Table>
+                    </Table>
+                </div>
                 {data.meta.links && data.meta.links.length > 0 && (
-                    <div className="mt-4">
+                    <div className="my-4">
                         <Pagination
                             links={data.meta.links}
                             preserveQuery={{
@@ -181,4 +189,3 @@ export function DataTable<T extends Record<string, any>>({
         </Card>
     );
 }
-

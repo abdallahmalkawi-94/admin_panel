@@ -19,6 +19,10 @@ import {
     Key,
     Activity,
     Code,
+    Sparkles,
+    ShieldCheck,
+    ShieldOff,
+    IdCard,
 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -51,186 +55,145 @@ export default function Show({ product }: ShowProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`View Product - ${product.en_name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Product Details
-                        </h1>
-                        <p className="text-muted-foreground">
-                            View product information and configuration
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button asChild variant="outline">
-                            <Link href="/products">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Products
-                            </Link>
-                        </Button>
-                        <Button asChild>
-                            <Link href={`/products/${product.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </Link>
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleDelete}
-                            variant="destructive"
-                            className={"cursor-pointer"}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-background">
+                                <Package className="h-7 w-7 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Product Profile
+                                </div>
+                                <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                                    {product.en_name}
+                                </h1>
+                                <p className="text-muted-foreground">
+                                    {product.ar_name || 'Arabic name not set'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button asChild variant="outline">
+                                <Link href="/products">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Back
+                                </Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href={`/products/${product.id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </Link>
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleDelete}
+                                variant="destructive"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Product ID
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    #{product.id}
+                                </p>
+                            </div>
+                            <IdCard className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Signing Status
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {product.signing_active ? 'Active' : 'Inactive'}
+                                </p>
+                            </div>
+                            {product.signing_active ? (
+                                <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                            ) : (
+                                <ShieldOff className="h-5 w-5 text-amber-600" />
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* Product Information Card */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
                                 <CardTitle className="text-2xl">
-                                    {product.en_name}
+                                    API Configuration
                                 </CardTitle>
-                                <CardDescription>
-                                    {product.ar_name}
-                                </CardDescription>
                             </div>
-                            <Badge
-                                variant={
-                                    product.signing_active
-                                        ? 'success'
-                                        : 'secondary'
-                                }
-                            >
-                                {product.signing_active
-                                    ? 'Signing Active'
-                                    : 'Signing Inactive'}
-                            </Badge>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-6 md:grid-cols-2">
-                            {/* Basic Information */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">
-                                    Basic Information
-                                </h3>
-
-                                <div className="flex items-start gap-3">
-                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            English Name
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {product.en_name}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Arabic Name
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {product.ar_name}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Activity className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Signing Status
-                                        </p>
-                                        <Badge
-                                            variant={
-                                                product.signing_active
-                                                    ? 'success'
-                                                    : 'secondary'
-                                            }
-                                            className="mt-1"
-                                        >
-                                            {product.signing_active
-                                                ? 'Active'
-                                                : 'Inactive'}
-                                        </Badge>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Package className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Product ID
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            #{product.id}
-                                        </p>
-                                    </div>
+                        <div className="grid gap-6 grid-cols-2">
+                            {/* API Configuration */}
+                            <div className="flex items-start gap-3">
+                                <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Callback URL
+                                    </p>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {product.callback_url || 'N/A'}
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* API Configuration */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">
-                                    API Configuration
-                                </h3>
-
-                                <div className="flex items-start gap-3">
-                                    <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-medium">
-                                            Callback URL
-                                        </p>
-                                        <p className="truncate text-sm text-muted-foreground">
-                                            {product.callback_url || 'N/A'}
-                                        </p>
-                                    </div>
+                            <div className="flex items-start gap-3">
+                                <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Webhook URL
+                                    </p>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {product.webhook_url || 'N/A'}
+                                    </p>
                                 </div>
+                            </div>
 
-                                <div className="flex items-start gap-3">
-                                    <LinkIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-medium">
-                                            Webhook URL
-                                        </p>
-                                        <p className="truncate text-sm text-muted-foreground">
-                                            {product.webhook_url || 'N/A'}
-                                        </p>
-                                    </div>
+                            <div className="flex items-start gap-3">
+                                <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Invoice Inquiry API
+                                    </p>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {product.invoice_inquiry_api ||
+                                            'N/A'}
+                                    </p>
                                 </div>
+                            </div>
 
-                                <div className="flex items-start gap-3">
-                                    <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-medium">
-                                            Invoice Inquiry API
-                                        </p>
-                                        <p className="truncate text-sm text-muted-foreground">
-                                            {product.invoice_inquiry_api ||
-                                                'N/A'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div className="flex-1 overflow-hidden">
-                                        <p className="text-sm font-medium">
-                                            Invoice Creation API
-                                        </p>
-                                        <p className="truncate text-sm text-muted-foreground">
-                                            {product.invoice_creation_api ||
-                                                'N/A'}
-                                        </p>
-                                    </div>
+                            <div className="flex items-start gap-3">
+                                <Code className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium">
+                                        Invoice Creation API
+                                    </p>
+                                    <p className="truncate text-sm text-muted-foreground">
+                                        {product.invoice_creation_api ||
+                                            'N/A'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +201,7 @@ export default function Show({ product }: ShowProps) {
                 </Card>
 
                 {/* Security Credentials Card */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
                         <CardTitle>Security Credentials</CardTitle>
                         <CardDescription>
@@ -291,7 +254,7 @@ export default function Show({ product }: ShowProps) {
                 </Card>
 
                 {/* Timestamps Card */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
                         <CardTitle>Timestamps</CardTitle>
                         <CardDescription>

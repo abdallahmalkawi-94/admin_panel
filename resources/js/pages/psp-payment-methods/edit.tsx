@@ -15,6 +15,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -30,7 +31,17 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Save, Plus, X, ChevronDown } from 'lucide-react';
+import {
+    Save,
+    Plus,
+    X,
+    ChevronDown,
+    Sparkles,
+    CreditCard,
+    ShieldCheck,
+    Eye,
+    Layers,
+} from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -134,7 +145,7 @@ export default function Edit({
 
         const configValueMap = new Map<string, string>();
         const testValueMap = new Map<string, string>();
-        
+
         configPairs.forEach(p => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
@@ -143,7 +154,7 @@ export default function Edit({
                 }
             }
         });
-        
+
         testConfigPairs.forEach(p => {
             const trimmedKey = p.key.trim();
             if (trimmedKey) {
@@ -170,7 +181,7 @@ export default function Edit({
             } else {
                 const hasEmptyInConfig = configPairs.some(p => !p.key.trim() && p === configPairs[configPairs.length - 1]);
                 const hasEmptyInTest = testConfigPairs.some(p => !p.key.trim() && p === testConfigPairs[testConfigPairs.length - 1]);
-                
+
                 if (hasEmptyInConfig && hasEmptyInTest) {
                     syncedConfigPairs.push({ key: '', value: '' });
                     syncedTestConfigPairs.push({ key: '', value: '' });
@@ -246,7 +257,7 @@ export default function Edit({
             paymentMethodConfig.testConfigPairs,
             false
         );
-        
+
         setPaymentMethodConfig(prev => ({
             ...prev,
             configPairs: syncedConfigPairs,
@@ -258,8 +269,8 @@ export default function Edit({
         if (field === 'key') {
             const updatedConfigPairs = [...paymentMethodConfig.configPairs];
             const updatedTestConfigPairs = [...paymentMethodConfig.testConfigPairs];
-            const oldKey = type === 'config' 
-                ? updatedConfigPairs[index].key.trim() 
+            const oldKey = type === 'config'
+                ? updatedConfigPairs[index].key.trim()
                 : updatedTestConfigPairs[index].key.trim();
 
             if (type === 'config') {
@@ -331,12 +342,12 @@ export default function Edit({
             }
         });
 
-        const refundOptionId = paymentMethodConfig.refund_option_id && paymentMethodConfig.refund_option_id !== '' && paymentMethodConfig.refund_option_id !== null 
-            ? parseInt(paymentMethodConfig.refund_option_id.toString()) 
+        const refundOptionId = paymentMethodConfig.refund_option_id && paymentMethodConfig.refund_option_id !== '' && paymentMethodConfig.refund_option_id !== null
+            ? parseInt(paymentMethodConfig.refund_option_id.toString())
             : null;
-        
-        const payoutModelId = paymentMethodConfig.payout_model_id && paymentMethodConfig.payout_model_id !== '' && paymentMethodConfig.payout_model_id !== null 
-            ? parseInt(paymentMethodConfig.payout_model_id.toString()) 
+
+        const payoutModelId = paymentMethodConfig.payout_model_id && paymentMethodConfig.payout_model_id !== '' && paymentMethodConfig.payout_model_id !== null
+            ? parseInt(paymentMethodConfig.payout_model_id.toString())
             : null;
 
         const formData: Record<string, unknown> = {
@@ -368,26 +379,44 @@ export default function Edit({
         return paymentMethods.find(pm => pm.id === paymentMethodConfig.payment_method_id)?.description || `Payment Method ${paymentMethodConfig.payment_method_id}`;
     };
 
+    const statusBadge = paymentMethodConfig.is_active ? 'success' : 'secondary';
+    const checkoutBadge = paymentMethodConfig.shown_in_checkout ? 'success' : 'secondary';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit PSP Payment Method: ${pspPaymentMethod.id}`} />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Edit PSP Payment Method
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Configure payment method settings
-                        </p>
+            <div className="flex h-full flex-1 flex-col gap-8 p-6">
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Sparkles className="h-4 w-4" />
+                                PSP Payment Methods
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Edit PSP Payment Method
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Update activation, limits, and API configuration.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Badge variant={statusBadge}>
+                                {paymentMethodConfig.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                            <Badge variant={checkoutBadge}>
+                                {paymentMethodConfig.shown_in_checkout ? 'Shown in Checkout' : 'Hidden'}
+                            </Badge>
+                        </div>
                     </div>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px]">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Information (Read-only) */}
-                    <Card>
+                    <Card className="py-6">
                         <CardHeader>
                             <CardTitle>Basic Information</CardTitle>
                             <CardDescription>
@@ -417,7 +446,7 @@ export default function Edit({
                                 open={isCardOpen}
                                 onOpenChange={setIsCardOpen}
                             >
-                                <Card>
+                                <Card className="py-6">
                                     <CardHeader>
                                         <CollapsibleTrigger asChild>
                                             <div className="flex items-center justify-between cursor-pointer">
@@ -672,7 +701,7 @@ export default function Edit({
                                                         Add Pair
                                                     </Button>
                                                 </div>
-                                                
+
                                                 {/* Production Config */}
                                                 <div className="space-y-4">
                                                     <Label>Production Config</Label>
@@ -774,7 +803,58 @@ export default function Edit({
                             {processing ? 'Updating...' : 'Update'}
                         </Button>
                     </div>
-                </form>
+                    </form>
+
+                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                        <Card className="border-muted/60 bg-muted/30 py-6">
+                            <CardHeader>
+                                <CardTitle>Live Summary</CardTitle>
+                                <CardDescription>
+                                    Current routing configuration snapshot.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                        PSP
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                        {pspPaymentMethod.psp?.name || 'PSP'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {getPaymentMethodName()}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <Badge variant={statusBadge}>
+                                        {paymentMethodConfig.is_active ? 'Active' : 'Inactive'}
+                                    </Badge>
+                                    <Badge variant={checkoutBadge}>
+                                        {paymentMethodConfig.shown_in_checkout ? 'Checkout On' : 'Checkout Off'}
+                                    </Badge>
+                                </div>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <CreditCard className="h-4 w-4" />
+                                        <span>{paymentMethodConfig.subscription_model === '1' ? 'Revenue Sharing' : 'Licence'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Layers className="h-4 w-4" />
+                                        <span>Priority {paymentMethodConfig.priority}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <ShieldCheck className="h-4 w-4" />
+                                        <span>{paymentMethodConfig.support_tokenization ? 'Tokenization enabled' : 'Tokenization off'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Eye className="h-4 w-4" />
+                                        <span>{paymentMethodConfig.shown_in_checkout ? 'Visible in checkout' : 'Hidden in checkout'}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );

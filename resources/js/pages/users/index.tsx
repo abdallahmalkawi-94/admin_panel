@@ -8,11 +8,15 @@ import {
 import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus } from 'lucide-react';
+import { Plus, Users, ShieldCheck, AlertTriangle, Clock } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
 import { CountryDropDown } from '@/types/dropdown';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useInitials } from '@/hooks/use-initials';
+import Flag from 'react-world-flags';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -68,6 +72,17 @@ export default function Index({
     statuses,
     countries,
 }: IndexProps) {
+    const getInitials = useInitials();
+    const activeCount = users.data.filter(
+        (user) => user.status_id === USER_STATUS.ACTIVE,
+    ).length;
+    const pendingCount = users.data.filter(
+        (user) => user.status_id === USER_STATUS.PENDING_VERIFICATION,
+    ).length;
+    const blockedCount = users.data.filter(
+        (user) => user.status_id === USER_STATUS.BLOCKED,
+    ).length;
+
     // Use the reusable filters hook
     const {
         filters: searchFilters,
@@ -110,6 +125,17 @@ export default function Index({
         {
             key: 'name',
             label: 'Name',
+            render: (user) => (
+                <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            {getInitials(user.name)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <span>{user.name}</span>
+                </div>
+            ),
         },
         {
             key: 'email',
@@ -119,9 +145,19 @@ export default function Index({
             key: 'phone',
             label: 'Phone',
             render: (user) =>
-                user.country_code && user.mobile_number
-                    ? `${user.country_code} ${user.mobile_number}`
-                    : '-',
+                user.mobile_number ? (
+                    <div className="flex items-center gap-2">
+                        {user.country_code && (
+                            <Flag
+                                code={user.country_code}
+                                className="h-4 w-6 rounded object-cover"
+                            />
+                        )}
+                        <span>{user.mobile_number}</span>
+                    </div>
+                ) : (
+                    '-'
+                ),
         },
         {
             key: 'status',
@@ -186,26 +222,89 @@ export default function Index({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Users
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manage and view all users in the system
-                        </p>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-sky-500/10 via-emerald-400/10 to-amber-400/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                User Directory
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Users
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Track user activity, verification status, and access health.
+                            </p>
+                        </div>
+                        <Button asChild>
+                            <Link href="/users/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add User
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/users/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add User
-                        </Link>
-                    </Button>
                 </div>
 
-                {/* Filters */}
+                {/* Snapshot */}
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Total Users
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {users.meta.total}
+                                </p>
+                            </div>
+                            <Users className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Active (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {activeCount}
+                                </p>
+                            </div>
+                            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Pending (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {pendingCount}
+                                </p>
+                            </div>
+                            <Clock className="h-5 w-5 text-sky-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Blocked (This Page)
+                                </p>
+                                <p className="mt-2 text-2xl font-semibold">
+                                    {blockedCount}
+                                </p>
+                            </div>
+                            <AlertTriangle className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <DataFilters
+                    title="Filter Users"
                     fields={filterFields}
                     values={searchFilters}
                     onChange={handleFilterChange}

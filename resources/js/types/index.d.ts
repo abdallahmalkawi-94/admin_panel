@@ -316,6 +316,7 @@ export interface PspPaymentMethod {
         id: number;
         description: string;
         code: string;
+        logo_url?: string | null;
     } | null;
     merchant_id?: number | null;
     merchant?: {
@@ -346,6 +347,7 @@ export interface PspPaymentMethod {
     support_international_payment: boolean;
     post_fees_to_psp: boolean;
     fees_type: number;
+    fees_type_description: string;
     priority: number;
     max_allowed_amount: number;
     min_allowed_amount: number;

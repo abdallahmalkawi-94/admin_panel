@@ -6,6 +6,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -13,7 +14,7 @@ import AppLayout from '@/layouts/app-layout';
 import products from '@/routes/products';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, Sparkles, Package, ShieldCheck, ShieldOff, Link as LinkIcon, Key, Code } from 'lucide-react';
 import { FormEventHandler } from 'react';
 import { handleGeneratePassword } from '@/helpers/helpers';
 
@@ -55,29 +56,43 @@ export default function Create() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create a new product" />
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Create a new product
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Add a new product to start integration
-                        </p>
+            <div className="flex h-full flex-1 flex-col gap-8 p-6">
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <Sparkles className="h-4 w-4" />
+                                Product Onboarding
+                            </div>
+                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+                                Create a new product
+                            </h1>
+                            <p className="text-muted-foreground">
+                                Define API endpoints, signing preferences, and security keys.
+                            </p>
+                        </div>
+                        <Badge variant={data.signing_active ? 'success' : 'secondary'}>
+                            {data.signing_active ? 'Signing Active' : 'Signing Inactive'}
+                        </Badge>
                     </div>
                 </div>
 
-                {/* Form */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Product Information</CardTitle>
-                        <CardDescription>
-                            Enter the details for the new product
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+                    {/* Form */}
+                    <Card className="py-6">
+                        <CardHeader className="flex flex-row items-start justify-between gap-4">
+                            <div>
+                                <CardTitle>Product Information</CardTitle>
+                                <CardDescription>
+                                    Enter the details for the new product.
+                                </CardDescription>
+                            </div>
+                            <Package className="h-5 w-5 text-emerald-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit} className="space-y-6">
                             {/* En & Ar Name */}
                             <div className="grid gap-6 md:grid-cols-2">
                                 <div className="space-y-2">
@@ -349,25 +364,72 @@ export default function Create() {
                                 </div>
                             </div>
 
-                            {/* Submit Buttons */}
-                            <div className="flex items-center justify-end gap-4 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => window.history.back()}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={processing}>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    {processing
-                                        ? 'Creating...'
-                                        : 'Create'}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                                {/* Submit Buttons */}
+                                <div className="flex items-center justify-end gap-4 pt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => window.history.back()}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={processing}>
+                                        <Save className="mr-2 h-4 w-4" />
+                                        {processing ? 'Creating...' : 'Create'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    {/* Summary */}
+                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                        <Card className="border-muted/60 bg-muted/30 py-6">
+                            <CardHeader>
+                                <CardTitle>Live Summary</CardTitle>
+                                <CardDescription>
+                                    Snapshot of the integration profile.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                        Product
+                                    </p>
+                                    <p className="text-lg font-semibold">
+                                        {data.en_name || 'New Product'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {data.ar_name || 'Arabic name pending'}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <Badge variant={data.signing_active ? 'success' : 'secondary'}>
+                                        {data.signing_active ? 'Signing Active' : 'Signing Inactive'}
+                                    </Badge>
+                                </div>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        {data.signing_active ? <ShieldCheck className="h-4 w-4" /> : <ShieldOff className="h-4 w-4" />}
+                                        <span>{data.signing_active ? 'HMAC required' : 'HMAC disabled'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <LinkIcon className="h-4 w-4" />
+                                        <span>{data.callback_url || 'Callback URL pending'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Code className="h-4 w-4" />
+                                        <span>{data.invoice_creation_api || 'Invoice API pending'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <Key className="h-4 w-4" />
+                                        <span>{data.secret_key ? 'Secret key generated' : 'Secret key pending'}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );

@@ -10,7 +10,19 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, ArrowLeft } from 'lucide-react';
+import {
+    ArrowLeft,
+    BadgeCheck,
+    Banknote,
+    DollarSign,
+    Edit,
+    Globe,
+    IdCard,
+    Mail,
+    Phone,
+    Split,
+    User,
+} from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,165 +40,154 @@ interface ShowProps {
 }
 
 export default function Show({ psp }: ShowProps) {
+    const statusVariant = (() => {
+        const statusLabel = psp.status?.description?.toLowerCase() || '';
+        if (statusLabel.includes('active')) return 'success';
+        if (statusLabel.includes('inactive') || statusLabel.includes('blocked')) return 'destructive';
+        if (statusLabel.includes('pending')) return 'info';
+        return 'outline';
+    })();
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`PSP: ${psp.name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            {psp.name}
-                        </h1>
-                        <p className="text-muted-foreground">
-                            PSP details and information
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button asChild variant="outline">
-                            <Link href="/psps">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to PSPs
-                            </Link>
-                        </Button>
-                        <Button asChild>
-                            <Link href={`/psps/${psp.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </Link>
-                        </Button>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-background">
+                                <Banknote className="h-7 w-7 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <div className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    PSP Profile
+                                </div>
+                                <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                                    {psp.name} <code className="rounded bg-muted text-sm">({psp.code})</code>
+                                </h1>
+                                {/*<p className="text-muted-foreground">{psp.code}</p>*/}
+                                <p className="text-muted-foreground flex items-center gap-2">
+                                    <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    {psp.contact_email ?? "Contact email not configured"}
+                                </p>
+                                <p className="text-muted-foreground flex items-center gap-2">
+                                    <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    { psp.contact_person || 'Contact person not configured' }
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={statusVariant}>
+                                {psp.status?.description}
+                            </Badge>
+                            <Button asChild variant="outline">
+                                <Link href="/psps">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Back
+                                </Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href={`/psps/${psp.id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Basic Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Basic Information</CardTitle>
-                        <CardDescription>
-                            General details about the PSP
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    ID
-                                </dt>
-                                <dd className="mt-1 text-sm">{psp.id}</dd>
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    Psp ID
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    #{psp.id}
+                                </p>
                             </div>
+                            <IdCard className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Code
-                                </dt>
-                                <dd className="mt-1">
-                                    <code className="rounded bg-muted px-2 py-1 text-sm">
-                                        {psp.code}
-                                    </code>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Country
-                                </dt>
-                                <dd className="mt-1 text-sm">
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
                                     {psp.country?.name || '-'}
-                                </dd>
+                                </p>
                             </div>
+                            <Globe className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Settlement Currency
-                                </dt>
-                                <dd className="mt-1 text-sm">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    Currency
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
                                     {psp.settlement_currency
-                                        ? `${psp.settlement_currency.name} (${psp.settlement_currency.code})`
+                                        ? `${psp.settlement_currency.code} (${psp.settlement_currency.symbol})`
                                         : '-'}
-                                </dd>
+                                </p>
                             </div>
+                            <Banknote className="h-5 w-5 text-sky-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Monthly Fees
-                                </dt>
-                                <dd className="mt-1 text-sm">
-                                    {psp.settlement_currency?.symbol} {" "}
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    monthly fees
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {psp.settlement_currency?.symbol}{' '}
                                     {psp.monthly_fees}
-                                </dd>
+                                </p>
                             </div>
+                            <DollarSign className="h-5 w-5 text-blue-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Status
-                                </dt>
-                                <dd className="mt-1">
-                                    <Badge variant="info">
-                                        {psp.status?.description}
-                                    </Badge>
-                                </dd>
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    Splitting
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {psp.support_money_splitting
+                                        ? 'Enabled'
+                                        : 'Disabled'}
+                                </p>
                             </div>
+                            <Split className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Support Money Splitting
-                                </dt>
-                                <dd className="mt-1">
-                                    <Badge variant={psp.support_money_splitting ? 'success' : 'secondary'}>
-                                        {psp.support_money_splitting ? 'Yes' : 'No'}
-                                    </Badge>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Auto Transfer
-                                </dt>
-                                <dd className="mt-1">
-                                    <Badge variant={psp.enable_auto_transfer ? 'success' : 'secondary'}>
-                                        {psp.enable_auto_transfer ? 'Enabled' : 'Disabled'}
-                                    </Badge>
-                                </dd>
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {psp.enable_auto_transfer
+                                        ? 'Enabled'
+                                        : 'Disabled'}
+                                </p>
                             </div>
-                        </dl>
-                    </CardContent>
-                </Card>
-
-                {/* Contact Information */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Contact Information</CardTitle>
-                        <CardDescription>
-                            PSP contact details
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Contact Person
-                                </dt>
-                                <dd className="mt-1 text-sm">
-                                    {psp.contact_person || '-'}
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Contact Email
-                                </dt>
-                                <dd className="mt-1 text-sm">
-                                    {psp.contact_email ? (
-                                        <a
-                                            href={`mailto:${psp.contact_email}`}
-                                            className="text-blue-600 hover:underline"
-                                            target="_blank"
-                                        >
-                                            {psp.contact_email}
-                                        </a>
-                                    ) : (
-                                        '-'
-                                    )}
-                                </dd>
-                            </div>
-                        </dl>
-                    </CardContent>
-                </Card>
+                            <BadgeCheck className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Technical Details */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
                         <CardTitle>Technical Details</CardTitle>
                         <CardDescription>
@@ -265,7 +266,7 @@ export default function Show({ psp }: ShowProps) {
                 </Card>
 
                 {/* Banking Details */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
                         <CardTitle>Banking Details</CardTitle>
                         <CardDescription>
@@ -311,53 +312,20 @@ export default function Show({ psp }: ShowProps) {
                 </Card>
 
                 {/* Notes */}
-                {psp.notes && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Notes</CardTitle>
-                            <CardDescription>
-                                Additional information
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="whitespace-pre-wrap text-sm">
-                                {psp.notes}
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
-
-                {/* Metadata */}
-                <Card>
+                <Card className="py-6">
                     <CardHeader>
-                        <CardTitle>Metadata</CardTitle>
+                        <CardTitle>Notes</CardTitle>
                         <CardDescription>
-                            System information
+                            Additional information
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Created At
-                                </dt>
-                                <dd className="mt-1 text-sm">
-                                    {new Date(psp.created_at).toLocaleString()}
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-muted-foreground">
-                                    Updated At
-                                </dt>
-                                <dd className="mt-1 text-sm">
-                                    {new Date(psp.updated_at).toLocaleString()}
-                                </dd>
-                            </div>
-                        </dl>
+                        <p className="text-sm whitespace-pre-wrap">
+                            {psp.notes ?? "N/A"}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
         </AppLayout>
     );
 }
-

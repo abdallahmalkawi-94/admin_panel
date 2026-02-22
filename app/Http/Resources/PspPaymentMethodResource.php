@@ -33,6 +33,7 @@ class PspPaymentMethodResource extends JsonResource
                     'id' => $this->paymentMethod->id,
                     'description' => $this->paymentMethod->description,
                     'code' => $this->paymentMethod->code,
+                    'logo_url' => $this->paymentMethod->logo_url,
                 ];
             }),
             'merchant_id' => $this->merchant_id,

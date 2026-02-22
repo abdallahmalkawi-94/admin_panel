@@ -18,6 +18,11 @@ import {
     Phone,
     Trash2,
     User as UserIcon,
+    Users,
+    ShieldCheck,
+    CheckCircle2,
+    IdCard,
+    Earth,
 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,158 +73,112 @@ export default function Show({ user }: ShowProps) {
         }
     };
 
+    const initials = user.name
+        ? user.name
+              .split(' ')
+              .slice(0, 2)
+              .map((part) => part.charAt(0))
+              .join('')
+              .toUpperCase()
+        : 'U';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`View User - ${user.name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            User Details
-                        </h1>
-                        <p className="text-muted-foreground">
-                            View user information and account status
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button asChild variant="outline">
-                            <Link href="/users">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Users
-                            </Link>
-                        </Button>
-                        <Button asChild>
-                            <Link href={`/users/${user.id}/edit`}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </Link>
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleDelete}
-                            variant="destructive"
-                            className={"cursor-pointer"}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
-                    </div>
-                </div>
-
-                {/* User Information Card */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle className="text-2xl">
-                                    {user.name}
-                                </CardTitle>
-                                <CardDescription>
-                                    {user.email}
-                                </CardDescription>
+                {/* Hero */}
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-sky-500/10 via-emerald-400/10 to-amber-400/10 p-6">
+                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-background text-xl font-semibold">
+                                {initials}
                             </div>
+                            <div>
+                                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    User Profile
+                                </div>
+                                <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                                    {user.name}
+                                </h1>
+                                <p className="text-muted-foreground flex items-center gap-2">
+                                    <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    {user.email}
+                                </p>
+                                <p className="text-muted-foreground flex items-center gap-2">
+                                    <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    {user.country_code} {user.mobile_number}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
                             <Badge variant={getStatusVariant(user.status_id)}>
                                 {user.status.description}
                             </Badge>
+                            <Badge variant={user.email_verified_at ? 'success' : 'info'}>
+                                {user.email_verified_at ? 'Verified' : 'Pending'}
+                            </Badge>
+                            <Button asChild variant="outline">
+                                <Link href="/users">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Back
+                                </Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href={`/users/${user.id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </Link>
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleDelete}
+                                variant="destructive"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </Button>
                         </div>
-                    </CardHeader>
+                    </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    User ID
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    #{user.id}
+                                </p>
+                            </div>
+                            <IdCard className="h-5 w-5 text-emerald-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Country
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {user.country_name || user.country_code}
+                                </p>
+                            </div>
+                            <MapPin className="h-5 w-5 text-amber-600" />
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* User Information Card */}
+                <Card className={'py-6'}>
                     <CardContent>
                         <div className="grid gap-6 md:grid-cols-2">
-                            {/* Personal Information */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold">
-                                    Personal Information
+                                    Account Timeline
                                 </h3>
-
-                                <div className="flex items-start gap-3">
-                                    <UserIcon className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Full Name
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {user.name}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Email Address
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {user.email}
-                                        </p>
-                                        {user.email_verified_at ? (
-                                            <Badge
-                                                variant="success"
-                                                className="mt-1"
-                                            >
-                                                Verified
-                                            </Badge>
-                                        ) : (
-                                            <Badge
-                                                variant="secondary"
-                                                className="mt-1"
-                                            >
-                                                Not Verified
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <Phone className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Mobile Number
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {user.country_code} {user.mobile_number}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-3">
-                                    <MapPin className="mt-0.5 h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p className="text-sm font-medium">
-                                            Country
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {user.country_name || user.country_code}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Account Information */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold">
-                                    Account Information
-                                </h3>
-
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">
-                                        Account Status
-                                    </p>
-                                    <Badge variant={getStatusVariant(user.status_id)}>
-                                        {user.status.description}
-                                    </Badge>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <p className="text-sm font-medium">
-                                        User ID
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        #{user.id}
-                                    </p>
-                                </div>
-
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">
                                         Created At
@@ -236,7 +195,6 @@ export default function Show({ user }: ShowProps) {
                                         })}
                                     </p>
                                 </div>
-
                                 <div className="space-y-2">
                                     <p className="text-sm font-medium">
                                         Last Updated
@@ -253,7 +211,6 @@ export default function Show({ user }: ShowProps) {
                                         })}
                                     </p>
                                 </div>
-
                                 {user.email_verified_at && (
                                     <div className="space-y-2">
                                         <p className="text-sm font-medium">
