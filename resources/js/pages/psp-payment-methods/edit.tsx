@@ -1,8 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type PspPaymentMethod, type BreadcrumbItem } from '@/types';
 import {
-    type PspDropDown,
-    type PaymentMethodDropDown,
     type RefundOptionDropDown,
     type PayoutModelDropDown,
 } from '@/types/dropdown';
@@ -36,7 +34,6 @@ import {
     Plus,
     X,
     ChevronDown,
-    Sparkles,
     CreditCard,
     ShieldCheck,
     Eye,
@@ -57,8 +54,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface EditProps {
     pspPaymentMethod: PspPaymentMethod;
-    psps: PspDropDown[];
-    paymentMethods: PaymentMethodDropDown[];
     refundOptions: RefundOptionDropDown[];
     payoutModels: PayoutModelDropDown[];
 }
@@ -88,8 +83,6 @@ interface PaymentMethodConfig {
 
 export default function Edit({
     pspPaymentMethod,
-    psps,
-    paymentMethods,
     refundOptions,
     payoutModels,
 }: EditProps) {
@@ -375,10 +368,6 @@ export default function Edit({
         });
     };
 
-    const getPaymentMethodName = () => {
-        return paymentMethods.find(pm => pm.id === paymentMethodConfig.payment_method_id)?.description || `Payment Method ${paymentMethodConfig.payment_method_id}`;
-    };
-
     const statusBadge = paymentMethodConfig.is_active ? 'success' : 'secondary';
     const checkoutBadge = paymentMethodConfig.shown_in_checkout ? 'success' : 'secondary';
 
@@ -390,17 +379,23 @@ export default function Edit({
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
                     <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                                <Sparkles className="h-4 w-4" />
-                                PSP Payment Methods
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-background">
+                                {
+                                    pspPaymentMethod.payment_method?.logo_url ? <img src={pspPaymentMethod.payment_method?.logo_url} alt="payment method logo" /> : <CreditCard className="h-7 w-7 text-muted-foreground" />
+                                }
                             </div>
-                            <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-                                Edit PSP Payment Method
-                            </h1>
-                            <p className="text-muted-foreground">
-                                Update activation, limits, and API configuration.
-                            </p>
+                            <div>
+                                <div className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+                                    Edit PSP Payment Method
+                                </div>
+                                <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+                                    {pspPaymentMethod.psp?.name} - {pspPaymentMethod.payment_method?.description}
+                                </h1>
+                                <p className="text-muted-foreground">
+                                    Update activation, limits, and API configuration.
+                                </p>
+                            </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             <Badge variant={statusBadge}>
@@ -415,32 +410,6 @@ export default function Edit({
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_460px]">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Basic Information (Read-only) */}
-                    <Card className="py-6">
-                        <CardHeader>
-                            <CardTitle>Basic Information</CardTitle>
-                            <CardDescription>
-                                PSP and Payment Method details
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>PSP</Label>
-                                    <div className="text-sm font-medium">
-                                        {psps.find(p => p.id.toString() === data.psp_id)?.name || 'N/A'}
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Payment Method</Label>
-                                    <div className="text-sm font-medium">
-                                        {paymentMethods.find(pm => pm.id.toString() === data.payment_method_id)?.description || 'N/A'}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     {/* Configuration Card */}
                             <Collapsible
                                 open={isCardOpen}
@@ -451,9 +420,9 @@ export default function Edit({
                                         <CollapsibleTrigger asChild>
                                             <div className="flex items-center justify-between cursor-pointer">
                                                 <div className="flex-1">
-                                                    <CardTitle>{getPaymentMethodName()} Configuration</CardTitle>
+                                                    <CardTitle>{pspPaymentMethod.payment_method?.description} Configuration</CardTitle>
                                                     <CardDescription>
-                                                        Configure settings for {getPaymentMethodName()}
+                                                        Configure settings for {pspPaymentMethod.payment_method?.description}
                                                     </CardDescription>
                                                 </div>
                                                 <ChevronDown
@@ -822,7 +791,7 @@ export default function Edit({
                                         {pspPaymentMethod.psp?.name || 'PSP'}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        {getPaymentMethodName()}
+                                        {pspPaymentMethod.payment_method?.description}
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap gap-2">

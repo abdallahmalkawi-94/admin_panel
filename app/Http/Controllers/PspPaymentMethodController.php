@@ -92,16 +92,11 @@ class PspPaymentMethodController extends Controller
     public function edit(PspPaymentMethod $pspPaymentMethod): Response|ResponseFactory
     {
         $pspPaymentMethod->load(['psp', 'paymentMethod']);
-
-        $psps = PspsDropDown();
-        $paymentMethods = PaymentMethodsDropDown();
         $refundOptions = RefundOptionsDropDown();
         $payoutModels = PayoutModelsDropDown();
 
         return inertia('psp-payment-methods/edit', [
             'pspPaymentMethod' => (new PspPaymentMethodResource($pspPaymentMethod))->resolve(),
-            'psps' => $psps,
-            'paymentMethods' => $paymentMethods,
             'refundOptions' => $refundOptions,
             'payoutModels' => $payoutModels,
         ]);
