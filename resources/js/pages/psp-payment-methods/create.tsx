@@ -23,6 +23,15 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import {
+    Table,
+    TableBody,
+    TableBodyRow,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableHeadRow,
+} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import {
@@ -834,7 +843,7 @@ export default function Create({
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
                                                     <Label className="text-base font-semibold">
-                                                        Configuration (Production & Test)
+                                                        Configuration Table
                                                     </Label>
                                                     <Button
                                                         type="button"
@@ -849,158 +858,126 @@ export default function Create({
                                                     </Button>
                                                 </div>
 
-                                                <div className="space-y-4">
-                                                    <Label>Production Config</Label>
-                                                    <div className="space-y-3">
-                                                        {sharedConfigPairs.map(
-                                                            (
-                                                                pair,
-                                                                pairIndex,
-                                                            ) => (
-                                                                <div
-                                                                    key={
-                                                                        pairIndex
-                                                                    }
-                                                                    className="flex items-start gap-2"
-                                                                >
-                                                                    <div className="grid flex-1 grid-cols-2 gap-2">
-                                                                        <Input
-                                                                            placeholder="Key"
-                                                                            value={
-                                                                                pair.key
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) =>
-                                                                                updateConfigPair(
-                                                                                    'config',
-                                                                                    pairIndex,
-                                                                                    'key',
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                                )
-                                                                            }
-                                                                            onBlur={
-                                                                                syncConfigPairsOnBlur
-                                                                            }
-                                                                        />
-                                                                        <Input
-                                                                            placeholder="Value"
-                                                                            value={
-                                                                                pair.value
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) =>
-                                                                                updateConfigPair(
-                                                                                    'config',
-                                                                                    pairIndex,
-                                                                                    'value',
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    </div>
-                                                                    {sharedConfigPairs.length >
-                                                                        1 && (
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="outline"
-                                                                            size="icon"
-                                                                            onClick={() =>
-                                                                                removeConfigPair(
-                                                                                    'config',
-                                                                                    pairIndex,
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <X className="h-4 w-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="space-y-4">
-                                                    <Label>Test Config</Label>
-                                                    <div className="space-y-3">
-                                                        {sharedTestConfigPairs.map(
-                                                            (
-                                                                pair,
-                                                                pairIndex,
-                                                            ) => (
-                                                                <div
-                                                                    key={
-                                                                        pairIndex
-                                                                    }
-                                                                    className="flex items-start gap-2"
-                                                                >
-                                                                    <div className="grid flex-1 grid-cols-2 gap-2">
-                                                                        <Input
-                                                                            placeholder="Key"
-                                                                            value={
-                                                                                pair.key
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) =>
-                                                                                updateConfigPair(
-                                                                                    'test',
-                                                                                    pairIndex,
-                                                                                    'key',
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                                )
-                                                                            }
-                                                                            onBlur={
-                                                                                syncConfigPairsOnBlur
-                                                                            }
-                                                                        />
-                                                                        <Input
-                                                                            placeholder="Value"
-                                                                            value={
-                                                                                pair.value
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) =>
-                                                                                updateConfigPair(
-                                                                                    'test',
-                                                                                    pairIndex,
-                                                                                    'value',
-                                                                                    e
-                                                                                        .target
-                                                                                        .value,
-                                                                                )
-                                                                            }
-                                                                        />
-                                                                    </div>
-                                                                    {sharedTestConfigPairs.length >
-                                                                        1 && (
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="outline"
-                                                                            size="icon"
-                                                                            onClick={() =>
-                                                                                removeConfigPair(
-                                                                                    'test',
-                                                                                    pairIndex,
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <X className="h-4 w-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </div>
+                                                <div className="rounded-xl border">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableHeadRow>
+                                                                <TableHead>
+                                                                    Key
+                                                                </TableHead>
+                                                                <TableHead>
+                                                                    Production
+                                                                    Value
+                                                                </TableHead>
+                                                                <TableHead>
+                                                                    Test Value
+                                                                </TableHead>
+                                                                <TableHead className="w-[88px]">
+                                                                    Actions
+                                                                </TableHead>
+                                                            </TableHeadRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {sharedConfigPairs.map(
+                                                                (
+                                                                    pair,
+                                                                    pairIndex,
+                                                                ) => (
+                                                                    <TableBodyRow
+                                                                        key={
+                                                                            pairIndex
+                                                                        }
+                                                                    >
+                                                                        <TableCell className="min-w-[220px]">
+                                                                            <Input
+                                                                                placeholder="Key"
+                                                                                value={
+                                                                                    pair.key
+                                                                                }
+                                                                                onChange={(
+                                                                                    e,
+                                                                                ) =>
+                                                                                    updateConfigPair(
+                                                                                        'config',
+                                                                                        pairIndex,
+                                                                                        'key',
+                                                                                        e
+                                                                                            .target
+                                                                                            .value,
+                                                                                    )
+                                                                                }
+                                                                                onBlur={
+                                                                                    syncConfigPairsOnBlur
+                                                                                }
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell className="min-w-[220px]">
+                                                                            <Input
+                                                                                placeholder="Production value"
+                                                                                value={
+                                                                                    pair.value
+                                                                                }
+                                                                                onChange={(
+                                                                                    e,
+                                                                                ) =>
+                                                                                    updateConfigPair(
+                                                                                        'config',
+                                                                                        pairIndex,
+                                                                                        'value',
+                                                                                        e
+                                                                                            .target
+                                                                                            .value,
+                                                                                    )
+                                                                                }
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell className="min-w-[220px]">
+                                                                            <Input
+                                                                                placeholder="Test value"
+                                                                                value={
+                                                                                    sharedTestConfigPairs[
+                                                                                        pairIndex
+                                                                                    ]
+                                                                                        ?.value ||
+                                                                                    ''
+                                                                                }
+                                                                                onChange={(
+                                                                                    e,
+                                                                                ) =>
+                                                                                    updateConfigPair(
+                                                                                        'test',
+                                                                                        pairIndex,
+                                                                                        'value',
+                                                                                        e
+                                                                                            .target
+                                                                                            .value,
+                                                                                    )
+                                                                                }
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell>
+                                                                            {sharedConfigPairs.length >
+                                                                                1 && (
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    onClick={() =>
+                                                                                        removeConfigPair(
+                                                                                            'config',
+                                                                                            pairIndex,
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <X className="h-4 w-4" />
+                                                                                </Button>
+                                                                            )}
+                                                                        </TableCell>
+                                                                    </TableBodyRow>
+                                                                ),
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
                                                 </div>
                                             </div>
                                         </CardContent>
@@ -1013,17 +990,10 @@ export default function Create({
                                                 paymentMethodConfigs[pmId] ||
                                                 buildPaymentMethodConfig(pmId);
 
-                                            const isOpen =
-                                                openCards[pmId] ?? true;
+                                            const isOpen = openCards[pmId] ?? true;
                                             const configIndex = index;
-                                            const refundOptionError =
-                                                errors[
-                                                    `payment_methods_config.${configIndex}.refund_option_id`
-                                                ];
-                                            const payoutModelError =
-                                                errors[
-                                                    `payment_methods_config.${configIndex}.payout_model_id`
-                                                ];
+                                            const refundOptionError = errors[`payment_methods_config.${configIndex}.refund_option_id`];
+                                            const payoutModelError = errors[`payment_methods_config.${configIndex}.payout_model_id`];
 
                                             return (
                                                 <Collapsible
