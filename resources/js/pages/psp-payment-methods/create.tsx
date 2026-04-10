@@ -1,3 +1,28 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import {
@@ -7,31 +32,7 @@ import {
     type RefundOptionDropDown,
 } from '@/types/dropdown';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { MultiSelect } from '@/components/ui/multi-select';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import axios from 'axios';
 import {
     ChevronDown,
     ChevronLeft,
@@ -46,7 +47,6 @@ import {
     X,
 } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
-import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -70,6 +70,26 @@ interface KeyValuePair {
     value: string;
 }
 
+const createEmptyPair = (): KeyValuePair => ({
+    key: '',
+    value: '',
+});
+
+const pairsToObject = (
+    pairs: KeyValuePair[],
+): Record<string, string> | null => {
+    const result: Record<string, string> = {};
+
+    pairs.forEach((pair) => {
+        const trimmedKey = pair.key.trim();
+        if (trimmedKey) {
+            result[trimmedKey] = pair.value;
+        }
+    });
+
+    return Object.keys(result).length > 0 ? result : null;
+};
+
 interface PaymentMethodConfig {
     payment_method_id: number;
     refund_option_id: string;
@@ -84,8 +104,6 @@ interface PaymentMethodConfig {
     priority: string;
     max_allowed_amount: string;
     min_allowed_amount: string;
-    configPairs: KeyValuePair[];
-    testConfigPairs: KeyValuePair[];
 }
 
 export default function Create({
@@ -94,12 +112,24 @@ export default function Create({
     payoutModels,
 }: CreateProps) {
     const [step, setStep] = useState(1);
-    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<number[]>([]);
-    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<Record<number, PaymentMethodConfig>>({});
+    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<
+        number[]
+    >([]);
+    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<
+        Record<number, PaymentMethodConfig>
+    >({});
     const [openCards, setOpenCards] = useState<Record<number, boolean>>({});
-    const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDropDown[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<
+        PaymentMethodDropDown[]
+    >([]);
+    const [sharedConfigPairs, setSharedConfigPairs] = useState<KeyValuePair[]>([
+        createEmptyPair(),
+    ]);
+    const [sharedTestConfigPairs, setSharedTestConfigPairs] = useState<
+        KeyValuePair[]
+    >([createEmptyPair()]);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors, reset } = useForm({
         psp_id: '',
         payment_method_id: [] as number[],
         refund_option_id: '',
@@ -114,75 +144,81 @@ export default function Create({
         priority: '0',
         max_allowed_amount: '0',
         min_allowed_amount: '0',
-        config: null as Record<string, unknown> | null,
-        test_config: null as Record<string, unknown> | null,
-        payment_methods_config: [] as any[],
     });
 
     useEffect(() => {
-        if (data.psp_id) {
-            axios.post(`/psp-payment-methods/get_payment_methods`, {
-                "psp_id": data.psp_id,
-            }).then(response => {
+        if (!data.psp_id) {
+            setPaymentMethods([]);
+            return;
+        }
+
+        axios
+            .post(`/psp-payment-methods/get_payment_methods`, {
+                psp_id: data.psp_id,
+            })
+            .then((response) => {
                 setPaymentMethods(response.data.PaymentMethods);
-                console.log(response);
-            }).catch(error => {
+            })
+            .catch((error) => {
                 console.error('Error fetching payment methods:', error);
                 setPaymentMethods([]);
-            }).finally(() => {
-                // setLoadingMerchants(false);
             });
-        }
     }, [data.psp_id]);
 
-    // Initialize payment method configs when payment methods are selected
-    useEffect(() => {
-        const newConfigs: Record<number, PaymentMethodConfig> = {};
-        const newOpenCards: Record<number, boolean> = {};
-        selectedPaymentMethodIds.forEach((pmId) => {
-            if (!paymentMethodConfigs[pmId]) {
-                const existingConfig = paymentMethodConfigs[pmId];
-                newConfigs[pmId] = existingConfig || {
-                    payment_method_id: pmId,
-                    refund_option_id: data.refund_option_id || '',
-                    payout_model_id: data.payout_model_id || '',
-                    support_tokenization: data.support_tokenization || false,
-                    subscription_model: data.subscription_model || '1',
-                    is_active: data.is_active ?? true,
-                    shown_in_checkout: data.shown_in_checkout ?? true,
-                    support_international_payment:
-                        data.support_international_payment || false,
-                    post_fees_to_psp: data.post_fees_to_psp || false,
-                    fees_type: data.fees_type || '0',
-                    priority: data.priority || '0',
-                    max_allowed_amount: data.max_allowed_amount || '0',
-                    min_allowed_amount: data.min_allowed_amount || '0',
-                    configPairs: [{ key: '', value: '' }],
-                    testConfigPairs: [{ key: '', value: '' }],
-                };
-            } else {
-                newConfigs[pmId] = paymentMethodConfigs[pmId];
-            }
-            // Initialize all cards as open by default
-            if (openCards[pmId] === undefined) {
-                newOpenCards[pmId] = true;
-            } else {
-                newOpenCards[pmId] = openCards[pmId];
-            }
-        });
-        setPaymentMethodConfigs(newConfigs);
-        setOpenCards((prev) => ({ ...prev, ...newOpenCards }));
-    }, [selectedPaymentMethodIds]);
+    const buildPaymentMethodConfig = (pmId: number): PaymentMethodConfig => ({
+        payment_method_id: pmId,
+        refund_option_id: data.refund_option_id || '',
+        payout_model_id: data.payout_model_id || '',
+        support_tokenization: data.support_tokenization || false,
+        subscription_model: data.subscription_model || '1',
+        is_active: data.is_active ?? true,
+        shown_in_checkout: data.shown_in_checkout ?? true,
+        support_international_payment:
+            data.support_international_payment || false,
+        post_fees_to_psp: data.post_fees_to_psp || false,
+        fees_type: data.fees_type || '0',
+        priority: data.priority || '0',
+        max_allowed_amount: data.max_allowed_amount || '0',
+        min_allowed_amount: data.min_allowed_amount || '0',
+    });
 
     const handlePaymentMethodChange = (paymentMethodIds: number[]) => {
         setSelectedPaymentMethodIds(paymentMethodIds);
         setData('payment_method_id', paymentMethodIds);
+        setPaymentMethodConfigs((prev) => {
+            const nextConfigs: Record<number, PaymentMethodConfig> = {};
+
+            paymentMethodIds.forEach((pmId) => {
+                nextConfigs[pmId] =
+                    prev[pmId] || buildPaymentMethodConfig(pmId);
+            });
+
+            return nextConfigs;
+        });
+        setOpenCards((prev) => {
+            const nextOpenCards: Record<number, boolean> = {};
+
+            paymentMethodIds.forEach((pmId) => {
+                nextOpenCards[pmId] = prev[pmId] ?? true;
+            });
+
+            return nextOpenCards;
+        });
+    };
+
+    const handlePspChange = (value: string) => {
+        setData('psp_id', value);
+        setData('payment_method_id', []);
+        setSelectedPaymentMethodIds([]);
+        setPaymentMethodConfigs({});
+        setOpenCards({});
+        setStep(1);
     };
 
     const updatePaymentMethodConfig = (
         pmId: number,
         field: keyof PaymentMethodConfig,
-        value: any,
+        value: PaymentMethodConfig[keyof PaymentMethodConfig],
     ) => {
         setPaymentMethodConfigs((prev) => ({
             ...prev,
@@ -279,120 +315,85 @@ export default function Create({
         return { syncedConfigPairs, syncedTestConfigPairs };
     };
 
-    const addConfigPairToBoth = (pmId: number) => {
-        const config = paymentMethodConfigs[pmId];
-        const newPair = { key: '', value: '' };
+    const addConfigPairToBoth = () => {
+        const newPair = createEmptyPair();
 
-        // Directly add pair to both configs without syncing (empty pairs will sync when key is entered)
-        setPaymentMethodConfigs((prev) => ({
-            ...prev,
-            [pmId]: {
-                ...prev[pmId],
-                configPairs: [...config.configPairs, newPair],
-                testConfigPairs: [...config.testConfigPairs, newPair],
-            },
-        }));
+        setSharedConfigPairs((prev) => [...prev, newPair]);
+        setSharedTestConfigPairs((prev) => [...prev, newPair]);
     };
 
-    const removeConfigPair = (
-        pmId: number,
-        type: 'config' | 'test',
-        index: number,
-    ) => {
-        const config = paymentMethodConfigs[pmId];
+    const removeConfigPair = (type: 'config' | 'test', index: number) => {
         const pairToRemove =
             type === 'config'
-                ? config.configPairs[index]
-                : config.testConfigPairs[index];
+                ? sharedConfigPairs[index]
+                : sharedTestConfigPairs[index];
         const keyToRemove = pairToRemove.key.trim();
 
         // Remove from both configs if key is not empty (to keep keys in sync)
         if (keyToRemove) {
-            const newConfigPairs = config.configPairs.filter(
+            const newConfigPairs = sharedConfigPairs.filter(
                 (p) => p.key.trim() !== keyToRemove,
             );
-            const newTestConfigPairs = config.testConfigPairs.filter(
+            const newTestConfigPairs = sharedTestConfigPairs.filter(
                 (p) => p.key.trim() !== keyToRemove,
             );
 
             // Ensure at least one empty pair exists
             if (newConfigPairs.length === 0) {
-                newConfigPairs.push({ key: '', value: '' });
+                newConfigPairs.push(createEmptyPair());
             }
             if (newTestConfigPairs.length === 0) {
-                newTestConfigPairs.push({ key: '', value: '' });
+                newTestConfigPairs.push(createEmptyPair());
             }
 
-            setPaymentMethodConfigs((prev) => ({
-                ...prev,
-                [pmId]: {
-                    ...prev[pmId],
-                    configPairs: newConfigPairs,
-                    testConfigPairs: newTestConfigPairs,
-                },
-            }));
+            setSharedConfigPairs(newConfigPairs);
+            setSharedTestConfigPairs(newTestConfigPairs);
         } else {
             // If removing empty pair, remove from both to keep them in sync
-            const newConfigPairs = config.configPairs.filter((_, i) => {
+            const newConfigPairs = sharedConfigPairs.filter((_, i) => {
                 if (type === 'config') return i !== index;
                 return true;
             });
-            const newTestConfigPairs = config.testConfigPairs.filter((_, i) => {
+            const newTestConfigPairs = sharedTestConfigPairs.filter((_, i) => {
                 if (type === 'test') return i !== index;
                 return true;
             });
 
             // Ensure at least one empty pair exists
             if (newConfigPairs.length === 0) {
-                newConfigPairs.push({ key: '', value: '' });
+                newConfigPairs.push(createEmptyPair());
             }
             if (newTestConfigPairs.length === 0) {
-                newTestConfigPairs.push({ key: '', value: '' });
+                newTestConfigPairs.push(createEmptyPair());
             }
 
-            setPaymentMethodConfigs((prev) => ({
-                ...prev,
-                [pmId]: {
-                    ...prev[pmId],
-                    configPairs: newConfigPairs,
-                    testConfigPairs: newTestConfigPairs,
-                },
-            }));
+            setSharedConfigPairs(newConfigPairs);
+            setSharedTestConfigPairs(newTestConfigPairs);
         }
     };
 
-    const syncConfigPairsOnBlur = (pmId: number) => {
-        const config = paymentMethodConfigs[pmId];
+    const syncConfigPairsOnBlur = () => {
         // Sync keys to remove duplicates and ensure both configs have the same keys
         const { syncedConfigPairs, syncedTestConfigPairs } = syncConfigKeys(
-            config.configPairs,
-            config.testConfigPairs,
+            sharedConfigPairs,
+            sharedTestConfigPairs,
             false,
         );
 
-        setPaymentMethodConfigs((prev) => ({
-            ...prev,
-            [pmId]: {
-                ...prev[pmId],
-                configPairs: syncedConfigPairs,
-                testConfigPairs: syncedTestConfigPairs,
-            },
-        }));
+        setSharedConfigPairs(syncedConfigPairs);
+        setSharedTestConfigPairs(syncedTestConfigPairs);
     };
 
     const updateConfigPair = (
-        pmId: number,
         type: 'config' | 'test',
         index: number,
         field: 'key' | 'value',
         value: string,
     ) => {
-        const config = paymentMethodConfigs[pmId];
-
         if (field === 'key') {
             // When updating a key, update it in both configs directly without syncing (to avoid duplicates while typing)
-            const updatedConfigPairs = [...config.configPairs];
-            const updatedTestConfigPairs = [...config.testConfigPairs];
+            const updatedConfigPairs = [...sharedConfigPairs];
+            const updatedTestConfigPairs = [...sharedTestConfigPairs];
             const oldKey =
                 type === 'config'
                     ? updatedConfigPairs[index].key.trim()
@@ -457,36 +458,18 @@ export default function Create({
             }
 
             // Update state directly without syncing (sync will happen on blur)
-            setPaymentMethodConfigs((prev) => ({
-                ...prev,
-                [pmId]: {
-                    ...prev[pmId],
-                    configPairs: updatedConfigPairs,
-                    testConfigPairs: updatedTestConfigPairs,
-                },
-            }));
+            setSharedConfigPairs(updatedConfigPairs);
+            setSharedTestConfigPairs(updatedTestConfigPairs);
         } else {
             // When updating a value, only update the specific config
             if (type === 'config') {
-                const updated = [...config.configPairs];
+                const updated = [...sharedConfigPairs];
                 updated[index] = { ...updated[index], value: value };
-                setPaymentMethodConfigs((prev) => ({
-                    ...prev,
-                    [pmId]: {
-                        ...prev[pmId],
-                        configPairs: updated,
-                    },
-                }));
+                setSharedConfigPairs(updated);
             } else {
-                const updated = [...config.testConfigPairs];
+                const updated = [...sharedTestConfigPairs];
                 updated[index] = { ...updated[index], value: value };
-                setPaymentMethodConfigs((prev) => ({
-                    ...prev,
-                    [pmId]: {
-                        ...prev[pmId],
-                        testConfigPairs: updated,
-                    },
-                }));
+                setSharedTestConfigPairs(updated);
             }
         }
     };
@@ -510,40 +493,13 @@ export default function Create({
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
+        const sharedConfig = pairsToObject(sharedConfigPairs);
+        const sharedTestConfig = pairsToObject(sharedTestConfigPairs);
+
         // Convert payment method configs to the format expected by backend
         const paymentMethodsConfig = selectedPaymentMethodIds.map((pmId) => {
-            const config = paymentMethodConfigs[pmId] || {
-                payment_method_id: pmId,
-                refund_option_id: '',
-                payout_model_id: '',
-                support_tokenization: false,
-                subscription_model: '1',
-                is_active: true,
-                shown_in_checkout: true,
-                support_international_payment: false,
-                post_fees_to_psp: false,
-                fees_type: '0',
-                priority: '0',
-                max_allowed_amount: '0',
-                min_allowed_amount: '0',
-                configPairs: [{ key: '', value: '' }],
-                testConfigPairs: [{ key: '', value: '' }],
-            };
-
-            // Convert key-value pairs to JSON objects
-            const configObj: Record<string, string> = {};
-            (config.configPairs || []).forEach((pair) => {
-                if (pair.key.trim()) {
-                    configObj[pair.key.trim()] = pair.value;
-                }
-            });
-
-            const testConfigObj: Record<string, string> = {};
-            (config.testConfigPairs || []).forEach((pair) => {
-                if (pair.key.trim()) {
-                    testConfigObj[pair.key.trim()] = pair.value;
-                }
-            });
+            const config =
+                paymentMethodConfigs[pmId] || buildPaymentMethodConfig(pmId);
 
             // Handle refund_option_id and payout_model_id conversion
             const refundOptionId =
@@ -581,11 +537,8 @@ export default function Create({
                 min_allowed_amount: parseInt(
                     config.min_allowed_amount?.toString() || '0',
                 ),
-                config: Object.keys(configObj).length > 0 ? configObj : null,
-                test_config:
-                    Object.keys(testConfigObj).length > 0
-                        ? testConfigObj
-                        : null,
+                config: sharedConfig,
+                test_config: sharedTestConfig,
             };
         });
 
@@ -600,7 +553,7 @@ export default function Create({
         }
 
         // Only send the required fields, not the top-level config fields
-        const formData: any = {
+        const formData = {
             psp_id: parseInt(data.psp_id),
             payment_method_id: selectedPaymentMethodIds,
             payment_methods_config: paymentMethodsConfig,
@@ -613,6 +566,8 @@ export default function Create({
                 reset();
                 setSelectedPaymentMethodIds([]);
                 setPaymentMethodConfigs({});
+                setSharedConfigPairs([createEmptyPair()]);
+                setSharedTestConfigPairs([createEmptyPair()]);
                 setStep(1);
             },
         });
@@ -642,10 +597,10 @@ export default function Create({
             <div className="flex h-full flex-1 flex-col gap-8 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Sparkles className="h-4 w-4" />
                                 PSP Payment Methods
                             </div>
@@ -731,502 +686,825 @@ export default function Create({
 
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-6">
-                    {step === 1 && (
-                        <Card className="py-6">
-                            <CardHeader>
-                                <CardTitle>Basic Information</CardTitle>
-                                <CardDescription>
-                                    Select PSP and Payment Methods
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                {/* PSP */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="psp_id">
-                                        PSP{' '}
-                                        <span className="text-destructive">*</span>
-                                    </Label>
-                                    <Select
-                                        value={data.psp_id}
-                                        onValueChange={(value) =>
-                                            setData('psp_id', value)
-                                        }
-                                    >
-                                        <SelectTrigger
-                                            id="psp_id"
-                                            aria-invalid={!!errors.psp_id}
-                                        >
-                                            <SelectValue placeholder="Select a PSP" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {psps.map((psp) => (
-                                                <SelectItem
-                                                    key={psp.id}
-                                                    value={psp.id.toString()}
+                            {step === 1 && (
+                                <Card className="py-6">
+                                    <CardHeader>
+                                        <CardTitle>Basic Information</CardTitle>
+                                        <CardDescription>
+                                            Select PSP and Payment Methods
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        {/* PSP */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="psp_id">
+                                                PSP{' '}
+                                                <span className="text-destructive">
+                                                    *
+                                                </span>
+                                            </Label>
+                                            <Select
+                                                value={data.psp_id}
+                                                onValueChange={handlePspChange}
+                                            >
+                                                <SelectTrigger
+                                                    id="psp_id"
+                                                    aria-invalid={
+                                                        !!errors.psp_id
+                                                    }
                                                 >
-                                                    {psp.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.psp_id && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.psp_id}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Payment Methods - Multi Select */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="payment_method_id">
-                                        Payment Methods{' '}
-                                        <span className="text-destructive">*</span>
-                                    </Label>
-                                    <MultiSelect
-                                        options={paymentMethods.map((pm) => ({
-                                            id: pm.id,
-                                            label: pm.description,
-                                        }))}
-                                        selected={selectedPaymentMethodIds}
-                                        onChange={handlePaymentMethodChange}
-                                        placeholder="Select payment methods..."
-                                        error={!!errors.payment_method_id}
-                                    />
-                                    {errors.payment_method_id && (
-                                        <p className="text-sm text-destructive">
-                                            {errors.payment_method_id}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Navigation */}
-                                <div className="flex items-center justify-end gap-4 pt-4">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => window.history.back()}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        onClick={handleNext}
-                                        disabled={!data.psp_id || selectedPaymentMethodIds.length === 0}
-                                    >
-                                        Next
-                                        <ChevronRight className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {step === 2 && (
-                        <>
-                            {/* Configuration for each payment method */}
-                            {selectedPaymentMethodIds.map((pmId, index) => {
-                                const config = paymentMethodConfigs[pmId] || {
-                                    payment_method_id: pmId,
-                                    refund_option_id: '',
-                                    payout_model_id: '',
-                                    support_tokenization: false,
-                                    subscription_model: '1',
-                                    is_active: true,
-                                    shown_in_checkout: true,
-                                    support_international_payment: false,
-                                    post_fees_to_psp: false,
-                                    fees_type: '0',
-                                    priority: '0',
-                                    max_allowed_amount: '0',
-                                    min_allowed_amount: '0',
-                                    configPairs: [{ key: '', value: '' }],
-                                    testConfigPairs: [{ key: '', value: '' }],
-                                };
-
-                                const isOpen = openCards[pmId] ?? true;
-                                const configIndex = index;
-                                const refundOptionError = errors[`payment_methods_config.${configIndex}.refund_option_id`];
-                                const payoutModelError = errors[`payment_methods_config.${configIndex}.payout_model_id`];
-
-                                return (
-                                    <Collapsible
-                                        key={pmId}
-                                        open={isOpen}
-                                        onOpenChange={(open) =>
-                                            setOpenCards((prev) => ({ ...prev, [pmId]: open }))
-                                        }
-                                    >
-                                        <Card className="py-6">
-                                            <CardHeader>
-                                                <CollapsibleTrigger asChild>
-                                                    <div className="flex items-center justify-between cursor-pointer">
-                                                        <div className="flex-1">
-                                                            <CardTitle>{getPaymentMethodName(pmId)} Configuration</CardTitle>
-                                                            <CardDescription>
-                                                                Configure settings for {getPaymentMethodName(pmId)}
-                                                            </CardDescription>
-                                                        </div>
-                                                        <ChevronDown
-                                                            className={`h-5 w-5 transition-transform duration-200 ${
-                                                                isOpen ? 'transform rotate-180' : ''
-                                                            }`}
-                                                        />
-                                                    </div>
-                                                </CollapsibleTrigger>
-                                            </CardHeader>
-                                            <CollapsibleContent>
-                                                <CardContent className="space-y-6">
-                                            {/* Refund Option & Payout Model */}
-                                            <div className="grid gap-6 md:grid-cols-3">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`refund_option_${pmId}`}>
-                                                        Refund Option{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Select
-                                                        value={config.refund_option_id}
-                                                        onValueChange={(value) =>
-                                                            updatePaymentMethodConfig(pmId, 'refund_option_id', value)
-                                                        }
-                                                    >
-                                                        <SelectTrigger
-                                                            id={`refund_option_${pmId}`}
-                                                            aria-invalid={!!refundOptionError}
+                                                    <SelectValue placeholder="Select a PSP" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {psps.map((psp) => (
+                                                        <SelectItem
+                                                            key={psp.id}
+                                                            value={psp.id.toString()}
                                                         >
-                                                            <SelectValue placeholder="Select a refund option" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {refundOptions.map((ro) => (
-                                                                <SelectItem
-                                                                    key={ro.id}
-                                                                    value={ro.id.toString()}
-                                                                >
-                                                                    {ro.description}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    {refundOptionError && (
-                                                        <p className="text-sm text-destructive">
-                                                            {refundOptionError}
-                                                        </p>
+                                                            {psp.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.psp_id && (
+                                                <p className="text-sm text-destructive">
+                                                    {errors.psp_id}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Payment Methods - Multi Select */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="payment_method_id">
+                                                Payment Methods{' '}
+                                                <span className="text-destructive">
+                                                    *
+                                                </span>
+                                            </Label>
+                                            <MultiSelect
+                                                options={paymentMethods.map(
+                                                    (pm) => ({
+                                                        id: pm.id,
+                                                        label: pm.description,
+                                                    }),
+                                                )}
+                                                selected={
+                                                    selectedPaymentMethodIds
+                                                }
+                                                onChange={
+                                                    handlePaymentMethodChange
+                                                }
+                                                placeholder="Select payment methods..."
+                                                error={
+                                                    !!errors.payment_method_id
+                                                }
+                                            />
+                                            {errors.payment_method_id && (
+                                                <p className="text-sm text-destructive">
+                                                    {errors.payment_method_id}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Navigation */}
+                                        <div className="flex items-center justify-end gap-4 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    window.history.back()
+                                                }
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                onClick={handleNext}
+                                                disabled={
+                                                    !data.psp_id ||
+                                                    selectedPaymentMethodIds.length ===
+                                                        0
+                                                }
+                                            >
+                                                Next
+                                                <ChevronRight className="ml-2 h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {step === 2 && (
+                                <>
+                                    <Card className="py-6">
+                                        <CardHeader>
+                                            <CardTitle>
+                                                Shared API Configuration
+                                            </CardTitle>
+                                            <CardDescription>
+                                                The production and test
+                                                key/value pairs below will be
+                                                applied to all selected payment
+                                                methods.
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-6">
+                                            <div className="space-y-3">
+                                                <Label>
+                                                    Selected Payment Methods
+                                                </Label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedPaymentMethods.map(
+                                                        (paymentMethod) => (
+                                                            <Badge
+                                                                key={
+                                                                    paymentMethod.id
+                                                                }
+                                                                variant="secondary"
+                                                            >
+                                                                {
+                                                                    paymentMethod.description
+                                                                }
+                                                            </Badge>
+                                                        ),
                                                     )}
                                                 </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`payout_model_${pmId}`}>
-                                                        Payout Model{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Select
-                                                        value={config.payout_model_id}
-                                                        onValueChange={(value) =>
-                                                            updatePaymentMethodConfig(pmId, 'payout_model_id', value)
-                                                        }
-                                                    >
-                                                        <SelectTrigger
-                                                            id={`payout_model_${pmId}`}
-                                                            aria-invalid={!!payoutModelError}
-                                                        >
-                                                            <SelectValue placeholder="Select a payout model" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {payoutModels.map((pm) => (
-                                                                <SelectItem
-                                                                    key={pm.id}
-                                                                    value={pm.id.toString()}
-                                                                >
-                                                                    {pm.description}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                    {payoutModelError && (
-                                                        <p className="text-sm text-destructive">
-                                                            {payoutModelError}
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`subscription_model_${pmId}`}>
-                                                        Subscription Model{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Select
-                                                        value={config.subscription_model}
-                                                        onValueChange={(value) =>
-                                                            updatePaymentMethodConfig(pmId, 'subscription_model', value)
-                                                        }
-                                                    >
-                                                        <SelectTrigger
-                                                            id={`subscription_model_${pmId}`}
-                                                        >
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="1">Revenue Sharing</SelectItem>
-                                                            <SelectItem value="2">Licence</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
                                             </div>
 
-                                            {/* Priority & Amount Limits */}
-                                            <div className="grid gap-6 md:grid-cols-3">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`priority_${pmId}`}>
-                                                        Priority{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Input
-                                                        id={`priority_${pmId}`}
-                                                        type="number"
-                                                        value={config.priority}
-                                                        onChange={(e) =>
-                                                            updatePaymentMethodConfig(pmId, 'priority', e.target.value)
-                                                        }
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`min_allowed_amount_${pmId}`}>
-                                                        Min Amount{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Input
-                                                        id={`min_allowed_amount_${pmId}`}
-                                                        type="number"
-                                                        value={config.min_allowed_amount}
-                                                        onChange={(e) =>
-                                                            updatePaymentMethodConfig(pmId, 'min_allowed_amount', e.target.value)
-                                                        }
-                                                        min="0"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`max_allowed_amount_${pmId}`}>
-                                                        Max Amount{' '}
-                                                        <span className="text-destructive">*</span>
-                                                    </Label>
-                                                    <Input
-                                                        id={`max_allowed_amount_${pmId}`}
-                                                        type="number"
-                                                        value={config.max_allowed_amount}
-                                                        onChange={(e) =>
-                                                            updatePaymentMethodConfig(pmId, 'max_allowed_amount', e.target.value)
-                                                        }
-                                                        min="0"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* Switches */}
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <Label htmlFor={`support_tokenization_${pmId}`}>
-                                                            Support Tokenization
-                                                        </Label>
-                                                    </div>
-                                                    <Switch
-                                                        id={`support_tokenization_${pmId}`}
-                                                        checked={config.support_tokenization}
-                                                        onCheckedChange={(checked) =>
-                                                            updatePaymentMethodConfig(pmId, 'support_tokenization', checked)
-                                                        }
-                                                    />
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <Label htmlFor={`is_active_${pmId}`}>Active</Label>
-                                                    </div>
-                                                    <Switch
-                                                        id={`is_active_${pmId}`}
-                                                        checked={config.is_active}
-                                                        onCheckedChange={(checked) =>
-                                                            updatePaymentMethodConfig(pmId, 'is_active', checked)
-                                                        }
-                                                    />
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <Label htmlFor={`shown_in_checkout_${pmId}`}>
-                                                            Shown in Checkout
-                                                        </Label>
-                                                    </div>
-                                                    <Switch
-                                                        id={`shown_in_checkout_${pmId}`}
-                                                        checked={config.shown_in_checkout}
-                                                        onCheckedChange={(checked) =>
-                                                            updatePaymentMethodConfig(pmId, 'shown_in_checkout', checked)
-                                                        }
-                                                    />
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <Label htmlFor={`support_international_payment_${pmId}`}>
-                                                            Support International Payment
-                                                        </Label>
-                                                    </div>
-                                                    <Switch
-                                                        id={`support_international_payment_${pmId}`}
-                                                        checked={config.support_international_payment}
-                                                        onCheckedChange={(checked) =>
-                                                            updatePaymentMethodConfig(pmId, 'support_international_payment', checked)
-                                                        }
-                                                    />
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-0.5">
-                                                        <Label htmlFor={`post_fees_to_psp_${pmId}`}>
-                                                            Post Fees to PSP
-                                                        </Label>
-                                                    </div>
-                                                    <Switch
-                                                        id={`post_fees_to_psp_${pmId}`}
-                                                        checked={config.post_fees_to_psp}
-                                                        onCheckedChange={(checked) =>
-                                                            updatePaymentMethodConfig(pmId, 'post_fees_to_psp', checked)
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            {/* JSON Configuration */}
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-base font-semibold">Configuration (Production & Test)</Label>
+                                                    <Label className="text-base font-semibold">
+                                                        Configuration (Production & Test)
+                                                    </Label>
                                                     <Button
                                                         type="button"
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => addConfigPairToBoth(pmId)}
+                                                        onClick={
+                                                            addConfigPairToBoth
+                                                        }
                                                     >
                                                         <Plus className="mr-2 h-4 w-4" />
                                                         Add Pair
                                                     </Button>
                                                 </div>
 
-                                                {/* Production Config */}
                                                 <div className="space-y-4">
                                                     <Label>Production Config</Label>
                                                     <div className="space-y-3">
-                                                        {config.configPairs.map((pair, pairIndex) => (
-                                                            <div
-                                                                key={pairIndex}
-                                                                className="flex gap-2 items-start"
-                                                            >
-                                                                <div className="flex-1 grid grid-cols-2 gap-2">
-                                                                    <Input
-                                                                        placeholder="Key"
-                                                                        value={pair.key}
-                                                                        onChange={(e) =>
-                                                                            updateConfigPair(pmId, 'config', pairIndex, 'key', e.target.value)
-                                                                        }
-                                                                        onBlur={() => syncConfigPairsOnBlur(pmId)}
-                                                                    />
-                                                                    <Input
-                                                                        placeholder="Value"
-                                                                        value={pair.value}
-                                                                        onChange={(e) =>
-                                                                            updateConfigPair(pmId, 'config', pairIndex, 'value', e.target.value)
-                                                                        }
-                                                                    />
+                                                        {sharedConfigPairs.map(
+                                                            (
+                                                                pair,
+                                                                pairIndex,
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        pairIndex
+                                                                    }
+                                                                    className="flex items-start gap-2"
+                                                                >
+                                                                    <div className="grid flex-1 grid-cols-2 gap-2">
+                                                                        <Input
+                                                                            placeholder="Key"
+                                                                            value={
+                                                                                pair.key
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updateConfigPair(
+                                                                                    'config',
+                                                                                    pairIndex,
+                                                                                    'key',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            onBlur={
+                                                                                syncConfigPairsOnBlur
+                                                                            }
+                                                                        />
+                                                                        <Input
+                                                                            placeholder="Value"
+                                                                            value={
+                                                                                pair.value
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updateConfigPair(
+                                                                                    'config',
+                                                                                    pairIndex,
+                                                                                    'value',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                    {sharedConfigPairs.length >
+                                                                        1 && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="icon"
+                                                                            onClick={() =>
+                                                                                removeConfigPair(
+                                                                                    'config',
+                                                                                    pairIndex,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </Button>
+                                                                    )}
                                                                 </div>
-                                                                {config.configPairs.length > 1 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        size="icon"
-                                                                        onClick={() => removeConfigPair(pmId, 'config', pairIndex)}
-                                                                    >
-                                                                        <X className="h-4 w-4" />
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        ))}
+                                                            ),
+                                                        )}
                                                     </div>
                                                 </div>
 
-                                                {/* Test Config */}
                                                 <div className="space-y-4">
                                                     <Label>Test Config</Label>
                                                     <div className="space-y-3">
-                                                        {config.testConfigPairs.map((pair, pairIndex) => (
-                                                            <div
-                                                                key={pairIndex}
-                                                                className="flex gap-2 items-start"
-                                                            >
-                                                                <div className="flex-1 grid grid-cols-2 gap-2">
-                                                                    <Input
-                                                                        placeholder="Key"
-                                                                        value={pair.key}
-                                                                        onChange={(e) =>
-                                                                            updateConfigPair(pmId, 'test', pairIndex, 'key', e.target.value)
-                                                                        }
-                                                                        onBlur={() => syncConfigPairsOnBlur(pmId)}
-                                                                    />
-                                                                    <Input
-                                                                        placeholder="Value"
-                                                                        value={pair.value}
-                                                                        onChange={(e) =>
-                                                                            updateConfigPair(pmId, 'test', pairIndex, 'value', e.target.value)
-                                                                        }
-                                                                    />
+                                                        {sharedTestConfigPairs.map(
+                                                            (
+                                                                pair,
+                                                                pairIndex,
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        pairIndex
+                                                                    }
+                                                                    className="flex items-start gap-2"
+                                                                >
+                                                                    <div className="grid flex-1 grid-cols-2 gap-2">
+                                                                        <Input
+                                                                            placeholder="Key"
+                                                                            value={
+                                                                                pair.key
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updateConfigPair(
+                                                                                    'test',
+                                                                                    pairIndex,
+                                                                                    'key',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            onBlur={
+                                                                                syncConfigPairsOnBlur
+                                                                            }
+                                                                        />
+                                                                        <Input
+                                                                            placeholder="Value"
+                                                                            value={
+                                                                                pair.value
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updateConfigPair(
+                                                                                    'test',
+                                                                                    pairIndex,
+                                                                                    'value',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                    {sharedTestConfigPairs.length >
+                                                                        1 && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="icon"
+                                                                            onClick={() =>
+                                                                                removeConfigPair(
+                                                                                    'test',
+                                                                                    pairIndex,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </Button>
+                                                                    )}
                                                                 </div>
-                                                                {config.testConfigPairs.length > 1 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        size="icon"
-                                                                        onClick={() => removeConfigPair(pmId, 'test', pairIndex)}
-                                                                    >
-                                                                        <X className="h-4 w-4" />
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        ))}
+                                                            ),
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
-                                                </CardContent>
-                                            </CollapsibleContent>
-                                        </Card>
-                                    </Collapsible>
-                                );
-                            })}
+                                        </CardContent>
+                                    </Card>
 
-                            {/* Navigation */}
-                            <div className="flex items-center justify-end gap-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleBack}
-                                >
-                                    <ChevronLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => window.history.back()}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={processing}>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    {processing ? 'Creating...' : 'Create'}
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                                    {/* Configuration for each payment method */}
+                                    {selectedPaymentMethodIds.map(
+                                        (pmId, index) => {
+                                            const config =
+                                                paymentMethodConfigs[pmId] ||
+                                                buildPaymentMethodConfig(pmId);
+
+                                            const isOpen =
+                                                openCards[pmId] ?? true;
+                                            const configIndex = index;
+                                            const refundOptionError =
+                                                errors[
+                                                    `payment_methods_config.${configIndex}.refund_option_id`
+                                                ];
+                                            const payoutModelError =
+                                                errors[
+                                                    `payment_methods_config.${configIndex}.payout_model_id`
+                                                ];
+
+                                            return (
+                                                <Collapsible
+                                                    key={pmId}
+                                                    open={isOpen}
+                                                    onOpenChange={(open) =>
+                                                        setOpenCards(
+                                                            (prev) => ({
+                                                                ...prev,
+                                                                [pmId]: open,
+                                                            }),
+                                                        )
+                                                    }
+                                                >
+                                                    <Card className="py-6">
+                                                        <CardHeader>
+                                                            <CollapsibleTrigger
+                                                                asChild
+                                                            >
+                                                                <div className="flex cursor-pointer items-center justify-between">
+                                                                    <div className="flex-1">
+                                                                        <CardTitle>
+                                                                            {getPaymentMethodName(
+                                                                                pmId,
+                                                                            )}{' '}
+                                                                            Configuration
+                                                                        </CardTitle>
+                                                                        <CardDescription>
+                                                                            Configure
+                                                                            settings
+                                                                            for{' '}
+                                                                            {getPaymentMethodName(
+                                                                                pmId,
+                                                                            )}
+                                                                        </CardDescription>
+                                                                    </div>
+                                                                    <ChevronDown
+                                                                        className={`h-5 w-5 transition-transform duration-200 ${
+                                                                            isOpen
+                                                                                ? 'rotate-180 transform'
+                                                                                : ''
+                                                                        }`}
+                                                                    />
+                                                                </div>
+                                                            </CollapsibleTrigger>
+                                                        </CardHeader>
+                                                        <CollapsibleContent>
+                                                            <CardContent className="space-y-6">
+                                                                {/* Refund Option & Payout Model */}
+                                                                <div className="grid gap-6 md:grid-cols-3">
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`refund_option_${pmId}`}
+                                                                        >
+                                                                            Refund
+                                                                            Option{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Select
+                                                                            value={
+                                                                                config.refund_option_id
+                                                                            }
+                                                                            onValueChange={(
+                                                                                value,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'refund_option_id',
+                                                                                    value,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <SelectTrigger
+                                                                                id={`refund_option_${pmId}`}
+                                                                                aria-invalid={
+                                                                                    !!refundOptionError
+                                                                                }
+                                                                            >
+                                                                                <SelectValue placeholder="Select a refund option" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {refundOptions.map(
+                                                                                    (
+                                                                                        ro,
+                                                                                    ) => (
+                                                                                        <SelectItem
+                                                                                            key={
+                                                                                                ro.id
+                                                                                            }
+                                                                                            value={ro.id.toString()}
+                                                                                        >
+                                                                                            {
+                                                                                                ro.description
+                                                                                            }
+                                                                                        </SelectItem>
+                                                                                    ),
+                                                                                )}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        {refundOptionError && (
+                                                                            <p className="text-sm text-destructive">
+                                                                                {
+                                                                                    refundOptionError
+                                                                                }
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`payout_model_${pmId}`}
+                                                                        >
+                                                                            Payout
+                                                                            Model{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Select
+                                                                            value={
+                                                                                config.payout_model_id
+                                                                            }
+                                                                            onValueChange={(
+                                                                                value,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'payout_model_id',
+                                                                                    value,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <SelectTrigger
+                                                                                id={`payout_model_${pmId}`}
+                                                                                aria-invalid={
+                                                                                    !!payoutModelError
+                                                                                }
+                                                                            >
+                                                                                <SelectValue placeholder="Select a payout model" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {payoutModels.map(
+                                                                                    (
+                                                                                        pm,
+                                                                                    ) => (
+                                                                                        <SelectItem
+                                                                                            key={
+                                                                                                pm.id
+                                                                                            }
+                                                                                            value={pm.id.toString()}
+                                                                                        >
+                                                                                            {
+                                                                                                pm.description
+                                                                                            }
+                                                                                        </SelectItem>
+                                                                                    ),
+                                                                                )}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                        {payoutModelError && (
+                                                                            <p className="text-sm text-destructive">
+                                                                                {
+                                                                                    payoutModelError
+                                                                                }
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`subscription_model_${pmId}`}
+                                                                        >
+                                                                            Subscription
+                                                                            Model{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Select
+                                                                            value={
+                                                                                config.subscription_model
+                                                                            }
+                                                                            onValueChange={(
+                                                                                value,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'subscription_model',
+                                                                                    value,
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <SelectTrigger
+                                                                                id={`subscription_model_${pmId}`}
+                                                                            >
+                                                                                <SelectValue />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="1">
+                                                                                    Revenue
+                                                                                    Sharing
+                                                                                </SelectItem>
+                                                                                <SelectItem value="2">
+                                                                                    Licence
+                                                                                </SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Priority & Amount Limits */}
+                                                                <div className="grid gap-6 md:grid-cols-3">
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`priority_${pmId}`}
+                                                                        >
+                                                                            Priority{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Input
+                                                                            id={`priority_${pmId}`}
+                                                                            type="number"
+                                                                            value={
+                                                                                config.priority
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'priority',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            min="0"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`min_allowed_amount_${pmId}`}
+                                                                        >
+                                                                            Min
+                                                                            Amount{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Input
+                                                                            id={`min_allowed_amount_${pmId}`}
+                                                                            type="number"
+                                                                            value={
+                                                                                config.min_allowed_amount
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'min_allowed_amount',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            min="0"
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="space-y-2">
+                                                                        <Label
+                                                                            htmlFor={`max_allowed_amount_${pmId}`}
+                                                                        >
+                                                                            Max
+                                                                            Amount{' '}
+                                                                            <span className="text-destructive">
+                                                                                *
+                                                                            </span>
+                                                                        </Label>
+                                                                        <Input
+                                                                            id={`max_allowed_amount_${pmId}`}
+                                                                            type="number"
+                                                                            value={
+                                                                                config.max_allowed_amount
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'max_allowed_amount',
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            min="0"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Switches */}
+                                                                <div className="space-y-4">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="space-y-0.5">
+                                                                            <Label
+                                                                                htmlFor={`support_tokenization_${pmId}`}
+                                                                            >
+                                                                                Support
+                                                                                Tokenization
+                                                                            </Label>
+                                                                        </div>
+                                                                        <Switch
+                                                                            id={`support_tokenization_${pmId}`}
+                                                                            checked={
+                                                                                config.support_tokenization
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                checked,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'support_tokenization',
+                                                                                    checked,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="space-y-0.5">
+                                                                            <Label
+                                                                                htmlFor={`is_active_${pmId}`}
+                                                                            >
+                                                                                Active
+                                                                            </Label>
+                                                                        </div>
+                                                                        <Switch
+                                                                            id={`is_active_${pmId}`}
+                                                                            checked={
+                                                                                config.is_active
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                checked,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'is_active',
+                                                                                    checked,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="space-y-0.5">
+                                                                            <Label
+                                                                                htmlFor={`shown_in_checkout_${pmId}`}
+                                                                            >
+                                                                                Shown
+                                                                                in
+                                                                                Checkout
+                                                                            </Label>
+                                                                        </div>
+                                                                        <Switch
+                                                                            id={`shown_in_checkout_${pmId}`}
+                                                                            checked={
+                                                                                config.shown_in_checkout
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                checked,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'shown_in_checkout',
+                                                                                    checked,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="space-y-0.5">
+                                                                            <Label
+                                                                                htmlFor={`support_international_payment_${pmId}`}
+                                                                            >
+                                                                                Support
+                                                                                International
+                                                                                Payment
+                                                                            </Label>
+                                                                        </div>
+                                                                        <Switch
+                                                                            id={`support_international_payment_${pmId}`}
+                                                                            checked={
+                                                                                config.support_international_payment
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                checked,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'support_international_payment',
+                                                                                    checked,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="space-y-0.5">
+                                                                            <Label
+                                                                                htmlFor={`post_fees_to_psp_${pmId}`}
+                                                                            >
+                                                                                Post
+                                                                                Fees
+                                                                                to
+                                                                                PSP
+                                                                            </Label>
+                                                                        </div>
+                                                                        <Switch
+                                                                            id={`post_fees_to_psp_${pmId}`}
+                                                                            checked={
+                                                                                config.post_fees_to_psp
+                                                                            }
+                                                                            onCheckedChange={(
+                                                                                checked,
+                                                                            ) =>
+                                                                                updatePaymentMethodConfig(
+                                                                                    pmId,
+                                                                                    'post_fees_to_psp',
+                                                                                    checked,
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </CardContent>
+                                                        </CollapsibleContent>
+                                                    </Card>
+                                                </Collapsible>
+                                            );
+                                        },
+                                    )}
+
+                                    {/* Navigation */}
+                                    <div className="flex items-center justify-end gap-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={handleBack}
+                                        >
+                                            <ChevronLeft className="mr-2 h-4 w-4" />
+                                            Back
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() =>
+                                                window.history.back()
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            <Save className="mr-2 h-4 w-4" />
+                                            {processing
+                                                ? 'Creating...'
+                                                : 'Create'}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </form>
                     </div>
 
@@ -1240,7 +1518,7 @@ export default function Create({
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                         PSP
                                     </p>
                                     <p className="text-lg font-semibold">
@@ -1253,29 +1531,56 @@ export default function Create({
                                     </p>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    <Badge variant={activeSelectedCount ? 'success' : 'secondary'}>
+                                    <Badge
+                                        variant={
+                                            activeSelectedCount
+                                                ? 'success'
+                                                : 'secondary'
+                                        }
+                                    >
                                         {activeSelectedCount} active
                                     </Badge>
-                                    <Badge variant={shownSelectedCount ? 'success' : 'secondary'}>
+                                    <Badge
+                                        variant={
+                                            shownSelectedCount
+                                                ? 'success'
+                                                : 'secondary'
+                                        }
+                                    >
                                         {shownSelectedCount} shown in checkout
                                     </Badge>
                                 </div>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <CreditCard className="h-4 w-4" />
-                                        <span>{selectedPaymentMethods.length || 0} selected methods</span>
+                                        <span>
+                                            {selectedPaymentMethods.length || 0}{' '}
+                                            selected methods
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Layers className="h-4 w-4" />
-                                        <span>{step === 2 ? 'Configuration in progress' : 'Awaiting configuration'}</span>
+                                        <span>
+                                            {step === 2
+                                                ? 'Configuration in progress'
+                                                : 'Awaiting configuration'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <ShieldCheck className="h-4 w-4" />
-                                        <span>{activeSelectedCount ? 'Active routing enabled' : 'Activation pending'}</span>
+                                        <span>
+                                            {activeSelectedCount
+                                                ? 'Active routing enabled'
+                                                : 'Activation pending'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Eye className="h-4 w-4" />
-                                        <span>{shownSelectedCount ? 'Checkout visibility set' : 'Checkout visibility pending'}</span>
+                                        <span>
+                                            {shownSelectedCount
+                                                ? 'Checkout visibility set'
+                                                : 'Checkout visibility pending'}
+                                        </span>
                                     </div>
                                 </div>
                             </CardContent>
