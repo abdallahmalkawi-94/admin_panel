@@ -9,14 +9,22 @@ use Illuminate\Support\Facades\Cache;
 
 class MerchantStatus extends Model
 {
-    protected $fillable = [
-        'description',
+    const ACTIVE = 1;
+    const IN_ACTIVE = 2;
+    const SUSPENDED = 3;
+    const STATUS = [
+        1 => "Active",
+        2 => "Inactive",
+        3 => "Suspended"
     ];
+    const CACHE_KEY_ALL = 'merchant_statuses:all';
 
     // Cache constants
-    const CACHE_KEY_ALL = 'merchant_statuses:all';
     const CACHE_KEY_DROPDOWN = 'merchant_statuses:all:dropdown';
-    const CACHE_TTL = 86400; // 24 hours
+const CACHE_TTL = 86400;
+        protected $fillable = [
+        'description',
+    ]; // 24 hours
 
     /**
      * Get all cached merchant statuses

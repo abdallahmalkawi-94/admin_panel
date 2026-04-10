@@ -77,4 +77,11 @@ abstract class BaseRepository
         $record->restore();
         return $record;
     }
+
+    public function where(array $conditions, array $attributes = ['*']): Collection
+    {
+        return $this->getModel()->newQuery()
+            ->select($attributes)
+            ->where($conditions)->get();
+    }
 }

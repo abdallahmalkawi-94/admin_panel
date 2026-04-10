@@ -46,6 +46,7 @@ import {
     X,
 } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -60,7 +61,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface CreateProps {
     psps: PspDropDown[];
-    paymentMethods: PaymentMethodDropDown[];
     refundOptions: RefundOptionDropDown[];
     payoutModels: PayoutModelDropDown[];
 }
@@ -90,18 +90,14 @@ interface PaymentMethodConfig {
 
 export default function Create({
     psps,
-    paymentMethods,
     refundOptions,
     payoutModels,
 }: CreateProps) {
     const [step, setStep] = useState(1);
-    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<
-        number[]
-    >([]);
-    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<
-        Record<number, PaymentMethodConfig>
-    >({});
+    const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<number[]>([]);
+    const [paymentMethodConfigs, setPaymentMethodConfigs] = useState<Record<number, PaymentMethodConfig>>({});
     const [openCards, setOpenCards] = useState<Record<number, boolean>>({});
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDropDown[]>([]);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         psp_id: '',
@@ -122,6 +118,22 @@ export default function Create({
         test_config: null as Record<string, unknown> | null,
         payment_methods_config: [] as any[],
     });
+
+    useEffect(() => {
+        if (data.psp_id) {
+            axios.post(`/psp-payment-methods/get_payment_methods`, {
+                "psp_id": data.psp_id,
+            }).then(response => {
+                setPaymentMethods(response.data.PaymentMethods);
+                console.log(response);
+            }).catch(error => {
+                console.error('Error fetching payment methods:', error);
+                setPaymentMethods([]);
+            }).finally(() => {
+                // setLoadingMerchants(false);
+            });
+        }
+    }, [data.psp_id]);
 
     // Initialize payment method configs when payment methods are selected
     useEffect(() => {
@@ -379,8 +391,8 @@ export default function Create({
 
         if (field === 'key') {
             // When updating a key, update it in both configs directly without syncing (to avoid duplicates while typing)
-            let updatedConfigPairs = [...config.configPairs];
-            let updatedTestConfigPairs = [...config.testConfigPairs];
+            const updatedConfigPairs = [...config.configPairs];
+            const updatedTestConfigPairs = [...config.testConfigPairs];
             const oldKey =
                 type === 'config'
                     ? updatedConfigPairs[index].key.trim()

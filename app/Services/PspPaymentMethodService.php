@@ -93,4 +93,9 @@ class PspPaymentMethodService
     {
         return $this->pspPaymentMethodRepository->delete($id, $force);
     }
+
+    public function where (array $conditions, array $attributes = ['*']): Collection
+    {
+        return $this->pspPaymentMethodRepository->where($conditions, $attributes);
+    }
 }

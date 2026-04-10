@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePspPaymentMethodRequest;
 use App\Http\Requests\UpdatePspPaymentMethodRequest;
 use App\Http\Resources\PspPaymentMethodResource;
+use App\Models\Psp;
 use App\Models\PspPaymentMethod;
 use App\Services\PspPaymentMethodService;
 use Exception;
@@ -45,13 +46,13 @@ class PspPaymentMethodController extends Controller
     public function create(): Response|ResponseFactory
     {
         $psps = PspsDropDown();
-        $paymentMethods = PaymentMethodsDropDown();
+//        $paymentMethods = PaymentMethodsDropDown();
         $refundOptions = RefundOptionsDropDown();
         $payoutModels = PayoutModelsDropDown();
 
         return inertia('psp-payment-methods/create', [
             'psps' => $psps,
-            'paymentMethods' => $paymentMethods,
+//            'paymentMethods' => $paymentMethods,
             'refundOptions' => $refundOptions,
             'payoutModels' => $payoutModels,
         ]);
@@ -132,5 +133,31 @@ class PspPaymentMethodController extends Controller
             logger($e->getMessage());
             return back()->with('error', 'Failed to delete PSP Payment Method: ' . $e->getMessage());
         }
+    }
+
+    public function getPaymentMethod(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'psp_id' => 'required|integer|exists:psps,id',
+        ]);
+
+        $pspId = (int) $validated['psp_id'];
+
+        $assignPaymentMethods = $this->pspPaymentMethodService->where([
+            ['psp_id', $pspId],
+        ], ["payment_method_id"])->pluck("payment_method_id")->toArray();
+
+        $paymentMethods = PaymentMethodsDropDown();
+
+        if (!empty($assignPaymentMethods)) {
+            $collection = collect($paymentMethods);
+            $paymentMethods = $collection->whereNotIn("id", $assignPaymentMethods)
+                ->values()
+                ->toArray();
+        }
+
+        return response()->json([
+            "PaymentMethods" => $paymentMethods,
+        ]);
     }
 }

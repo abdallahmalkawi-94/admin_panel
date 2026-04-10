@@ -655,7 +655,7 @@ export default function Create({
                                                             key={terms.id}
                                                             value={terms.id.toString()}
                                                         >
-                                                            Version {terms.version}
+                                                            {terms.description} - Version {terms.version}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

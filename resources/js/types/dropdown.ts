@@ -33,6 +33,7 @@ export interface MerchantStatusDropDown {
 export interface TermsAndConditionDropDown {
     id: number;
     version: string;
+    description: string;
 }
 
 export interface MerchantDropDown {
