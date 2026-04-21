@@ -89,7 +89,7 @@ class MerchantController extends Controller
         $products = ProductsDropDown();
         $statuses = MerchantStatusesDropDown();
         $banks = BanksDropDown();
-        $termsAndConditions = TermsAndConditionsDropDown();
+        $termsAndConditions = TermsAndConditionsDropDown(); // TODO Should be filtered by country
         $merchants = MerchantsDropDown();
         $countries = CountriesDropDown();
         $currencies = CurrenciesDropDown();

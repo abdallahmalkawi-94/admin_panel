@@ -12,5 +12,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("/{pspPaymentMethod}/edit", [PspPaymentMethodController::class, "edit"])->name("psp-payment-methods.edit");
         Route::patch("/{pspPaymentMethod}", [PspPaymentMethodController::class, "update"])->name("psp-payment-methods.update");
         Route::delete("/{pspPaymentMethod}", [PspPaymentMethodController::class, "destroy"])->name("psp-payment-methods.destroy");
+
+        Route::post("/get_payment_methods", [PspPaymentMethodController::class, "getPaymentMethod"])->name("psp-payment-methods.getPaymentMethod");
     });
 });

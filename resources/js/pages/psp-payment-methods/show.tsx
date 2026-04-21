@@ -92,7 +92,9 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border bg-background">
-                                <CreditCard className="h-7 w-7 text-muted-foreground" />
+                                {
+                                    pspPaymentMethod.payment_method?.logo_url ? <img src={pspPaymentMethod.payment_method?.logo_url} alt="payment method logo" /> : <CreditCard className="h-7 w-7 text-muted-foreground" />
+                                }
                             </div>
                             <div>
                                 <div className="text-xs tracking-[0.2em] text-muted-foreground uppercase">

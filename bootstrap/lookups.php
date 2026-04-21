@@ -89,10 +89,11 @@ function TermsAndConditionsDropDown(): array
 {
     return Cache::remember('terms_and_conditions:dropdown', 86400, function () {
         return TermsAndCondition::query()
-            ->get(['id', 'version'])
+            ->get(['id', 'version', 'description'])
             ->map(fn($terms) => [
                 'id' => $terms->id,
                 'version' => $terms->version,
+                'description' => $terms->description,
             ])
             ->toArray();
     });
