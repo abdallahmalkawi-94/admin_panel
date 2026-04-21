@@ -11,6 +11,7 @@ import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus, CreditCard, ShieldCheck, Eye, Layers } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
+import { Badge } from '@/components/ui/badge';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -105,15 +106,7 @@ export default function Index({ pspPaymentMethods, filters }: IndexProps) {
             key: 'is_active',
             label: 'Status',
             render: (pspPaymentMethod) => (
-                <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        pspPaymentMethod.is_active
-                            ? 'bg-green-600 text-white'
-                            : 'bg-red-600 text-white'
-                    }`}
-                >
-                    {pspPaymentMethod.is_active ? 'Active' : 'Inactive'}
-                </span>
+                <Badge variant={pspPaymentMethod.is_active ? "success" : "dark"}>{pspPaymentMethod.is_active ? 'Active' : 'Inactive'}</Badge>
             ),
         },
     ];

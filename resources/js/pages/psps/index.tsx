@@ -36,6 +36,27 @@ interface IndexProps {
     countries: Country[];
 }
 
+const PSP_STATUS = {
+    ACTIVE: 1,
+    IN_ACTIVE: 2,
+    SUSPEND: 4,
+} as const;
+
+const getStatusVariant = (
+    statusId: number,
+): 'success' | 'dark' | 'info' | 'destructive' | 'secondary' => {
+    switch (statusId) {
+        case PSP_STATUS.ACTIVE:
+            return 'success';
+        case PSP_STATUS.IN_ACTIVE:
+            return 'dark';
+        case PSP_STATUS.SUSPEND:
+            return 'info';
+        default:
+            return 'secondary';
+    }
+};
+
 export default function Index({
     psps,
     filters,
@@ -120,7 +141,8 @@ export default function Index({
             key: 'status',
             label: 'Status',
             render: (psp) => (
-                <Badge variant="info">{psp.status?.description}</Badge>
+               // console.log(psp)
+                <Badge variant={getStatusVariant(psp.psp_status_id)}>{psp.status?.description}</Badge>
             ),
         },
         {
