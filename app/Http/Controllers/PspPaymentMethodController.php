@@ -34,14 +34,54 @@ class PspPaymentMethodController extends Controller
     public function index(Request $request): Response|ResponseFactory
     {
         $perPage = $request->input('per_page', 10);
-        $filters = $request->only(['psp_id', 'payment_method_id', 'is_active']);
+        $filters = $request->only(['psp_id', 'payment_method_id', 'is_active', 'merchant_id', 'invoice_type_id']);
 
         $pspPaymentMethods = $this->pspPaymentMethodService->paginate($perPage, $filters);
+
+        $merchants = collect(MerchantsDropDown())->pluck('en_name', 'id')->map(fn($label, $value) => [
+            'value' => (string)$value,
+            'label' => $label,
+        ])->values();
+
+        $invoiceTypes = collect(InvoiceTypesDropDown())->pluck('description', 'id')->map(fn($label, $value) => [
+            'value' => (string)$value,
+            'label' => $label,
+        ])->values();
+
+        $psps = collect(PspsDropDown())->pluck('name', 'id')->map(fn($label, $value) => [
+            'value' => (string)$value,
+            'label' => $label,
+        ])->values();
+
+        $paymentMethods = collect(PaymentMethodsDropDown())->pluck('description', 'id')->map(fn($label, $value) => [
+            'value' => (string)$value,
+            'label' => $label,
+        ])->values();
 
         return inertia('psp-payment-methods/index', [
             'pspPaymentMethods' => PspPaymentMethodResource::collection($pspPaymentMethods),
             'filters' => $filters,
+            'merchants' => $merchants,
+            'invoiceTypes' => $invoiceTypes,
+            'psps' => $psps,
+            'paymentMethods' => $paymentMethods,
         ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StorePspPaymentMethodRequest $request): RedirectResponse
+    {
+        try {
+            $validated = $request->validated();
+            $count = count($validated['payment_methods_config'] ?? []);
+            $this->pspPaymentMethodService->create($validated);
+            return redirect()->route('psp-payment-methods.index')->with('success', "{$count} PSP Payment Method(s) created successfully.");
+        } catch (Exception $e) {
+            logger($e->getMessage());
+            return back()->withInput()->with('error', 'Failed to create PSP Payment Method: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -58,23 +98,6 @@ class PspPaymentMethodController extends Controller
             'refundOptions' => $refundOptions,
             'payoutModels' => $payoutModels,
         ]);
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePspPaymentMethodRequest $request): RedirectResponse
-    {
-        try {
-            $validated = $request->validated();
-            $count = count($validated['payment_methods_config'] ?? []);
-            $this->pspPaymentMethodService->create($validated);
-            return redirect()->route('psp-payment-methods.index')->with('success', "{$count} PSP Payment Method(s) created successfully.");
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            return back()->withInput()->with('error', 'Failed to create PSP Payment Method: ' . $e->getMessage());
-        }
     }
 
     /**
@@ -138,7 +161,7 @@ class PspPaymentMethodController extends Controller
             'psp_id' => 'required|integer|exists:psps,id',
         ]);
 
-        $pspId = (int) $validated['psp_id'];
+        $pspId = (int)$validated['psp_id'];
 
         $assignPaymentMethods = $this->pspPaymentMethodService->where([
             ['psp_id', $pspId],
@@ -158,7 +181,8 @@ class PspPaymentMethodController extends Controller
         ]);
     }
 
-    public function createMerchantPaymentMethod(Merchant $merchant): Response|RedirectResponse {
+    public function createMerchantPaymentMethod(Merchant $merchant): Response|RedirectResponse
+    {
         $invoiceTypes = $merchant->invoiceTypes()->get();
         $childMerchants = $merchant->childMerchants()->get(["id", "en_name", "ar_name"]);
 

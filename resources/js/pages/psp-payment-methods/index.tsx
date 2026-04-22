@@ -23,15 +23,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Filters {
     psp_id?: string;
     payment_method_id?: string;
+    merchant_id?: string;
+    invoice_type_id?: string;
     is_active?: string;
 }
+
+type SelectOption = {
+    value: string;
+    label: string;
+};
 
 interface IndexProps {
     pspPaymentMethods: PaginatedResourceCollection<PspPaymentMethod>;
     filters: Filters;
+    merchants: SelectOption[];
+    invoiceTypes: SelectOption[];
+    psps: SelectOption[];
+    paymentMethods: SelectOption[];
 }
 
-export default function Index({ pspPaymentMethods, filters }: IndexProps) {
+export default function Index({ pspPaymentMethods, filters, merchants, invoiceTypes, psps, paymentMethods}: IndexProps) {
     const activeCount = pspPaymentMethods.data.filter((method) => method.is_active).length;
     const shownCount = pspPaymentMethods.data.filter((method) => method.shown_in_checkout).length;
     const uniquePspCount = new Set(pspPaymentMethods.data.map((method) => method.psp?.id).filter(Boolean)).size;
@@ -127,6 +138,34 @@ export default function Index({ pspPaymentMethods, filters }: IndexProps) {
 
     // Define filter fields
     const filterFields: FilterField[] = [
+        {
+            key: 'psp_id',
+            label: 'Payment Service Provider',
+            type: 'select',
+            placeholder: 'All',
+            options: [{ value: 'all', label: 'All' }, ...psps],
+        },
+        {
+            key: 'payment_method_id',
+            label: 'Payment Method',
+            type: 'select',
+            placeholder: 'All',
+            options: [{ value: 'all', label: 'All' }, ...paymentMethods],
+        },
+        {
+            key: 'merchant_id',
+            label: 'Merchant',
+            type: 'select',
+            placeholder: 'All',
+            options: [{ value: 'all', label: 'All' }, ...merchants],
+        },
+        {
+            key: 'invoice_type_id',
+            label: 'Invoice Type',
+            type: 'select',
+            placeholder: 'All',
+            options: [{ value: 'all', label: 'All' }, ...invoiceTypes],
+        },
         {
             key: 'is_active',
             label: 'Active',

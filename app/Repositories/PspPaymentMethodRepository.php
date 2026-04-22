@@ -23,8 +23,6 @@ class PspPaymentMethodRepository extends BaseRepository
     public function paginate(int $perPage = 15, array $filters = []): Collection|LengthAwarePaginator
     {
         return $this->getModel()->newQuery()
-//            ->join("merchants", "merchants.id", "=", "psp_payment_methods.merchant_id")
-//            ->join("invoice_types", "invoice_types.id", "=", "psp_payment_methods.invoice_type_id")
             ->applyFilters($filters)
             ->paginate($perPage);
     }

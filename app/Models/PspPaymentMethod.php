@@ -162,6 +162,17 @@ class PspPaymentMethod extends Model
     }
 
     /**
+     * Scope a query to filter by invoice_type_id.
+     */
+    public function scopeFilterByInvoiceTypeId($query, ?string $invoiceTypeId)
+    {
+        if ($invoiceTypeId !== null && $invoiceTypeId !== '' && $invoiceTypeId !== 'all') {
+            return $query->where('invoice_type_id', $invoiceTypeId);
+        }
+        return $query;
+    }
+
+    /**
      * Scope a query to apply all filters at once.
      */
     public function scopeApplyFilters($query, array $filters)
@@ -170,7 +181,8 @@ class PspPaymentMethod extends Model
             ->filterByPspId($filters['psp_id'] ?? null)
             ->filterByPaymentMethodId($filters['payment_method_id'] ?? null)
             ->filterByMerchantId($filters['merchant_id'] ?? null)
-            ->filterByIsActive($filters['is_active'] ?? null);
+            ->filterByIsActive($filters['is_active'] ?? null)
+            ->filterByInvoiceTypeId($filters['invoice_type_id'] ?? null);
     }
 
     /**
