@@ -50,7 +50,7 @@ class FeesCollectionModelService
         return $this->feesCollectionModelRepository->delete($id, $force);
     }
 
-    public function getForPspPaymentMethod(PspPaymentMethod $pspPaymentMethod): Collection
+    public function getForPspPaymentMethod(PspPaymentMethod $pspPaymentMethod): \Illuminate\Support\Collection
     {
         return $pspPaymentMethod->feesCollectionModel()
             ->get()
@@ -85,7 +85,7 @@ class FeesCollectionModelService
     /**
      * @throws Exception
      */
-    public function syncForPspPaymentMethod(PspPaymentMethod $pspPaymentMethod, array $slices, ?int $userId = null): Collection
+    public function syncForPspPaymentMethod(PspPaymentMethod $pspPaymentMethod, array $slices, ?int $userId = null): \Illuminate\Support\Collection
     {
         DB::transaction(function () use ($pspPaymentMethod, $slices, $userId) {
             $existingSlices = $pspPaymentMethod->feesCollectionModel()->get()->keyBy('id');

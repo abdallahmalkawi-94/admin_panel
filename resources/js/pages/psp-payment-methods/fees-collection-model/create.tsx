@@ -23,15 +23,8 @@ import {
     type FeesCollectionSlice,
     type PspPaymentMethod,
 } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    CreditCard,
-    DollarSign,
-    Plus,
-    Save,
-    Trash2,
-} from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { CreditCard, DollarSign, Plus, Save, Trash2 } from 'lucide-react';
 import type { FormEventHandler } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -71,7 +64,7 @@ interface FeesCollectionModelProps {
 
 const createEmptySlice = (isDefault: boolean = false): EditableFeeSlice => ({
     from: '0',
-    to: '',
+    to: '0',
     foc_fixed: '0',
     fom_fixed: '0',
     foc_percentage: '0',
@@ -129,12 +122,43 @@ const toEditableSlice = (slice: FeesCollectionSlice): EditableFeeSlice => ({
 const fieldLabelClassName =
     'text-[11px] font-semibold tracking-[0.16em] text-muted-foreground uppercase';
 
+const toIntegerString = (value: string): string => {
+    if (value.trim() === '') {
+        return '';
+    }
+
+    const numericValue = Number.parseInt(value, 10);
+
+    return Number.isNaN(numericValue) ? value : String(numericValue);
+};
+
+const synchronizeSliceStarts = (
+    slices: EditableFeeSlice[],
+): EditableFeeSlice[] =>
+    slices.map((slice, index) => {
+        if (index === 0) {
+            return {
+                ...slice,
+                from: toIntegerString(slice.from),
+                to: toIntegerString(slice.to),
+            };
+        }
+
+        const previousTo = Number.parseInt(slices[index - 1]?.to ?? '', 10);
+
+        return {
+            ...slice,
+            from: Number.isNaN(previousTo) ? '' : String(previousTo + 1),
+            to: toIntegerString(slice.to),
+        };
+    });
+
 export default function FeesCollectionModel({
     pspPaymentMethod,
     feeSlices,
 }: FeesCollectionModelProps) {
     const initialSlices = feeSlices.length
-        ? feeSlices.map(toEditableSlice)
+        ? synchronizeSliceStarts(feeSlices.map(toEditableSlice))
         : [createEmptySlice(true)];
 
     const { data, setData, post, processing, errors } = useForm<{
@@ -148,16 +172,27 @@ export default function FeesCollectionModel({
         field: keyof EditableFeeSlice,
         value: string | boolean | number | undefined,
     ) => {
-        setData(
-            'slices',
-            data.slices.map((slice, sliceIndex) =>
-                sliceIndex === index ? { ...slice, [field]: value } : slice,
-            ),
+        const nextSlices = data.slices.map((slice, sliceIndex) =>
+            sliceIndex === index ? { ...slice, [field]: value } : slice,
         );
+
+        setData('slices', synchronizeSliceStarts(nextSlices));
     };
 
     const addSlice = () => {
-        setData('slices', [...data.slices, createEmptySlice(false)]);
+        const lastSlice = data.slices[data.slices.length - 1];
+        const lastTo = Number.parseInt(lastSlice?.to ?? '', 10);
+
+        setData(
+            'slices',
+            synchronizeSliceStarts([
+                ...data.slices,
+                {
+                    ...createEmptySlice(false),
+                    from: Number.isNaN(lastTo) ? '' : String(lastTo + 1),
+                },
+            ]),
+        );
     };
 
     const removeSlice = (index: number) => {
@@ -177,16 +212,18 @@ export default function FeesCollectionModel({
             };
         }
 
-        setData('slices', nextSlices);
+        setData('slices', synchronizeSliceStarts(nextSlices));
     };
 
     const markAsDefault = (index: number) => {
         setData(
             'slices',
-            data.slices.map((slice, sliceIndex) => ({
-                ...slice,
-                is_default: sliceIndex === index,
-            })),
+            synchronizeSliceStarts(
+                data.slices.map((slice, sliceIndex) => ({
+                    ...slice,
+                    is_default: sliceIndex === index,
+                })),
+            ),
         );
     };
 
@@ -228,15 +265,19 @@ export default function FeesCollectionModel({
                             </div>
                             <div>
                                 <h1 className="text-3xl font-semibold tracking-tight">
-                                    {pspPaymentMethod.payment_method?.description || 'Payment Method Fees'}
+                                    {pspPaymentMethod.payment_method
+                                        ?.description || 'Payment Method Fees'}
                                 </h1>
                                 <p className="text-muted-foreground">
-                                    {pspPaymentMethod.psp?.name || 'PSP not configured'}
+                                    {pspPaymentMethod.psp?.name ||
+                                        'PSP not configured'}
                                 </p>
                                 {pspPaymentMethod.merchant && (
                                     <p className="text-sm text-muted-foreground">
                                         {pspPaymentMethod.merchant.en_name}
-                                        {pspPaymentMethod.invoice_type ? ` • ${pspPaymentMethod.invoice_type.description}` : ''}
+                                        {pspPaymentMethod.invoice_type
+                                            ? ` • ${pspPaymentMethod.invoice_type.description}`
+                                            : ''}
                                     </p>
                                 )}
                             </div>
@@ -249,25 +290,19 @@ export default function FeesCollectionModel({
                         <CardHeader>
                             <CardTitle>Configuration Notes</CardTitle>
                             <CardDescription>
-                                This screen saves the full fee slice set for
-                                the selected PSP payment method.
+                                This screen saves the full fee slice set for the
+                                selected PSP payment method.
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
                             <p>
-                                Exactly one row must be marked as default.
-                                It still behaves like a normal range and is
-                                also used as the fallback when no range
-                                matches.
+                                Exactly one row must be marked as default. It
+                                still behaves like a normal range and is also
+                                used as the fallback when no range matches.
                             </p>
                             <p>
-                                Ranges are inclusive. If one row ends at
-                                `500`, the next row must start above `500`
-                                to avoid overlap.
-                            </p>
-                            <p>
-                                Leave the upper bound empty and click `Max`
-                                for the final open-ended range.
+                                Ranges are inclusive. If one row ends at `500`,
+                                the next row must start at `501`.
                             </p>
                         </CardContent>
                     </Card>
@@ -284,8 +319,8 @@ export default function FeesCollectionModel({
                                 <CardTitle>Transaction Fee Slices</CardTitle>
                                 <CardDescription>
                                     Define fee ranges for this PSP payment
-                                    method. Leave the upper bound empty to mark
-                                    a row as Max.
+                                    method. Each next row starts at the previous
+                                    upper bound plus one.
                                 </CardDescription>
                                 <InputError message={errors.slices} />
                             </CardHeader>
@@ -336,10 +371,18 @@ export default function FeesCollectionModel({
                                                                 </div>
                                                                 <Input
                                                                     type="number"
-                                                                    step="0.00001"
+                                                                    step="1"
                                                                     min="0"
                                                                     value={
                                                                         slice.from
+                                                                    }
+                                                                    readOnly={
+                                                                        index >
+                                                                        0
+                                                                    }
+                                                                    disabled={
+                                                                        index >
+                                                                        0
                                                                     }
                                                                     onChange={(
                                                                         event,
@@ -371,12 +414,11 @@ export default function FeesCollectionModel({
                                                                 <div className="flex items-center gap-2">
                                                                     <Input
                                                                         type="number"
-                                                                        step="0.00001"
+                                                                        step="1"
                                                                         min="0"
                                                                         value={
                                                                             slice.to
                                                                         }
-                                                                        placeholder="Max"
                                                                         onChange={(
                                                                             event,
                                                                         ) =>
@@ -389,19 +431,6 @@ export default function FeesCollectionModel({
                                                                             )
                                                                         }
                                                                     />
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        onClick={() =>
-                                                                            updateSlice(
-                                                                                index,
-                                                                                'to',
-                                                                                '',
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Max
-                                                                    </Button>
                                                                 </div>
                                                                 <InputError
                                                                     message={getFieldError(

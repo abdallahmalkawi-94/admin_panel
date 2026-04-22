@@ -57,7 +57,7 @@ class StoreFeesCollectionModelRequest extends FormRequest
                     $value = $normalizedSlice[$field];
 
                     if ($value === '' || $value === null) {
-                        $normalizedSlice[$field] = $field === 'to' ? null : 0;
+                        $normalizedSlice[$field] = in_array($field, ['from', 'to'], true) ? null : 0;
 
                         continue;
                     }
@@ -92,8 +92,8 @@ class StoreFeesCollectionModelRequest extends FormRequest
             'slices' => ['required', 'array', 'min:1'],
             'slices.*' => ['required', 'array'],
             'slices.*.id' => ['nullable', 'integer', 'distinct'],
-            'slices.*.from' => ['required', 'numeric', 'min:0'],
-            'slices.*.to' => ['nullable', 'numeric'],
+            'slices.*.from' => ['required', 'integer', 'min:0'],
+            'slices.*.to' => ['required', 'integer', 'min:0'],
             'slices.*.foc_fixed' => ['required', 'numeric', 'min:0'],
             'slices.*.fom_fixed' => ['required', 'numeric', 'min:0'],
             'slices.*.foc_percentage' => ['required', 'numeric', 'min:0'],
@@ -133,12 +133,6 @@ class StoreFeesCollectionModelRequest extends FormRequest
                 $validator->errors()->add('slices', 'Exactly one default slice is required.');
             }
 
-            $maxRowsCount = $slices->whereNull('to')->count();
-
-            if ($maxRowsCount > 1) {
-                $validator->errors()->add('slices', 'Only one range can use Max as the upper bound.');
-            }
-
             $pspPaymentMethod = $this->route('pspPaymentMethod');
             $sliceIds = $slices->pluck('id')->filter()->map(fn ($id) => (int) $id)->values();
 
@@ -166,19 +160,15 @@ class StoreFeesCollectionModelRequest extends FormRequest
                 }
             }
 
-            $sortedSlices = $slices
-                ->sortBy([
-                    fn (array $slice) => (float) $slice['from'],
-                    fn (array $slice) => $slice['to'] === null ? INF : (float) $slice['to'],
-                ])
-                ->values();
-
-            foreach ($sortedSlices as $position => $slice) {
-                if (! is_numeric($slice['from']) || ($slice['to'] !== null && ! is_numeric($slice['to']))) {
+            foreach ($slices as $position => $slice) {
+                if (! is_numeric($slice['from'] ?? null) || ! is_numeric($slice['to'] ?? null)) {
                     continue;
                 }
 
-                if ($slice['to'] !== null && (float) $slice['to'] < (float) $slice['from']) {
+                $currentFrom = (int) $slice['from'];
+                $currentTo = (int) $slice['to'];
+
+                if ($currentTo < $currentFrom) {
                     $validator->errors()->add(
                         "slices.{$slice['_index']}.to",
                         'The upper bound must be greater than or equal to the lower bound.',
@@ -189,16 +179,27 @@ class StoreFeesCollectionModelRequest extends FormRequest
                     continue;
                 }
 
-                $previousSlice = $sortedSlices[$position - 1];
+                $previousSlice = $slices[$position - 1];
 
-                if (! is_numeric($previousSlice['from']) || ($previousSlice['to'] !== null && ! is_numeric($previousSlice['to']))) {
+                if (! is_numeric($previousSlice['to'] ?? null)) {
                     continue;
                 }
 
-                if ($previousSlice['to'] === null || (float) $slice['from'] <= (float) $previousSlice['to']) {
+                $previousTo = (int) $previousSlice['to'];
+
+                if ($currentFrom <= $previousTo) {
                     $validator->errors()->add(
                         "slices.{$slice['_index']}.from",
                         'This range overlaps with another fee slice.',
+                    );
+
+                    continue;
+                }
+
+                if ($currentFrom !== $previousTo + 1) {
+                    $validator->errors()->add(
+                        "slices.{$slice['_index']}.from",
+                        'Each slice must start at the previous slice upper bound plus 1.',
                     );
                 }
             }

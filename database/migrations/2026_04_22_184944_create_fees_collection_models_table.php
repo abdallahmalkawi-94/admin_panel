@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('merchant_id')->nullable()->references('id')->on('merchants');
             $table->foreignId('invoice_type_id')->nullable()->references('id')->on('invoice_types');
             $table->decimal('from', 15, 5)->default(0);
-            $table->decimal('to', 15, 5)->nullable();
+            $table->decimal('to', 15, 5)->default(0);
             $table->decimal('foc_fixed', 15, 5)->default(0);
             $table->decimal('fom_fixed', 15, 5)->default(0);
             $table->decimal('foc_percentage', 15, 5)->default(0);

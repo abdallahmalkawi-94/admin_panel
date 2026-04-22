@@ -39,7 +39,7 @@ class FeesCollectionModelTest extends TestCase
         $pspPaymentMethod = $this->createPspPaymentMethod();
 
         $firstSlice = $this->createFeeSlice($pspPaymentMethod, [
-            'from' => 500.01,
+            'from' => 501,
             'to' => 1000,
             'is_default' => false,
         ]);
@@ -49,8 +49,8 @@ class FeesCollectionModelTest extends TestCase
             'is_default' => false,
         ]);
         $thirdSlice = $this->createFeeSlice($pspPaymentMethod, [
-            'from' => 1000.01,
-            'to' => null,
+            'from' => 1001,
+            'to' => 5000,
             'is_default' => true,
         ]);
 
@@ -59,14 +59,14 @@ class FeesCollectionModelTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('psp-payment-methods/fees-collection-model')
+            ->component('psp-payment-methods/fees-collection-model/create')
             ->where('pspPaymentMethod.id', $pspPaymentMethod->id)
             ->where('feeSlices', function (array $feeSlices) use ($secondSlice, $firstSlice, $thirdSlice) {
                 return count($feeSlices) === 3
                     && $feeSlices[0]['id'] === $secondSlice->id
                     && $feeSlices[1]['id'] === $firstSlice->id
                     && $feeSlices[2]['id'] === $thirdSlice->id
-                    && $feeSlices[2]['to'] === null;
+                    && (float) $feeSlices[2]['to'] === 5000.0;
             })
         );
     }
@@ -81,7 +81,7 @@ class FeesCollectionModelTest extends TestCase
             'is_default' => false,
         ]);
         $removedSlice = $this->createFeeSlice($pspPaymentMethod, [
-            'from' => 100.01,
+            'from' => 101,
             'to' => 200,
             'is_default' => true,
         ]);
@@ -107,8 +107,8 @@ class FeesCollectionModelTest extends TestCase
                     'is_default' => false,
                 ],
                 [
-                    'from' => '250.01',
-                    'to' => null,
+                    'from' => '251',
+                    'to' => '9999',
                     'foc_fixed' => '7.5',
                     'fom_fixed' => '10',
                     'foc_percentage' => '0.35',
@@ -142,7 +142,7 @@ class FeesCollectionModelTest extends TestCase
         $this->assertFalse($activeSlices[0]->is_default);
         $this->assertSame($this->user->id, $activeSlices[0]->updated_by);
 
-        $this->assertNull($activeSlices[1]->to);
+        $this->assertEquals(9999.0, (float) $activeSlices[1]->to);
         $this->assertTrue($activeSlices[1]->is_default);
         $this->assertSame($this->user->id, $activeSlices[1]->created_by);
         $this->assertSame($this->user->id, $activeSlices[1]->updated_by);
@@ -212,19 +212,32 @@ class FeesCollectionModelTest extends TestCase
         $response->assertSessionHasErrors('slices.0.to');
     }
 
-    public function test_it_rejects_multiple_max_ranges(): void
+    public function test_it_requires_the_upper_bound_for_every_slice(): void
     {
         $pspPaymentMethod = $this->createPspPaymentMethod();
         $payload = ['slices' => $this->validSlicesPayload()];
 
         $payload['slices'][0]['to'] = null;
-        $payload['slices'][1]['to'] = null;
 
         $response = $this
             ->from(route('fees-collection-model.create', $pspPaymentMethod))
             ->post(route('fees-collection-model.store', $pspPaymentMethod), $payload);
 
-        $response->assertSessionHasErrors('slices');
+        $response->assertSessionHasErrors('slices.0.to');
+    }
+
+    public function test_it_requires_each_next_slice_to_start_from_previous_to_plus_one(): void
+    {
+        $pspPaymentMethod = $this->createPspPaymentMethod();
+        $payload = ['slices' => $this->validSlicesPayload()];
+
+        $payload['slices'][1]['from'] = '550';
+
+        $response = $this
+            ->from(route('fees-collection-model.create', $pspPaymentMethod))
+            ->post(route('fees-collection-model.store', $pspPaymentMethod), $payload);
+
+        $response->assertSessionHasErrors('slices.1.from');
     }
 
     public function test_it_rejects_slice_ids_from_another_psp_payment_method(): void
@@ -409,8 +422,8 @@ class FeesCollectionModelTest extends TestCase
                 'is_default' => false,
             ],
             [
-                'from' => '500.01',
-                'to' => null,
+                'from' => '501',
+                'to' => '1000',
                 'foc_fixed' => '5',
                 'fom_fixed' => '10',
                 'foc_percentage' => '0.45',
