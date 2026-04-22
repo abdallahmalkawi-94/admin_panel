@@ -105,9 +105,14 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
                                         ?.description || 'Payment Method'}
                                 </h1>
                                 <p className="text-muted-foreground">
-                                    {pspPaymentMethod.psp?.name ||
-                                        'PSP not configured'}
+                                    {pspPaymentMethod.psp?.name || 'PSP not configured'}
                                 </p>
+                                {
+                                    pspPaymentMethod.merchant &&
+                                    <p className="text-muted-foreground">
+                                        {pspPaymentMethod.merchant?.en_name} - {pspPaymentMethod.invoice_type?.description}
+                                    </p>
+                                }
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">

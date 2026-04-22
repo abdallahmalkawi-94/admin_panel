@@ -89,6 +89,24 @@ class PspPaymentMethodService
      */
     public function update($id, array $data): ?Model
     {
+        DB::transaction(function () use ($id, $data) {
+            $new = $this->pspPaymentMethodRepository->update($data, $id);
+            $sharedData = [
+                "support_tokenization" => $new->getAttribute("support_tokenization"),
+                "payout_model_id" => $new->getAttribute("payout_model_id"),
+                "shown_in_checkout" => $new->getAttribute("shown_in_checkout"),
+                "support_international_payment" => $new->getAttribute("support_international_payment"),
+                "fees_type" => $new->getAttribute("fees_type"),
+                "priority" => $new->getAttribute("priority"),
+                "refund_option_id" => $new->getAttribute("refund_option_id"),
+            ];
+
+            $this->pspPaymentMethodRepository->updateWhere([
+                "psp_id" => $new->getAttribute("psp_id"),
+                "payment_method_id" => $new->getAttribute("payment_method_id"),
+            ], $sharedData);
+        });
+
         return $this->pspPaymentMethodRepository->update($data, $id);
     }
 

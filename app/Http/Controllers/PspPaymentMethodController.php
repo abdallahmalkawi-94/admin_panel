@@ -82,7 +82,7 @@ class PspPaymentMethodController extends Controller
      */
     public function show(PspPaymentMethod $pspPaymentMethod): Response|ResponseFactory
     {
-        $pspPaymentMethod->load(['psp', 'paymentMethod']);
+        $pspPaymentMethod->load(['psp', 'paymentMethod', 'merchant', 'invoiceType']);
         return inertia('psp-payment-methods/show', [
             'pspPaymentMethod' => (new PspPaymentMethodResource($pspPaymentMethod))->resolve(),
         ]);
@@ -93,7 +93,7 @@ class PspPaymentMethodController extends Controller
      */
     public function edit(PspPaymentMethod $pspPaymentMethod): Response|ResponseFactory
     {
-        $pspPaymentMethod->load(['psp', 'paymentMethod']);
+        $pspPaymentMethod->load(['psp', 'paymentMethod', 'merchant', 'invoiceType']);
         $refundOptions = RefundOptionsDropDown();
         $payoutModels = PayoutModelsDropDown();
 
@@ -172,6 +172,9 @@ class PspPaymentMethodController extends Controller
         ]);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function storeMerchantPaymentMethods(StoreMerchantPaymentMethodsRequest $request, Merchant $merchant): RedirectResponse
     {
         try {

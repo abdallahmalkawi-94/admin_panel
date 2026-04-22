@@ -49,17 +49,6 @@ abstract class BaseRepository
     }
 
     /**
-     * Update a record by ID.
-     * @throws Exception
-     */
-    public function update(array $attributes, int|string $id): ?Model
-    {
-        $record = $this->getModel()->newQuery()->findOrFail($id);
-        $record->update($attributes);
-        return $record;
-    }
-
-    /**
      * Soft or hard delete a record.
      */
     public function delete(int|string $id, bool $force = false): bool
@@ -75,6 +64,24 @@ abstract class BaseRepository
     {
         $record = $this->getModel()->newQuery()->onlyTrashed()->findOrFail($id);
         $record->restore();
+        return $record;
+    }
+
+    public function updateWhere(array $conditions, array $attributes): bool
+    {
+        return $this->getModel()->newQuery()
+            ->where($conditions)
+            ->update($attributes);
+    }
+
+    /**
+     * Update a record by ID.
+     * @throws Exception
+     */
+    public function update(array $attributes, int|string $id): ?Model
+    {
+        $record = $this->getModel()->newQuery()->findOrFail($id);
+        $record->update($attributes);
         return $record;
     }
 
