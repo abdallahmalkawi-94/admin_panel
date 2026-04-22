@@ -516,6 +516,12 @@ export default function Edit({
                                             ?.description
                                     }
                                 </h1>
+                                {
+                                    pspPaymentMethod.merchant &&
+                                    <p className="text-muted-foreground">
+                                        {pspPaymentMethod.merchant?.en_name} - {pspPaymentMethod.invoice_type?.description}
+                                    </p>
+                                }
                                 <p className="text-muted-foreground">
                                     Update activation, limits, and API
                                     configuration.
@@ -588,6 +594,7 @@ export default function Edit({
                                                     </span>
                                                 </Label>
                                                 <Select
+                                                    disabled={!!pspPaymentMethod.merchant}
                                                     value={
                                                         paymentMethodConfig.refund_option_id
                                                     }
@@ -653,6 +660,7 @@ export default function Edit({
                                                     </span>
                                                 </Label>
                                                 <Select
+                                                    disabled={!!pspPaymentMethod.merchant}
                                                     value={
                                                         paymentMethodConfig.payout_model_id
                                                     }
@@ -753,6 +761,7 @@ export default function Edit({
                                                     </span>
                                                 </Label>
                                                 <Input
+                                                    readOnly={!!pspPaymentMethod.merchant}
                                                     id="priority"
                                                     type="number"
                                                     value={
@@ -824,6 +833,7 @@ export default function Edit({
                                                     </Label>
                                                 </div>
                                                 <Switch
+                                                    disabled={!!pspPaymentMethod.merchant}
                                                     id="support_tokenization"
                                                     checked={
                                                         paymentMethodConfig.support_tokenization
@@ -868,6 +878,7 @@ export default function Edit({
                                                     </Label>
                                                 </div>
                                                 <Switch
+                                                    disabled={!!pspPaymentMethod.merchant}
                                                     id="shown_in_checkout"
                                                     checked={
                                                         paymentMethodConfig.shown_in_checkout
@@ -891,6 +902,7 @@ export default function Edit({
                                                     </Label>
                                                 </div>
                                                 <Switch
+                                                    disabled={!!pspPaymentMethod.merchant}
                                                     id="support_international_payment"
                                                     checked={
                                                         paymentMethodConfig.support_international_payment
@@ -935,17 +947,20 @@ export default function Edit({
                                                 <Label className="text-base font-semibold">
                                                     Configuration Table
                                                 </Label>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={
-                                                        addConfigPairToBoth
-                                                    }
-                                                >
-                                                    <Plus className="mr-2 h-4 w-4" />
-                                                    Add Pair
-                                                </Button>
+                                                {
+                                                    !pspPaymentMethod.merchant &&
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={
+                                                            addConfigPairToBoth
+                                                        }
+                                                    >
+                                                        <Plus className="mr-2 h-4 w-4" />
+                                                        Add Pair
+                                                    </Button>
+                                                }
                                             </div>
 
                                             <div className="rounded-xl border">
@@ -961,9 +976,12 @@ export default function Edit({
                                                             <TableHead>
                                                                 Test Value
                                                             </TableHead>
-                                                            <TableHead className="w-[88px]">
-                                                                Actions
-                                                            </TableHead>
+                                                            {
+                                                                !pspPaymentMethod.merchant &&
+                                                                <TableHead className="w-[88px]">
+                                                                    Actions
+                                                                </TableHead>
+                                                            }
                                                         </TableHeadRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -979,6 +997,7 @@ export default function Edit({
                                                                 >
                                                                     <TableCell className="min-w-[220px]">
                                                                         <Input
+                                                                            readOnly={!!pspPaymentMethod.merchant}
                                                                             placeholder="Key"
                                                                             value={
                                                                                 pair.key
@@ -1045,26 +1064,29 @@ export default function Edit({
                                                                             }
                                                                         />
                                                                     </TableCell>
-                                                                    <TableCell>
-                                                                        {paymentMethodConfig
-                                                                            .configPairs
-                                                                            .length >
-                                                                            1 && (
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="outline"
-                                                                                size="icon"
-                                                                                onClick={() =>
-                                                                                    removeConfigPair(
-                                                                                        'config',
-                                                                                        pairIndex,
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                <X className="h-4 w-4" />
-                                                                            </Button>
-                                                                        )}
-                                                                    </TableCell>
+                                                                    {
+                                                                        !pspPaymentMethod.merchant &&
+                                                                        <TableCell>
+                                                                            {paymentMethodConfig
+                                                                                    .configPairs
+                                                                                    .length >
+                                                                                1 && (
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="icon"
+                                                                                        onClick={() =>
+                                                                                            removeConfigPair(
+                                                                                                'config',
+                                                                                                pairIndex,
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        <X className="h-4 w-4" />
+                                                                                    </Button>
+                                                                                )}
+                                                                        </TableCell>
+                                                                    }
                                                                 </TableBodyRow>
                                                             ),
                                                         )}

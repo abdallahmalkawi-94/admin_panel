@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MerchantController;
+use App\Http\Controllers\PspPaymentMethodController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("/{merchant}/edit", [MerchantController::class, "edit"])->name("merchants.edit");
         Route::patch("/{merchant}", [MerchantController::class, "update"])->name("merchants.update");
         Route::delete("/{merchant}", [MerchantController::class, "destroy"])->name("merchants.destroy");
+
+        Route::get("/{merchant}/payment_methods", [PspPaymentMethodController::class, "createMerchantPaymentMethod"])->name("merchants.payment_methods.create");
+        Route::post("/{merchant}/payment_methods", [PspPaymentMethodController::class, "storeMerchantPaymentMethods"])->name("merchants.payment_methods.store");
     });
 });
 

@@ -103,6 +103,12 @@ export default function Show({ merchant }: ShowProps) {
                                     Edit
                                 </Link>
                             </Button>
+                            <Button asChild>
+                                <Link href={`/merchants/${merchant.id}/payment_methods`}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Add Payment Method
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 </div>
