@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMerchantPaymentMethodsRequest;
 use App\Http\Requests\StorePspPaymentMethodRequest;
 use App\Http\Requests\UpdatePspPaymentMethodRequest;
+use App\Http\Resources\InvoiceTypeResource;
+use App\Http\Resources\MerchantResource;
 use App\Http\Resources\PspPaymentMethodResource;
-use App\Models\Psp;
+use App\Models\Merchant;
 use App\Models\PspPaymentMethod;
 use App\Services\PspPaymentMethodService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Response;
 use Inertia\ResponseFactory;
 
@@ -46,13 +50,11 @@ class PspPaymentMethodController extends Controller
     public function create(): Response|ResponseFactory
     {
         $psps = PspsDropDown();
-//        $paymentMethods = PaymentMethodsDropDown();
         $refundOptions = RefundOptionsDropDown();
         $payoutModels = PayoutModelsDropDown();
 
         return inertia('psp-payment-methods/create', [
             'psps' => $psps,
-//            'paymentMethods' => $paymentMethods,
             'refundOptions' => $refundOptions,
             'payoutModels' => $payoutModels,
         ]);
@@ -154,5 +156,41 @@ class PspPaymentMethodController extends Controller
         return response()->json([
             "PaymentMethods" => $paymentMethods,
         ]);
+    }
+
+    public function createMerchantPaymentMethod(Merchant $merchant): Response|RedirectResponse {
+        $invoiceTypes = $merchant->invoiceTypes()->get();
+        $childMerchants = $merchant->childMerchants()->get(["id", "en_name", "ar_name"]);
+
+        $supportedPaymentMethods = $this->pspPaymentMethodService->getSupportedPaymentMethods($merchant)->toArray();
+
+        return inertia('merchants/payment-method/create', [
+            'invoiceTypes' => InvoiceTypeResource::collection($invoiceTypes)->resolve(),
+            'childMerchants' => MerchantResource::collection($childMerchants)->resolve(),
+            'supportedPaymentMethods' => $supportedPaymentMethods,
+            'merchant' => (new MerchantResource($merchant))->resolve(),
+        ]);
+    }
+
+    public function storeMerchantPaymentMethods(StoreMerchantPaymentMethodsRequest $request, Merchant $merchant): RedirectResponse
+    {
+        try {
+            $count = $this->pspPaymentMethodService->storeMerchantPaymentMethods(
+                $merchant,
+                $request->validated(),
+            );
+
+            return redirect()
+                ->route('merchants.show', $merchant->id)
+                ->with('success', "{$count} merchant payment method assignment(s) saved successfully.");
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (Exception $e) {
+            logger($e->getMessage());
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to save merchant payment methods: ' . $e->getMessage());
+        }
     }
 }

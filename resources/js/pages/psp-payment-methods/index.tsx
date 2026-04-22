@@ -99,8 +99,22 @@ export default function Index({ pspPaymentMethods, filters }: IndexProps) {
             ),
         },
         {
-            key: 'priority',
-            label: 'Priority',
+            key: 'merchant',
+            label: 'Merchant',
+            render: (pspPaymentMethod) => (
+                <div className="flex items-center gap-2">
+                    <span>{pspPaymentMethod.merchant?.en_name || 'N/A'}</span>
+                </div>
+            ),
+        },
+        {
+            key: 'invoice_type',
+            label: 'Invoice Type',
+            render: (pspPaymentMethod) => (
+                <div className="flex items-center gap-2">
+                    <span>{pspPaymentMethod.invoice_type?.description || 'N/A'}</span>
+                </div>
+            ),
         },
         {
             key: 'is_active',

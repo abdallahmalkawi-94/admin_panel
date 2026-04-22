@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use App\Constants\fees_type;
+use App\Models\Merchant;
+use App\Models\PspPaymentMethod;
+use App\Models\PspStatus;
 use App\Repositories\PspPaymentMethodRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class PspPaymentMethodService
 {
@@ -24,7 +28,7 @@ class PspPaymentMethodService
 
         // Load relationships for paginated results
         if ($result instanceof LengthAwarePaginator) {
-            $result->load(['psp', 'paymentMethod', 'merchant']);
+            $result->load(['psp', 'paymentMethod', 'merchant', 'invoiceType']);
         }
 
         return $result;
@@ -73,7 +77,6 @@ class PspPaymentMethodService
                 'test_config' => $config['test_config'] ?? null,
             ];
 
-            // TODO Should be handle create or update
             $createdRecords[] = $this->pspPaymentMethodRepository->create($recordData);
         }
 
@@ -94,8 +97,81 @@ class PspPaymentMethodService
         return $this->pspPaymentMethodRepository->delete($id, $force);
     }
 
-    public function where (array $conditions, array $attributes = ['*']): Collection
+    public function where(array $conditions, array $attributes = ['*']): Collection
     {
         return $this->pspPaymentMethodRepository->where($conditions, $attributes);
+    }
+
+    public function getSupportedPaymentMethods(Merchant $merchant, array $ids = []): Collection
+    {
+        $merchantSettings = $merchant->settings()->first(['id', 'merchant_id', 'country_code', 'currency_code']);
+        $conditions = [
+            "psps.country_code" => $merchantSettings->country_code,
+            "psps.settlement_currency_code" => $merchantSettings->currency_code,
+            "psps.psp_status_id" => PspStatus::ACTIVE,
+        ];
+
+        return $this->pspPaymentMethodRepository->getSupportedPaymentMethods($conditions, $ids);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function storeMerchantPaymentMethods(Merchant $merchant, array $data): int
+    {
+        $invoiceTypeIds = array_values(array_unique($data['invoice_type_ids'] ?? []));
+        $targetMerchantIds = collect([$merchant->id, ...($data['child_merchant_ids'] ?? [])])
+            ->map(static fn($merchantId) => (int)$merchantId)
+            ->unique()
+            ->values()
+            ->all();
+
+        $paymentMethodsPayload = collect($data['payment_methods'] ?? [])->keyBy('source_psp_payment_method_id');
+
+//        dd($data, $invoiceTypeIds, $targetMerchantIds, $paymentMethodsPayload);
+
+        $affectedRecords = 0;
+
+        DB::transaction(function () use (
+            $invoiceTypeIds,
+            $paymentMethodsPayload,
+            $targetMerchantIds,
+            &$affectedRecords,
+        ) {
+            $merchantPspPaymentMethods = [];
+            foreach ($targetMerchantIds as $targetMerchantId) {
+                foreach ($invoiceTypeIds as $invoiceTypeId) {
+                    foreach ($paymentMethodsPayload as $sourcePaymentMethodId => $paymentMethodPayload) {
+                        $pspPaymentMethod = [
+                            "psp_id" => $paymentMethodPayload['original']['psp_id'],
+                            "payment_method_id" => $paymentMethodPayload['original']['payment_method_id'],
+                            "merchant_id" => $targetMerchantId,
+                            "invoice_type_id" => $invoiceTypeId,
+                            "support_tokenization" => $paymentMethodPayload['original']['support_tokenization'],
+                            "subscription_model" => $paymentMethodPayload['edited']['subscription_model'],
+                            "payout_model_id" => $paymentMethodPayload['original']['payout_model_id'],
+                            "is_active" => $paymentMethodPayload['edited']['is_active'],
+                            "shown_in_checkout" => $paymentMethodPayload['original']['shown_in_checkout'],
+                            "support_international_payment" => $paymentMethodPayload['original']['support_international_payment'],
+                            "post_fees_to_psp" => $paymentMethodPayload['edited']['post_fees_to_psp'],
+                            "fees_type" => $paymentMethodPayload['original']['fees_type'],
+                            "priority" => $paymentMethodPayload['original']['priority'],
+                            "refund_option_id" => $paymentMethodPayload['original']['refund_option_id'],
+                            "max_allowed_amount" => $paymentMethodPayload['edited']['max_allowed_amount'],
+                            "min_allowed_amount" => $paymentMethodPayload['edited']['min_allowed_amount'],
+                            "config" => json_encode($paymentMethodPayload['edited']['config']),
+                            "test_config" => json_encode($paymentMethodPayload['edited']['test_config']),
+                        ];
+
+                        $merchantPspPaymentMethods[] = $pspPaymentMethod;
+                        $affectedRecords++;
+                    }
+                }
+            }
+
+            PspPaymentMethod::query()->upsert($merchantPspPaymentMethods, ['psp_id', 'payment_method_id', 'merchant_id', 'invoice_type_id']);
+        });
+
+        return $affectedRecords;
     }
 }
