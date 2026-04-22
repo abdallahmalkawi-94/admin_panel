@@ -10,7 +10,15 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, ArrowLeft, Building2, Globe, Wallet, ShieldCheck } from 'lucide-react';
+import {
+    Edit,
+    ArrowLeft,
+    Building2,
+    Globe,
+    Wallet,
+    ShieldCheck,
+    CreditCard,
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -105,7 +113,7 @@ export default function Show({ merchant }: ShowProps) {
                             </Button>
                             <Button asChild>
                                 <Link href={`/merchants/${merchant.id}/payment_methods`}>
-                                    <Edit className="mr-2 h-4 w-4" />
+                                    <CreditCard className="mr-2 h-4 w-4" />
                                     Add Payment Method
                                 </Link>
                             </Button>

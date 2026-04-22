@@ -359,6 +359,25 @@ export interface PspPaymentMethod {
     updated_at: string;
 }
 
+export interface FeesCollectionSlice {
+    id?: number;
+    from: string | number;
+    to: string | number | null;
+    foc_fixed: string | number;
+    fom_fixed: string | number;
+    foc_percentage: string | number;
+    fom_percentage: string | number;
+    foc_psp_cost_fixed: string | number;
+    fom_psp_cost_fixed: string | number;
+    fom_psp_cost_percentage: string | number;
+    foc_psp_cost_percentage: string | number;
+    installment_fom_fixed: string | number;
+    installment_fom_percentage: string | number;
+    installment_foc_fixed: string | number;
+    installment_foc_percentage: string | number;
+    is_default: boolean;
+}
+
 export interface PaginationLink {
     url: string | null;
     label: string;

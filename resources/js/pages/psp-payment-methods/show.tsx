@@ -140,6 +140,14 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
                                     Edit
                                 </Link>
                             </Button>
+                            <Button asChild>
+                                <Link
+                                    href={`/fees-collection-model/${pspPaymentMethod.id}/create`}
+                                >
+                                    <DollarSign className="mr-2 h-4 w-4" />
+                                    Fees
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 </div>
