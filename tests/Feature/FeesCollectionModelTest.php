@@ -34,6 +34,21 @@ class FeesCollectionModelTest extends TestCase
         $this->actingAs($this->user);
     }
 
+    public function test_it_renders_the_shared_fee_page_when_no_fee_slices_exist(): void
+    {
+        $pspPaymentMethod = $this->createPspPaymentMethod();
+
+        $response = $this->get(route('fees-collection-model.create', $pspPaymentMethod));
+
+        $response->assertOk();
+
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('psp-payment-methods/fees-collection-model/create')
+            ->where('pspPaymentMethod.id', $pspPaymentMethod->id)
+            ->where('feeSlices', [])
+        );
+    }
+
     public function test_it_renders_the_fee_slices_page_with_sorted_rows(): void
     {
         $pspPaymentMethod = $this->createPspPaymentMethod();
@@ -69,6 +84,30 @@ class FeesCollectionModelTest extends TestCase
                     && (float) $feeSlices[2]['to'] === 5000.0;
             })
         );
+    }
+
+    public function test_it_creates_the_first_fee_slice_set_for_a_psp_payment_method(): void
+    {
+        $pspPaymentMethod = $this->createPspPaymentMethod();
+
+        $response = $this->post(route('fees-collection-model.store', $pspPaymentMethod), [
+            'slices' => $this->validSlicesPayload(),
+        ]);
+
+        $response->assertRedirect(route('fees-collection-model.create', $pspPaymentMethod));
+        $response->assertSessionHas('success');
+
+        $activeSlices = FeesCollectionModel::query()
+            ->where('psp_payment_method_id', $pspPaymentMethod->id)
+            ->orderBy('from')
+            ->get();
+
+        $this->assertCount(2, $activeSlices);
+        $this->assertSame([0.0, 501.0], $activeSlices->map(fn (FeesCollectionModel $slice) => (float) $slice->from)->all());
+        $this->assertSame([500.0, 1000.0], $activeSlices->map(fn (FeesCollectionModel $slice) => (float) $slice->to)->all());
+        $this->assertSame([false, true], $activeSlices->map(fn (FeesCollectionModel $slice) => $slice->is_default)->all());
+        $this->assertTrue($activeSlices->every(fn (FeesCollectionModel $slice) => $slice->created_by === $this->user->id));
+        $this->assertTrue($activeSlices->every(fn (FeesCollectionModel $slice) => $slice->updated_by === $this->user->id));
     }
 
     public function test_it_saves_fee_slices_and_soft_deletes_omitted_rows(): void

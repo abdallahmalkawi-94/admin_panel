@@ -87,15 +87,16 @@ class FeesCollectionModelService
      */
     public function syncForPspPaymentMethod(PspPaymentMethod $pspPaymentMethod, array $slices, ?int $userId = null): \Illuminate\Support\Collection
     {
+        // TODO Need enhancement
         DB::transaction(function () use ($pspPaymentMethod, $slices, $userId) {
             $existingSlices = $pspPaymentMethod->feesCollectionModel()->get()->keyBy('id');
             $retainedIds = [];
 
             foreach ($slices as $slice) {
                 $attributes = [
-                    'psp_payment_method_id' => $pspPaymentMethod->id,
-                    'merchant_id' => null,
-                    'invoice_type_id' => null,
+                    'psp_payment_method_id' => $pspPaymentMethod->getAttribute('id'),
+                    'merchant_id' => $pspPaymentMethod->getAttribute("merchant_id"),
+                    'invoice_type_id' => $pspPaymentMethod->getAttribute("invoice_type_id"),
                     'from' => $slice['from'],
                     'to' => $slice['to'],
                     'foc_fixed' => $slice['foc_fixed'],
