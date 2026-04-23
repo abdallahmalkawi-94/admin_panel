@@ -1,10 +1,14 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Language, type PaginatedResourceCollection } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Badge } from '@/components/ui/badge';
 import { useFilters } from '@/hooks/use-filters';
+import AppLayout from '@/layouts/app-layout';
+import {
+    type BreadcrumbItem,
+    type Language,
+    type PaginatedResourceCollection,
+} from '@/types';
+import { Head, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -54,12 +58,7 @@ export default function Index({ languages, filters }: IndexProps) {
             label: 'Code',
             className: 'font-medium',
             render: (language) => (
-                <Link
-                    href={`/languages/${language.code}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline font-mono"
-                >
-                    {language.code.toUpperCase()}
-                </Link>
+                <span className="font-mono">{language.code.toUpperCase()}</span>
             ),
         },
         {
@@ -136,6 +135,7 @@ export default function Index({ languages, filters }: IndexProps) {
                     description="A list of all languages including their codes and text direction."
                     data={languages}
                     columns={columns}
+                    getRowHref={(language) => `/languages/${language.code}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No languages found."
@@ -144,4 +144,3 @@ export default function Index({ languages, filters }: IndexProps) {
         </AppLayout>
     );
 }
-

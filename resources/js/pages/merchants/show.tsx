@@ -99,12 +99,6 @@ export default function Show({ merchant }: ShowProps) {
                             <Badge variant={statusVariant}>
                                 {merchant.status?.description || 'Status pending'}
                             </Badge>
-                            <Button variant="outline" asChild>
-                                <Link href="/merchants">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/merchants/${merchant.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />

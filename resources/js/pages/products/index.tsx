@@ -1,3 +1,8 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
     type BreadcrumbItem,
@@ -5,12 +10,7 @@ import {
     type Product,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus, Package, ShieldCheck, ShieldOff } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
+import { Package, Plus } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -65,14 +65,6 @@ export default function Index({ products, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (product) => (
-                <Link
-                    href={`/products/${product.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {product.id}
-                </Link>
-            ),
         },
         {
             key: 'en_name',
@@ -100,10 +92,10 @@ export default function Index({ products, filters }: IndexProps) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Package className="h-4 w-4" />
                                 Product Catalog
                             </div>
@@ -111,7 +103,8 @@ export default function Index({ products, filters }: IndexProps) {
                                 Products
                             </h1>
                             <p className="text-muted-foreground">
-                                Manage integrations, signing status, and API endpoints.
+                                Manage integrations, signing status, and API
+                                endpoints.
                             </p>
                         </div>
                         <Button asChild>
@@ -128,7 +121,7 @@ export default function Index({ products, filters }: IndexProps) {
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Total Products
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -156,6 +149,7 @@ export default function Index({ products, filters }: IndexProps) {
                     description="A list of all products."
                     data={products}
                     columns={columns}
+                    getRowHref={(product) => `/products/${product.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No products found."

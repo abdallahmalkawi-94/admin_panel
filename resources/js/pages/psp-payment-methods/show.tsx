@@ -126,12 +126,6 @@ export default function Show({ pspPaymentMethod }: ShowProps) {
                                     ? 'Shown in Checkout'
                                     : 'Hidden'}
                             </Badge>
-                            <Button variant="outline" asChild>
-                                <Link href="/psp-payment-methods">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link
                                     href={`/psp-payment-methods/${pspPaymentMethod.id}/edit`}

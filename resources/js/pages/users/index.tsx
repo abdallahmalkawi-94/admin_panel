@@ -1,3 +1,11 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useFilters } from '@/hooks/use-filters';
+import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import {
     type BreadcrumbItem,
@@ -5,17 +13,9 @@ import {
     type User,
     type UserStatus,
 } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus, Users, ShieldCheck, AlertTriangle, Clock } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
 import { CountryDropDown } from '@/types/dropdown';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useInitials } from '@/hooks/use-initials';
+import { Head, Link, router } from '@inertiajs/react';
+import { AlertTriangle, Clock, Plus, ShieldCheck, Users } from 'lucide-react';
 import Flag from 'react-world-flags';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -113,14 +113,6 @@ export default function Index({
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (user) => (
-                <Link
-                    href={`/users/${user.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {user.id}
-                </Link>
-            ),
         },
         {
             key: 'name',
@@ -223,11 +215,11 @@ export default function Index({
             <Head title="Users" />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
-                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-sky-500/10 via-emerald-400/10 to-amber-400/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Users className="h-4 w-4" />
                                 User Directory
                             </div>
@@ -252,7 +244,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Total Users
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -265,7 +257,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Active (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -278,7 +270,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Pending (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -291,7 +283,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Blocked (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -319,6 +311,7 @@ export default function Index({
                     description="A list of all users including their name, email, and contact information."
                     data={users}
                     columns={columns}
+                    getRowHref={(user) => `/users/${user.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No users found."

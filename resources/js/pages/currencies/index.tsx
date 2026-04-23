@@ -1,9 +1,13 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Currency, type PaginatedResourceCollection } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
 import { useFilters } from '@/hooks/use-filters';
+import AppLayout from '@/layouts/app-layout';
+import {
+    type BreadcrumbItem,
+    type Currency,
+    type PaginatedResourceCollection,
+} from '@/types';
+import { Head, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -51,14 +55,6 @@ export default function Index({ currencies, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (currency) => (
-                <Link
-                    href={`/currencies/${currency.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {currency.id}
-                </Link>
-            ),
         },
         {
             key: 'code',
@@ -134,6 +130,7 @@ export default function Index({ currencies, filters }: IndexProps) {
                     description="A list of all currencies including their codes, symbols, and countries."
                     data={currencies}
                     columns={columns}
+                    getRowHref={(currency) => `/currencies/${currency.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No currencies found."
@@ -142,4 +139,3 @@ export default function Index({ currencies, filters }: IndexProps) {
         </AppLayout>
     );
 }
-

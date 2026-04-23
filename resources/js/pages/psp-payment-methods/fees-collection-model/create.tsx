@@ -243,7 +243,7 @@ export default function FeesCollectionModel({
             <Head title={`Fee Slices: ${pspPaymentMethod.id}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-background to-sky-500/10 p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-xs tracking-[0.24em] text-muted-foreground uppercase">
                             <DollarSign className="h-4 w-4" />

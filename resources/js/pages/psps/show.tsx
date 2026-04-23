@@ -82,12 +82,6 @@ export default function Show({ psp }: ShowProps) {
                             <Badge variant={statusVariant}>
                                 {psp.status?.description}
                             </Badge>
-                            <Button asChild variant="outline">
-                                <Link href="/psps">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/psps/${psp.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />

@@ -76,12 +76,6 @@ export default function Show({ product }: ShowProps) {
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button asChild variant="outline">
-                                <Link href="/products">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/products/${product.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />

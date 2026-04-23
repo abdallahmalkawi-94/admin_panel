@@ -1,10 +1,14 @@
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Country, type PaginatedResourceCollection } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { type Column, DataTable } from '@/components/data-table';
 import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Badge } from '@/components/ui/badge';
 import { useFilters } from '@/hooks/use-filters';
+import AppLayout from '@/layouts/app-layout';
+import {
+    type BreadcrumbItem,
+    type Country,
+    type PaginatedResourceCollection,
+} from '@/types';
+import { Head, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -71,14 +75,6 @@ export default function Index({ countries, filters, regions }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (country) => (
-                <Link
-                    href={`/countries/${country.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {country.id}
-                </Link>
-            ),
         },
         {
             key: 'iso2',
@@ -204,6 +200,7 @@ export default function Index({ countries, filters, regions }: IndexProps) {
                     description="A list of all countries including their ISO codes, regions, and status."
                     data={countries}
                     columns={columns}
+                    getRowHref={(country) => `/countries/${country.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No countries found."

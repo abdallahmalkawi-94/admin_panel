@@ -1,15 +1,15 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
-    type PaymentNetwork,
     type BreadcrumbItem,
     type PaginatedResourceCollection,
+    type PaymentNetwork,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -58,14 +58,6 @@ export default function Index({ paymentNetworks, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (paymentNetwork) => (
-                <Link
-                    href={`/payment-networks/${paymentNetwork.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {paymentNetwork.id}
-                </Link>
-            ),
         },
         {
             key: 'name',
@@ -141,6 +133,9 @@ export default function Index({ paymentNetworks, filters }: IndexProps) {
                     description="A list of all payment networks with their details."
                     data={paymentNetworks}
                     columns={columns}
+                    getRowHref={(paymentNetwork) =>
+                        `/payment-networks/${paymentNetwork.id}`
+                    }
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No payment networks found."

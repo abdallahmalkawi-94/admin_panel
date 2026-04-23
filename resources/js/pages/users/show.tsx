@@ -87,7 +87,7 @@ export default function Show({ user }: ShowProps) {
             <Head title={`View User - ${user.name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
-                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-sky-500/10 via-emerald-400/10 to-amber-400/10 p-6">
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
                     <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -118,12 +118,6 @@ export default function Show({ user }: ShowProps) {
                             <Badge variant={user.email_verified_at ? 'success' : 'info'}>
                                 {user.email_verified_at ? 'Verified' : 'Pending'}
                             </Badge>
-                            <Button asChild variant="outline">
-                                <Link href="/users">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/users/${user.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />

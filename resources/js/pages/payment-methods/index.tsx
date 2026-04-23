@@ -1,15 +1,15 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
-    type PaymentMethod,
     type BreadcrumbItem,
     type PaginatedResourceCollection,
+    type PaymentMethod,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,14 +59,6 @@ export default function Index({ paymentMethods, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (paymentMethod) => (
-                <Link
-                    href={`/payment-methods/${paymentMethod.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {paymentMethod.id}
-                </Link>
-            ),
         },
         {
             key: 'description',
@@ -80,7 +72,13 @@ export default function Index({ paymentMethods, filters }: IndexProps) {
             key: 'is_one_time_payment',
             label: 'One Time Payment',
             render: (paymentMethod) => (
-                <span className={paymentMethod.is_one_time_payment ? 'text-green-600' : 'text-gray-500'}>
+                <span
+                    className={
+                        paymentMethod.is_one_time_payment
+                            ? 'text-green-600'
+                            : 'text-gray-500'
+                    }
+                >
                     {paymentMethod.is_one_time_payment ? 'Yes' : 'No'}
                 </span>
             ),
@@ -146,6 +144,9 @@ export default function Index({ paymentMethods, filters }: IndexProps) {
                     description="A list of all payment methods with their details."
                     data={paymentMethods}
                     columns={columns}
+                    getRowHref={(paymentMethod) =>
+                        `/payment-methods/${paymentMethod.id}`
+                    }
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No payment methods found."
