@@ -6,7 +6,6 @@ use App\Http\Requests\StoreMerchantRequest;
 use App\Http\Requests\UpdateMerchantRequest;
 use App\Http\Resources\MerchantResource;
 use App\Models\Merchant;
-use App\Models\MerchantStatus;
 use App\Services\MerchantService;
 use App\Services\ProductService;
 use Exception;
@@ -24,8 +23,9 @@ class MerchantController extends Controller
 
     public function __construct(
         MerchantService $merchantService,
-        ProductService $productService
-    ) {
+        ProductService  $productService
+    )
+    {
         $this->merchantService = $merchantService;
         $this->productService = $productService;
     }
@@ -68,7 +68,7 @@ class MerchantController extends Controller
             'product_id' => 'required|integer|exists:products,id',
         ]);
 
-        $productId = (int) $validated['product_id'];
+        $productId = (int)$validated['product_id'];
 
         $merchants = $this->merchantService->getParentMerchantsByProduct($productId);
 
@@ -79,6 +79,20 @@ class MerchantController extends Controller
                 'ar_name' => $merchant->ar_name,
             ])
         ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreMerchantRequest $request): RedirectResponse
+    {
+        try {
+            $this->merchantService->create($request->validated());
+            return redirect()->route('merchants.index')->with('success', 'Merchant created successfully.');
+        } catch (Exception $e) {
+            logger($e->getMessage());
+            return back()->withInput()->with('error', 'Failed to create merchant: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -108,25 +122,23 @@ class MerchantController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMerchantRequest $request): RedirectResponse
-    {
-        try {
-            $this->merchantService->create($request->validated());
-            return redirect()->route('merchants.index')->with('success', 'Merchant created successfully.');
-        } catch (Exception $e) {
-            logger($e->getMessage());
-            return back()->withInput()->with('error', 'Failed to create merchant: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(Merchant $merchant): Response|ResponseFactory
     {
-        $merchant->load(['status', 'product', 'parentMerchant', 'settings.bank', 'settings.termsAndCondition', 'settings.currency', 'settings.country', 'invoiceTypes']);
+        $merchant->load([
+            'status',
+            'product',
+            'parentMerchant',
+            'settings.bank',
+            'settings.termsAndCondition',
+            'settings.currency',
+            'settings.country',
+            'invoiceTypes',
+            'pspPaymentMethods.psp',
+            'pspPaymentMethods.paymentMethod',
+            'pspPaymentMethods.invoiceType',
+        ]);
 
         return inertia('merchants/show', [
             'merchant' => (new MerchantResource($merchant))->resolve(),

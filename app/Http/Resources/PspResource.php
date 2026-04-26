@@ -62,6 +62,17 @@ class PspResource extends JsonResource
                     'swift_code' => $this->bank->swift_code,
                 ];
             }),
+            'psp_payment_methods' => $this->when($this->relationLoaded('pspPaymentMethods'), function () {
+                return $this->pspPaymentMethods->map(function ($pspPaymentMethod) {
+                    return [
+                        'id' => $pspPaymentMethod->id,
+                        'psp' => $pspPaymentMethod->psp->name,
+                        'payment_method' => $pspPaymentMethod->paymentMethod->description,
+                        'payment_method_logo_url' => $pspPaymentMethod->paymentMethod->logo_url,
+                        'status' => (bool)$pspPaymentMethod->is_active,
+                    ];
+                });
+            }),
             'bank_account_number' => $this->bank_account_number,
             'iban' => $this->iban,
             'enable_auto_transfer' => $this->enable_auto_transfer,

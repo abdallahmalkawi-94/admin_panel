@@ -1,3 +1,9 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
     type BreadcrumbItem,
@@ -6,13 +12,7 @@ import {
     type PaginatedResourceCollection,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus, Store, Rocket, ShieldCheck, Users } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
+import { Plus, Rocket, ShieldCheck, Store, Users } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -73,9 +73,15 @@ export default function Index({
     statuses,
     products,
 }: IndexProps) {
-    const liveCount = merchants.data.filter((merchant) => merchant.is_live).length;
-    const testCount = merchants.data.filter((merchant) => !merchant.is_live).length;
-    const activeCount = merchants.data.filter((merchant) => merchant.status_id === MERCHANT_STATUS.ACTIVE).length;
+    const liveCount = merchants.data.filter(
+        (merchant) => merchant.is_live,
+    ).length;
+    const testCount = merchants.data.filter(
+        (merchant) => !merchant.is_live,
+    ).length;
+    const activeCount = merchants.data.filter(
+        (merchant) => merchant.status_id === MERCHANT_STATUS.ACTIVE,
+    ).length;
 
     // Use the reusable filters hook
     const {
@@ -107,14 +113,6 @@ export default function Index({
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (merchant) => (
-                <Link
-                    href={`/merchants/${merchant.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {merchant.id}
-                </Link>
-            ),
         },
         {
             key: 'en_name',
@@ -207,10 +205,10 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Store className="h-4 w-4" />
                                 Merchant Directory
                             </div>
@@ -218,7 +216,8 @@ export default function Index({
                                 Merchants
                             </h1>
                             <p className="text-muted-foreground">
-                                Monitor onboarding, live status, and product alignment at a glance.
+                                Monitor onboarding, live status, and product
+                                alignment at a glance.
                             </p>
                         </div>
                         <Button asChild>
@@ -235,7 +234,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Total Merchants
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -248,7 +247,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Live (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -261,7 +260,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Test (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -274,7 +273,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Active (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -302,6 +301,7 @@ export default function Index({
                     description="A list of all merchants including their name, product, and status."
                     data={merchants}
                     columns={columns}
+                    getRowHref={(merchant) => `/merchants/${merchant.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No merchants found."

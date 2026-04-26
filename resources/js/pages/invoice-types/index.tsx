@@ -1,15 +1,15 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
-    type InvoiceType,
     type BreadcrumbItem,
+    type InvoiceType,
     type PaginatedResourceCollection,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -59,14 +59,6 @@ export default function Index({ invoiceTypes, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (invoiceType) => (
-                <Link
-                    href={`/invoice-types/${invoiceType.id}/edit`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {invoiceType.id}
-                </Link>
-            ),
         },
         {
             key: 'code',
@@ -135,6 +127,9 @@ export default function Index({ invoiceTypes, filters }: IndexProps) {
                     description="A list of all invoice types with their details."
                     data={invoiceTypes}
                     columns={columns}
+                    getRowHref={(invoiceType) =>
+                        `/invoice-types/${invoiceType.id}/edit`
+                    }
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No invoice types found."

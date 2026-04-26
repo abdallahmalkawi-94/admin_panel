@@ -90,12 +90,6 @@ export default function Edit({ product }: EditProps) {
                             <Badge variant={data.signing_active ? 'success' : 'secondary'}>
                                 {data.signing_active ? 'Signing Active' : 'Signing Inactive'}
                             </Badge>
-                            <Button asChild variant="outline">
-                                <Link href={`/products/${product.id}`}>
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Product
-                                </Link>
-                            </Button>
                         </div>
                     </div>
                 </div>

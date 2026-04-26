@@ -110,7 +110,7 @@ export default function Edit({ user, countries, statuses }: EditProps) {
             <Head title={`Edit User - ${user.name}`} />
             <div className="flex h-full flex-1 flex-col gap-8 p-6">
                 {/* Hero */}
-                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-sky-500/10 via-emerald-400/10 to-amber-400/10 p-6">
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
                     <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
@@ -129,12 +129,6 @@ export default function Edit({ user, countries, statuses }: EditProps) {
                             <Badge variant={statusVariant}>
                                 {selectedStatus?.description || 'Status pending'}
                             </Badge>
-                            <Button asChild variant="outline">
-                                <Link href="/users">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Users
-                                </Link>
-                            </Button>
                         </div>
                     </div>
                 </div>

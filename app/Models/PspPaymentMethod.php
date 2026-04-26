@@ -8,6 +8,7 @@ use App\Constants\refund_option;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PspPaymentMethod extends Model
@@ -100,6 +101,11 @@ class PspPaymentMethod extends Model
         return $this->belongsTo(PayoutModel::class);
     }
 
+    public function feesCollectionModel(): HasMany
+    {
+        return $this->hasMany(FeesCollectionModel::class);
+    }
+
     /**
      * Get the user who created this record.
      */
@@ -121,9 +127,10 @@ class PspPaymentMethod extends Model
      */
     public function scopeFilterByPspId($query, ?string $pspId)
     {
-        if (!empty($pspId)) {
+        if (! empty($pspId)) {
             return $query->where('psp_id', $pspId);
         }
+
         return $query;
     }
 
@@ -132,9 +139,10 @@ class PspPaymentMethod extends Model
      */
     public function scopeFilterByPaymentMethodId($query, ?string $paymentMethodId)
     {
-        if (!empty($paymentMethodId)) {
+        if (! empty($paymentMethodId)) {
             return $query->where('payment_method_id', $paymentMethodId);
         }
+
         return $query;
     }
 
@@ -146,6 +154,7 @@ class PspPaymentMethod extends Model
         if ($merchantId !== null && $merchantId !== '' && $merchantId !== 'all') {
             return $query->where('merchant_id', $merchantId);
         }
+
         return $query;
     }
 
@@ -156,8 +165,10 @@ class PspPaymentMethod extends Model
     {
         if ($isActive !== null && $isActive !== '' && $isActive !== 'all') {
             $value = $isActive === '1' || $isActive === 'true';
+
             return $query->where('is_active', $value);
         }
+
         return $query;
     }
 
@@ -169,6 +180,7 @@ class PspPaymentMethod extends Model
         if ($invoiceTypeId !== null && $invoiceTypeId !== '' && $invoiceTypeId !== 'all') {
             return $query->where('invoice_type_id', $invoiceTypeId);
         }
+
         return $query;
     }
 
@@ -188,26 +200,26 @@ class PspPaymentMethod extends Model
     /**
      * Get the fees_type
      */
-//    protected function feesType(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn (int $value) => fees_type::FEES_TYPE[$value],
-//        );
-//    }
-//
-//    /**
-//     * Get the refund_option
-//     */
-//    protected function refundOptionId(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn (int $value) => refund_option::REFUND_OPTIONS[$value],
-//        );
-//    }
-//
-//    protected function payoutModelId(): Attribute {
-//        return Attribute::make(
-//            get: fn (int $value) => payout_models::PAYOUT_MODEL[$value],
-//        );
-//    }
+    //    protected function feesType(): Attribute
+    //    {
+    //        return Attribute::make(
+    //            get: fn (int $value) => fees_type::FEES_TYPE[$value],
+    //        );
+    //    }
+    //
+    //    /**
+    //     * Get the refund_option
+    //     */
+    //    protected function refundOptionId(): Attribute
+    //    {
+    //        return Attribute::make(
+    //            get: fn (int $value) => refund_option::REFUND_OPTIONS[$value],
+    //        );
+    //    }
+    //
+    //    protected function payoutModelId(): Attribute {
+    //        return Attribute::make(
+    //            get: fn (int $value) => payout_models::PAYOUT_MODEL[$value],
+    //        );
+    //    }
 }

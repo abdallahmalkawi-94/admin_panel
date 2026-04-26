@@ -77,6 +77,10 @@ class Merchant extends Model
             ->wherePivot('deleted_at', null);
     }
 
+    public function pspPaymentMethods(): HasMany {
+        return $this->hasMany(PspPaymentMethod::class);
+    }
+
     /**
      * Scope a query to filter by name.
      */

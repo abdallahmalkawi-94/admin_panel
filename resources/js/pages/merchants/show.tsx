@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Merchant } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -10,9 +10,33 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, ArrowLeft, Building2, Globe, Wallet, ShieldCheck } from 'lucide-react';
+import {
+    Edit,
+    ArrowLeft,
+    Building2,
+    Globe,
+    Wallet,
+    ShieldCheck,
+    CreditCard,
+    ChevronDown,
+    IdCard,
+} from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import {
+    Table,
+    TableBody,
+    TableBodyRow,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableHeadRow,
+} from '@/components/ui/table';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -44,6 +68,7 @@ const ORDER_TYPES: { [key: number]: string } = {
 
 export default function Show({ merchant }: ShowProps) {
     const [activeTab, setActiveTab] = useState<'financial' | 'notifications' | 'urls'>('financial');
+    const [isOpen, setOpen] = useState(false);
     const statusVariant = (() => {
         const statusLabel = merchant.status?.description?.toLowerCase() || '';
         if (statusLabel.includes('active')) return 'success';
@@ -91,12 +116,6 @@ export default function Show({ merchant }: ShowProps) {
                             <Badge variant={statusVariant}>
                                 {merchant.status?.description || 'Status pending'}
                             </Badge>
-                            <Button variant="outline" asChild>
-                                <Link href="/merchants">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/merchants/${merchant.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />
@@ -105,7 +124,7 @@ export default function Show({ merchant }: ShowProps) {
                             </Button>
                             <Button asChild>
                                 <Link href={`/merchants/${merchant.id}/payment_methods`}>
-                                    <Edit className="mr-2 h-4 w-4" />
+                                    <CreditCard className="mr-2 h-4 w-4" />
                                     Add Payment Method
                                 </Link>
                             </Button>
@@ -114,6 +133,32 @@ export default function Show({ merchant }: ShowProps) {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    #ID
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {merchant.id}
+                                </p>
+                            </div>
+                            <IdCard className="h-5 w-5 text-blue-600" />
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    #Referral ID
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {merchant.referral_id}
+                                </p>
+                            </div>
+                            <IdCard className="h-5 w-5 text-blue-600" />
+                        </CardContent>
+                    </Card>
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
@@ -173,35 +218,121 @@ export default function Show({ merchant }: ShowProps) {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
-                    <Card className="lg:col-span-2 py-6">
-                        <CardHeader>
-                            <CardTitle>Merchant Identity</CardTitle>
-                            <CardDescription>
-                                Core identifiers and registry details.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Merchant ID
-                                    </dt>
-                                    <dd className="text-base font-semibold">
-                                        {merchant.id}
-                                    </dd>
-                                </div>
-                                <div className="space-y-2">
-                                    <dt className="text-sm font-medium text-muted-foreground">
-                                        Referral ID
-                                    </dt>
-                                    <dd className="text-base font-semibold">
-                                        {merchant.referral_id || '-'}
-                                    </dd>
-                                </div>
-                            </div>
 
-                        </CardContent>
-                    </Card>
+                    <div className="md:col-span-2 py-6">
+                        <Collapsible
+                            open={isOpen}
+                            onOpenChange={() =>
+                                setOpen(!isOpen)
+                            }
+                        >
+                            <Card className="py-6">
+                                <CardHeader>
+                                    <CollapsibleTrigger asChild>
+                                        <div className="flex cursor-pointer items-center justify-between">
+                                            <div className="flex-1">
+                                                <CardTitle>
+                                                    Payment Methods
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Payment Methods defined for merchant
+                                                </CardDescription>
+                                            </div>
+                                            <ChevronDown
+                                                className={`h-5 w-5 transition-transform duration-200 ${
+                                                    isOpen
+                                                        ? 'rotate-180 transform'
+                                                        : ''
+                                                }`}
+                                            />
+                                        </div>
+                                    </CollapsibleTrigger>
+                                </CardHeader>
+                                <CollapsibleContent>
+                                    <CardContent className="space-y-6">
+                                        <Table>
+                                            <TableHeader className="bg-muted/60 text-foreground">
+                                                <TableHeadRow>
+                                                    <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                        ID
+                                                    </TableHead>
+                                                    <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                        PSP
+                                                    </TableHead>
+                                                    <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                        Payment Method
+                                                    </TableHead>
+                                                    <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                        Invoice Type
+                                                    </TableHead>
+                                                    <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                        Status
+                                                    </TableHead>
+                                                </TableHeadRow>
+                                            </TableHeader>
+                                            {
+                                                <TableBody>
+                                                    {
+                                                        merchant.psp_payment_methods.length ? (
+                                                            merchant.psp_payment_methods.map((paymentMethod) => (
+                                                                <TableBodyRow
+                                                                    key={paymentMethod.id}
+                                                                    className="cursor-pointer hover:bg-muted/40"
+                                                                    onClick={() =>
+                                                                        router.visit(`/psp-payment-methods/${paymentMethod.id}`)
+                                                                    }
+                                                                >
+                                                                    <TableCell className="">
+                                                                        {paymentMethod.id}
+                                                                    </TableCell>
+                                                                    <TableCell className="">
+                                                                        {paymentMethod.psp}
+                                                                    </TableCell>
+                                                                    <TableCell className="">
+                                                                        <div className="flex items-center gap-2">
+                                                                            {paymentMethod.payment_method_logo_url && (
+                                                                                <img
+                                                                                    src={paymentMethod.payment_method_logo_url}
+                                                                                    alt={
+                                                                                        paymentMethod.payment_method ||
+                                                                                        'Payment method logo'
+                                                                                    }
+                                                                                    className="h-5 object-contain"
+                                                                                />
+                                                                            )}
+                                                                            <span>
+                                                                {paymentMethod.payment_method || 'N/A'}
+                                                            </span>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                    <TableCell className="">
+                                                                        {paymentMethod.invoice_type}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Badge
+                                                                            variant={paymentMethod.status ? 'success' : 'dark'}
+                                                                        >
+                                                                            {paymentMethod.status ? 'Active' : 'Inactive'}
+                                                                        </Badge>
+                                                                    </TableCell>
+                                                                </TableBodyRow>
+                                                            ))
+                                                        ) : (
+                                                            <TableBodyRow>
+                                                                <TableCell colSpan={5} className={"text-center"}>
+                                                                    No data found.
+                                                                </TableCell>
+                                                            </TableBodyRow>
+                                                        )
+                                                    }
+                                                </TableBody>
+                                            }
+                                        </Table>
+                                    </CardContent>
+                                </CollapsibleContent>
+                            </Card>
+                        </Collapsible>
+                    </div>
 
                     {/*Invoice Types*/}
                     <Card className="md:col-span-2 py-6">
@@ -244,7 +375,7 @@ export default function Show({ merchant }: ShowProps) {
                                             type="button"
                                             onClick={() => setActiveTab(id as typeof activeTab)}
                                             className={cn(
-                                                'flex flex-1 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors',
+                                                'cursor-pointer flex flex-1 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors',
                                                 activeTab === id
                                                     ? 'bg-neutral-900 text-white shadow-sm dark:bg-white dark:text-neutral-900'
                                                     : 'text-muted-foreground hover:bg-background/70',

@@ -1,3 +1,7 @@
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useFilters } from '@/hooks/use-filters';
 import AppLayout from '@/layouts/app-layout';
 import {
     type Bank,
@@ -5,11 +9,7 @@ import {
     type PaginatedResourceCollection,
 } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
 import { Plus } from 'lucide-react';
-import { useFilters } from '@/hooks/use-filters';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -58,14 +58,6 @@ export default function Index({ banks, filters }: IndexProps) {
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (bank) => (
-                <Link
-                    href={`/banks/${bank.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {bank.id}
-                </Link>
-            ),
         },
         {
             key: 'en_name',
@@ -130,6 +122,7 @@ export default function Index({ banks, filters }: IndexProps) {
                     description="A list of all banks with their details."
                     data={banks}
                     columns={columns}
+                    getRowHref={(bank) => `/banks/${bank.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No banks found."
@@ -138,4 +131,3 @@ export default function Index({ banks, filters }: IndexProps) {
         </AppLayout>
     );
 }
-

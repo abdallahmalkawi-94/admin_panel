@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Psp } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -11,18 +11,19 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-    ArrowLeft,
     BadgeCheck,
-    Banknote,
+    Banknote, ChevronDown,
     DollarSign,
     Edit,
     Globe,
     IdCard,
     Mail,
-    Phone,
     Split,
     User,
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Table, TableBody, TableBodyRow, TableCell, TableHead, TableHeader, TableHeadRow } from '@/components/ui/table';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -47,6 +48,9 @@ export default function Show({ psp }: ShowProps) {
         if (statusLabel.includes('pending')) return 'info';
         return 'outline';
     })();
+
+    const [isOpen, setOpen] = useState(false);
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -82,12 +86,6 @@ export default function Show({ psp }: ShowProps) {
                             <Badge variant={statusVariant}>
                                 {psp.status?.description}
                             </Badge>
-                            <Button asChild variant="outline">
-                                <Link href="/psps">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back
-                                </Link>
-                            </Button>
                             <Button asChild>
                                 <Link href={`/psps/${psp.id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" />
@@ -184,6 +182,113 @@ export default function Show({ psp }: ShowProps) {
                             <BadgeCheck className="h-5 w-5 text-emerald-600" />
                         </CardContent>
                     </Card>
+                </div>
+
+                <div className="md:col-span-2 py-6">
+                    <Collapsible
+                        open={isOpen}
+                        onOpenChange={() =>
+                            setOpen(!isOpen)
+                        }
+                    >
+                        <Card className="py-6">
+                            <CardHeader>
+                                <CollapsibleTrigger asChild>
+                                    <div className="flex cursor-pointer items-center justify-between">
+                                        <div className="flex-1">
+                                            <CardTitle>
+                                                Payment Methods
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Payment Methods defined for merchant
+                                            </CardDescription>
+                                        </div>
+                                        <ChevronDown
+                                            className={`h-5 w-5 transition-transform duration-200 ${
+                                                isOpen
+                                                    ? 'rotate-180 transform'
+                                                    : ''
+                                            }`}
+                                        />
+                                    </div>
+                                </CollapsibleTrigger>
+                            </CardHeader>
+                            <CollapsibleContent>
+                                <CardContent className="space-y-6">
+                                    <Table>
+                                        <TableHeader className="bg-muted/60 text-foreground">
+                                            <TableHeadRow>
+                                                <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                    ID
+                                                </TableHead>
+                                                <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                    PSP
+                                                </TableHead>
+                                                <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                    Payment Method
+                                                </TableHead>
+                                                <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                    Status
+                                                </TableHead>
+                                            </TableHeadRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {
+                                                psp.psp_payment_methods.length ? (
+                                                    psp.psp_payment_methods.map((paymentMethod) => (
+                                                        <TableBodyRow
+                                                            key={paymentMethod.id}
+                                                            className="cursor-pointer hover:bg-muted/40"
+                                                            onClick={() =>
+                                                                router.visit(`/psp-payment-methods/${paymentMethod.id}`)
+                                                            }
+                                                        >
+                                                            <TableCell className="">
+                                                                {paymentMethod.id}
+                                                            </TableCell>
+                                                            <TableCell className="">
+                                                                {paymentMethod.psp}
+                                                            </TableCell>
+                                                            <TableCell className="">
+                                                                <div className="flex items-center gap-2">
+                                                                    {paymentMethod.payment_method_logo_url && (
+                                                                        <img
+                                                                            src={paymentMethod.payment_method_logo_url}
+                                                                            alt={
+                                                                                paymentMethod.payment_method ||
+                                                                                'Payment method logo'
+                                                                            }
+                                                                            className="h-5 object-contain"
+                                                                        />
+                                                                    )}
+                                                                    <span>
+                                                                {paymentMethod.payment_method || 'N/A'}
+                                                            </span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge
+                                                                    variant={paymentMethod.status ? 'success' : 'dark'}
+                                                                >
+                                                                    {paymentMethod.status ? 'Active' : 'Inactive'}
+                                                                </Badge>
+                                                            </TableCell>
+                                                        </TableBodyRow>
+                                                    ))
+                                                ) : (
+                                                    <TableBodyRow>
+                                                        <TableCell colSpan={5} className={"text-center"}>
+                                                            No data found.
+                                                        </TableCell>
+                                                    </TableBodyRow>
+                                                )
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </CollapsibleContent>
+                        </Card>
+                    </Collapsible>
                 </div>
 
                 {/* Technical Details */}

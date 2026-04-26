@@ -1,17 +1,17 @@
-import AppLayout from '@/layouts/app-layout';
-import {
-    type PspPaymentMethod,
-    type BreadcrumbItem,
-    type PaginatedResourceCollection,
-} from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus, CreditCard, ShieldCheck, Eye, Layers } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
-import { Badge } from '@/components/ui/badge';
+import AppLayout from '@/layouts/app-layout';
+import {
+    type BreadcrumbItem,
+    type PaginatedResourceCollection,
+    type PspPaymentMethod,
+} from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { CreditCard, Eye, Layers, Plus, ShieldCheck } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -42,10 +42,23 @@ interface IndexProps {
     paymentMethods: SelectOption[];
 }
 
-export default function Index({ pspPaymentMethods, filters, merchants, invoiceTypes, psps, paymentMethods}: IndexProps) {
-    const activeCount = pspPaymentMethods.data.filter((method) => method.is_active).length;
-    const shownCount = pspPaymentMethods.data.filter((method) => method.shown_in_checkout).length;
-    const uniquePspCount = new Set(pspPaymentMethods.data.map((method) => method.psp?.id).filter(Boolean)).size;
+export default function Index({
+    pspPaymentMethods,
+    filters,
+    merchants,
+    invoiceTypes,
+    psps,
+    paymentMethods,
+}: IndexProps) {
+    const activeCount = pspPaymentMethods.data.filter(
+        (method) => method.is_active,
+    ).length;
+    const shownCount = pspPaymentMethods.data.filter(
+        (method) => method.shown_in_checkout,
+    ).length;
+    const uniquePspCount = new Set(
+        pspPaymentMethods.data.map((method) => method.psp?.id).filter(Boolean),
+    ).size;
 
     // Use the reusable filters hook
     const {
@@ -77,14 +90,6 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (pspPaymentMethod) => (
-                <Link
-                    href={`/psp-payment-methods/${pspPaymentMethod.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {pspPaymentMethod.id}
-                </Link>
-            ),
         },
         {
             key: 'psp',
@@ -101,11 +106,16 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     {pspPaymentMethod.payment_method?.logo_url && (
                         <img
                             src={pspPaymentMethod.payment_method.logo_url}
-                            alt={pspPaymentMethod.payment_method.description || 'Payment method logo'}
+                            alt={
+                                pspPaymentMethod.payment_method.description ||
+                                'Payment method logo'
+                            }
                             className="h-5 object-contain"
                         />
                     )}
-                    <span>{pspPaymentMethod.payment_method?.description || 'N/A'}</span>
+                    <span>
+                        {pspPaymentMethod.payment_method?.description || 'N/A'}
+                    </span>
                 </div>
             ),
         },
@@ -123,7 +133,9 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
             label: 'Invoice Type',
             render: (pspPaymentMethod) => (
                 <div className="flex items-center gap-2">
-                    <span>{pspPaymentMethod.invoice_type?.description || 'N/A'}</span>
+                    <span>
+                        {pspPaymentMethod.invoice_type?.description || 'N/A'}
+                    </span>
                 </div>
             ),
         },
@@ -131,7 +143,11 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
             key: 'is_active',
             label: 'Status',
             render: (pspPaymentMethod) => (
-                <Badge variant={pspPaymentMethod.is_active ? "success" : "dark"}>{pspPaymentMethod.is_active ? 'Active' : 'Inactive'}</Badge>
+                <Badge
+                    variant={pspPaymentMethod.is_active ? 'success' : 'dark'}
+                >
+                    {pspPaymentMethod.is_active ? 'Active' : 'Inactive'}
+                </Badge>
             ),
         },
     ];
@@ -185,10 +201,10 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <CreditCard className="h-4 w-4" />
                                 PSP Payment Methods
                             </div>
@@ -196,7 +212,8 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                                 PSP Payment Methods
                             </h1>
                             <p className="text-muted-foreground">
-                                Manage activation, checkout visibility, and routing priority.
+                                Manage activation, checkout visibility, and
+                                routing priority.
                             </p>
                         </div>
                         <Button asChild>
@@ -213,7 +230,7 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Total Methods
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -226,7 +243,7 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Active (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -239,7 +256,7 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Shown in Checkout
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -252,7 +269,7 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     PSP Coverage
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -280,6 +297,9 @@ export default function Index({ pspPaymentMethods, filters, merchants, invoiceTy
                     description="A list of all PSP payment methods with their details."
                     data={pspPaymentMethods}
                     columns={columns}
+                    getRowHref={(pspPaymentMethod) =>
+                        `/psp-payment-methods/${pspPaymentMethod.id}`
+                    }
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No PSP payment methods found."

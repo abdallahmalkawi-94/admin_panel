@@ -1,19 +1,19 @@
-import AppLayout from '@/layouts/app-layout';
-import {
-    type BreadcrumbItem,
-    type Psp,
-    type PspStatus,
-    type Country,
-    type PaginatedResourceCollection,
-} from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { DataFilters, type FilterField } from '@/components/data-filters';
+import { type Column, DataTable } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { type Column, DataTable } from '@/components/data-table';
-import { DataFilters, type FilterField } from '@/components/data-filters';
-import { Plus, Banknote, ShieldCheck, Split, Globe } from 'lucide-react';
 import { useFilters } from '@/hooks/use-filters';
+import AppLayout from '@/layouts/app-layout';
+import {
+    type BreadcrumbItem,
+    type Country,
+    type PaginatedResourceCollection,
+    type Psp,
+    type PspStatus,
+} from '@/types';
+import { Head, Link, router } from '@inertiajs/react';
+import { Banknote, Globe, Plus, ShieldCheck, Split } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -63,9 +63,15 @@ export default function Index({
     statuses,
     countries,
 }: IndexProps) {
-    const activeCount = psps.data.filter((psp) => psp.status?.description?.toLowerCase().includes('active')).length;
-    const splittingCount = psps.data.filter((psp) => psp.support_money_splitting).length;
-    const autoTransferCount = psps.data.filter((psp) => psp.enable_auto_transfer).length;
+    const activeCount = psps.data.filter((psp) =>
+        psp.status?.description?.toLowerCase().includes('active'),
+    ).length;
+    const splittingCount = psps.data.filter(
+        (psp) => psp.support_money_splitting,
+    ).length;
+    const autoTransferCount = psps.data.filter(
+        (psp) => psp.enable_auto_transfer,
+    ).length;
 
     // Use the reusable filters hook
     const {
@@ -97,14 +103,6 @@ export default function Index({
             key: 'id',
             label: 'ID',
             className: 'font-medium',
-            render: (psp) => (
-                <Link
-                    href={`/psps/${psp.id}`}
-                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                >
-                    {psp.id}
-                </Link>
-            ),
         },
         {
             key: 'name',
@@ -141,15 +139,21 @@ export default function Index({
             key: 'status',
             label: 'Status',
             render: (psp) => (
-               // console.log(psp)
-                <Badge variant={getStatusVariant(psp.psp_status_id)}>{psp.status?.description}</Badge>
+                // console.log(psp)
+                <Badge variant={getStatusVariant(psp.psp_status_id)}>
+                    {psp.status?.description}
+                </Badge>
             ),
         },
         {
             key: 'support_money_splitting',
             label: 'Money Splitting',
             render: (psp) => (
-                <Badge variant={psp.support_money_splitting ? 'success' : 'secondary'}>
+                <Badge
+                    variant={
+                        psp.support_money_splitting ? 'success' : 'secondary'
+                    }
+                >
                     {psp.support_money_splitting ? 'Yes' : 'No'}
                 </Badge>
             ),
@@ -204,10 +208,10 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-emerald-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Banknote className="h-4 w-4" />
                                 PSP Directory
                             </div>
@@ -232,7 +236,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Total PSPs
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -245,7 +249,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Active (This Page)
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -258,7 +262,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Money Splitting
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -271,7 +275,7 @@ export default function Index({
                     <Card>
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                     Auto Transfer
                                 </p>
                                 <p className="mt-2 text-2xl font-semibold">
@@ -299,6 +303,7 @@ export default function Index({
                     description="A list of all payment service providers including their details."
                     data={psps}
                     columns={columns}
+                    getRowHref={(psp) => `/psps/${psp.id}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No PSPs found."

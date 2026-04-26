@@ -248,6 +248,14 @@ export interface Merchant {
     settings?: MerchantSettings | null;
     invoice_types: InvoiceType[];
     invoice_type_ids: number[];
+    psp_payment_methods: {
+        id: number;
+        psp: string;
+        payment_method: string;
+        payment_method_logo_url: string;
+        status: boolean;
+        invoice_type: string;
+    }[];
     created_at: string;
     updated_at: string;
 }
@@ -295,6 +303,13 @@ export interface Psp {
         ar_name: string;
         swift_code: string;
     };
+    psp_payment_methods: {
+        id: number;
+        psp: string;
+        payment_method: string;
+        payment_method_logo_url: string;
+        status: boolean;
+    }[];
     iban?: string | null;
     enable_auto_transfer: boolean;
     created_at: string;
@@ -357,6 +372,25 @@ export interface PspPaymentMethod {
     updated_by?: number | null;
     created_at: string;
     updated_at: string;
+}
+
+export interface FeesCollectionSlice {
+    id?: number;
+    from: string | number;
+    to: string | number | null;
+    foc_fixed: string | number;
+    fom_fixed: string | number;
+    foc_percentage: string | number;
+    fom_percentage: string | number;
+    foc_psp_cost_fixed: string | number;
+    fom_psp_cost_fixed: string | number;
+    fom_psp_cost_percentage: string | number;
+    foc_psp_cost_percentage: string | number;
+    installment_fom_fixed: string | number;
+    installment_fom_percentage: string | number;
+    installment_foc_fixed: string | number;
+    installment_foc_percentage: string | number;
+    is_default: boolean;
 }
 
 export interface PaginationLink {
