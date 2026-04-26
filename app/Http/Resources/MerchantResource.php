@@ -92,6 +92,18 @@ class MerchantResource extends JsonResource
                     ]
                 ];
             }),
+            'psp_payment_methods' => $this->when($this->relationLoaded('pspPaymentMethods'), function () {
+                return $this->pspPaymentMethods->map(function ($pspPaymentMethod) {
+                    return [
+                        'id' => $pspPaymentMethod->id,
+                        'psp' => $pspPaymentMethod->psp->name,
+                        'payment_method' => $pspPaymentMethod->paymentMethod->description,
+                        'payment_method_logo_url' => $pspPaymentMethod->paymentMethod->logo_url,
+                        'status' => (bool)$pspPaymentMethod->is_active,
+                        'invoice_type' => $pspPaymentMethod->invoiceType->description,
+                    ];
+                });
+            }),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

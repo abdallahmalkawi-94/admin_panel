@@ -88,7 +88,7 @@ class PspController extends Controller
      */
     public function show(Psp $psp): Response|ResponseFactory
     {
-        $psp->load(['status', 'country', 'settlementCurrency', 'bank']);
+        $psp->load(['status', 'country', 'settlementCurrency', 'bank', 'pspPaymentMethods']);
 
         return inertia('psps/show', [
             'psp' => (new PspResource($psp))->resolve(),

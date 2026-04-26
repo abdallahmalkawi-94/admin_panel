@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Psp extends Model
@@ -65,5 +66,10 @@ class Psp extends Model
     public function bank(): BelongsTo
     {
         return $this->belongsTo(Bank::class);
+    }
+
+    public function pspPaymentMethods(): HasMany
+    {
+        return $this->hasMany(PspPaymentMethod::class)->whereNull(['merchant_id', 'invoice_type_id']);
     }
 }
