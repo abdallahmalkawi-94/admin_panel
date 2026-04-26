@@ -66,19 +66,23 @@ const TableHeadRow = React.forwardRef<
 ))
 TableHeadRow.displayName = "TableHeadRow"
 
-const TableBodyRow = React.forwardRef<
-    HTMLTableRowElement,
-    React.HTMLAttributes<HTMLTableRowElement>
->(({ className, ...props }, ref) => (
-    <tr
-        ref={ref}
-        className={cn(
-            "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-            className
-        )}
-        {...props}
-    />
-))
+interface TableBodyRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+    disableHover?: boolean;
+}
+
+const TableBodyRow = React.forwardRef<HTMLTableRowElement, TableBodyRowProps>(
+    ({ className, disableHover = false, ...props }, ref) => (
+        <tr
+            ref={ref}
+            className={cn(
+                "border-b transition-colors data-[state=selected]:bg-muted",
+                !disableHover && "hover:bg-muted/100",
+                className
+            )}
+            {...props}
+        />
+    )
+);
 TableBodyRow.displayName = "TableBodyRow"
 
 const TableHead = React.forwardRef<

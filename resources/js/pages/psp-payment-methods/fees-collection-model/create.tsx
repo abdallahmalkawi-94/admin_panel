@@ -353,6 +353,8 @@ export default function FeesCollectionModel({
                                     <TableBody>
                                         {data.slices.map((slice, index) => (
                                             <TableBodyRow
+                                                className={`${slice.is_default && "bg-green-100"}`}
+                                                disableHover={true}
                                                 key={slice.id ?? `new-${index}`}
                                             >
                                                 <TableCell className="align-top text-base font-semibold">
@@ -904,14 +906,15 @@ export default function FeesCollectionModel({
 
                                                 <TableCell className="text-center align-top">
                                                     <Button
+                                                        className={"cursor-pointer"}
                                                         type="button"
-                                                        variant="outline"
+                                                        variant="link"
                                                         size="icon"
                                                         onClick={() =>
                                                             removeSlice(index)
                                                         }
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4 text-red-500" />
                                                     </Button>
                                                 </TableCell>
                                             </TableBodyRow>

@@ -168,10 +168,10 @@ class StoreFeesCollectionModelRequest extends FormRequest
                 $currentFrom = (int) $slice['from'];
                 $currentTo = (int) $slice['to'];
 
-                if ($currentTo < $currentFrom) {
+                if ($currentTo <= $currentFrom) {
                     $validator->errors()->add(
                         "slices.{$slice['_index']}.to",
-                        'The upper bound must be greater than or equal to the lower bound.',
+                        'The upper bound must be greater than the lower bound.',
                     );
                 }
 
