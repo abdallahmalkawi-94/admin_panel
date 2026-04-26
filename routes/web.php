@@ -30,3 +30,4 @@ require __DIR__.'/message-types.php';
 require __DIR__.'/invoice-types.php';
 require __DIR__.'/psp-payment-methods.php';
 require __DIR__.'/fees-collection.php';
+require __DIR__.'/roles-permission.php';
