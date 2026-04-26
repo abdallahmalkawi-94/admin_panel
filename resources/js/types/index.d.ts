@@ -132,6 +132,24 @@ export interface Bank {
     updated_at: string;
 }
 
+export interface Permission {
+    id: number;
+    name: string;
+    guard_name: string;
+    module: string;
+}
+
+export interface Role {
+    id: number;
+    name: string;
+    guard_name: string;
+    permissions_count?: number;
+    permissions?: Permission[];
+    permission_names?: string[];
+    created_at?: string | null;
+    updated_at?: string | null;
+}
+
 export interface PaymentMethod {
     id: number;
     description: string;

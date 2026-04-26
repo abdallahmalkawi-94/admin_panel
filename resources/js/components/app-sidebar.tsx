@@ -19,6 +19,7 @@ import {
     Landmark,
     Languages,
     LayoutGrid,
+    LockIcon,
     MessagesSquare,
     PackageIcon,
     ReceiptIcon,
@@ -38,8 +39,19 @@ const navigationGroups: NavGroup[] = [
             },
             {
                 title: 'User Management',
-                href: '/users',
                 icon: UsersIcon,
+                items: [
+                    {
+                        title: "Users",
+                        href: '/users',
+                        icon: UsersIcon,
+                    },
+                    {
+                        title: "Roles & Permissions",
+                        href: '/roles',
+                        icon: LockIcon
+                    }
+                ]
             },
             {
                 title: 'Product Management',
