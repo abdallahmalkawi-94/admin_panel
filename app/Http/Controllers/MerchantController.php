@@ -206,4 +206,28 @@ class MerchantController extends Controller
             return back()->with('error', 'Failed to delete merchant: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get merchants by product ID
+     */
+    public function getMerchantsByProduct(Request $request): JsonResponse
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+        ]);
+
+        $productId = (int)$validated['product_id'];
+
+        $merchants = $this->merchantService->getMerchantsByProduct($productId);
+
+        return response()->json([
+            'merchants' => $merchants->map(fn($merchant) => [
+                'id' => $merchant->id,
+                'en_name' => $merchant->en_name,
+                'ar_name' => $merchant->ar_name,
+            ])
+        ]);
+    }
+
 }

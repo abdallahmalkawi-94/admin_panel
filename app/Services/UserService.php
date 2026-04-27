@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Constants\UserStatusConstants;
+use App\Models\UserMerchant;
 use App\Notifications\UserCreatedNotification;
 use App\Repositories\UserRepository;
 use Exception;
@@ -43,8 +44,20 @@ class UserService
         $data["status_id"] = UserStatusConstants::PENDING_VERIFICATION;
 
         $user = $this->userRepository->create($data);
+        $user->assignRole($data['role']);
 
         try {
+            if (!empty($data['merchant_ids'])) {
+                $userMerchants = [];
+                foreach ($data['merchant_ids'] as $merchantId) {
+                    $userMerchants[] = [
+                        "user_id" => $user->getAttribute('id'),
+                        "merchant_id" => $merchantId
+                    ];
+                }
+
+                UserMerchant::query()->upsert($userMerchants, ["user_id", "merchant_id"]);
+            }
             // Send notification with credentials
             $loginUrl = route('login');
             $user->notify(new UserCreatedNotification($plainPassword, $loginUrl));
@@ -65,6 +78,25 @@ class UserService
     public function update($id, array $data): ?Model
     {
         $user = $this->userRepository->update($data, $id);
+        $user->assignRole($data['role']);
+
+        if (!empty($data['merchant_ids'])) {
+            UserMerchant::query()
+                ->where("user_id", $id)
+                ->whereNotIn("merchant_id", $data['merchant_ids'])
+                ->delete();
+
+            $userMerchants = [];
+            foreach ($data['merchant_ids'] as $merchantId) {
+                $userMerchants[] = [
+                    "user_id" => $id,
+                    "merchant_id" => $merchantId,
+                    'deleted_at' => null
+                ];
+            }
+
+            UserMerchant::query()->upsert($userMerchants, ["user_id", "merchant_id"]);
+        }
         $this->bumpIndexCacheVersion();
         return $user;
     }

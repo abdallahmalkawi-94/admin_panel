@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'country_code',
         'mobile_number',
         'status_id',
+        'product_id'
     ];
 
     /**
@@ -69,6 +71,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_code', 'iso2');
+    }
+
+
+    public function product(): BelongsTo {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
+
+    public function userMerchants(): HasMany {
+        return $this->hasMany(UserMerchant::class, 'user_id');
     }
 
     /**

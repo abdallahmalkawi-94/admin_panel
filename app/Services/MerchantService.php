@@ -42,6 +42,16 @@ class MerchantService
     }
 
     /**
+     * Get parent merchants by product ID
+     */
+    public function getMerchantsByProduct(int $productId): Collection
+    {
+        return $this->merchantRepository->where([
+            ['product_id', $productId],
+        ], ['id', 'en_name', 'ar_name']);
+    }
+
+    /**
      * @throws Exception
      */
     public function update($id, array $data): ?Model

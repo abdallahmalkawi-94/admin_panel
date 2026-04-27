@@ -72,6 +72,7 @@ export default function Index({
     statuses,
     countries,
 }: IndexProps) {
+    console.log(users)
     const getInitials = useInitials();
     const activeCount = users.data.filter(
         (user) => user.status_id === USER_STATUS.ACTIVE,
@@ -150,6 +151,21 @@ export default function Index({
                 ) : (
                     '-'
                 ),
+        },
+        {
+            key: 'role',
+            label: 'Role',
+            render: (user) => (
+                <span>{user.role ?? "N/A"}</span>
+            ),
+        },
+        {
+            key: 'product',
+            label: 'Product',
+            render: (user) => (
+                // console.log(user)
+                <span>{user?.product?.en_name ?? "N/A"}</span>
+            ),
         },
         {
             key: 'status',

@@ -32,6 +32,10 @@ class StoreUserRequest extends FormRequest
                 'regex:/^\+[1-9]\d{1,14}$/',
                 'unique:users,mobile_number',
             ],
+            'role' => ['required', 'string', 'exists:roles,name'],
+            'product_id' => ['nullable', 'integer', 'min:1', 'exists:products,id'],
+            'merchant_ids' => ['array'],
+            'merchant_ids.*' => ['integer', 'exists:merchants,id'],
         ];
     }
 

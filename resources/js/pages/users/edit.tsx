@@ -1,6 +1,11 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type User, type UserStatus } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import {
+    type BreadcrumbItem,
+    Product,
+    type User,
+    type UserStatus,
+} from '@/types';
+import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -20,10 +25,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Save, UserCog, Sparkles, Mail, Phone, MapPin } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { Save, UserCog, Sparkles, Mail, Phone, MapPin } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import users from '@/routes/users';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { MerchantDropDown } from '@/types/dropdown';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,19 +49,30 @@ interface Country {
     name: string;
 }
 
+interface Role {
+    id: number;
+    name: string;
+}
+
 interface EditProps {
     user: User;
     countries: Country[];
     statuses: UserStatus[];
+    roles: Role[];
+    products: Product[];
 }
 
-export default function Edit({ user, countries, statuses }: EditProps) {
+export default function Edit({ user, countries, statuses, roles, products }: EditProps) {
+    console.log(user)
     const { data, setData, patch, processing, errors } = useForm({
         name: user.name || '',
         email: user.email || '',
         country_code: user.country_code || '',
         mobile_number: user.mobile_number || '',
         status_id: user.status_id.toString() || '',
+        role: user.role || '',
+        product_id: user?.product_id?.toString(),
+        merchant_ids: user.user_merchants.map((merchant) => merchant.merchant_id),
     });
 
     const [phoneValidationError, setPhoneValidationError] = useState<
@@ -86,6 +105,32 @@ export default function Edit({ user, countries, statuses }: EditProps) {
             setPhoneValidationError(null);
         }
     };
+
+    const [availableMerchants, setAvailableMerchants] = useState<MerchantDropDown[]>([]);
+    const [loadingMerchants, setLoadingMerchants] = useState(false);
+
+    // Fetch merchants when product changes
+    useEffect(() => {
+        if (data.product_id) {
+            setLoadingMerchants(true);
+            axios.get('/merchants/merchants-by-product', {
+                params: { product_id: data.product_id }
+            })
+                .then(response => {
+                    setAvailableMerchants(response.data.merchants);
+                })
+                .catch(error => {
+                    console.error('Error fetching merchants:', error);
+                    setAvailableMerchants([]);
+                })
+                .finally(() => {
+                    setLoadingMerchants(false);
+                });
+        } else {
+            setAvailableMerchants([]);
+            // setData('parent_merchant_id', '');
+        }
+    }, [data.product_id]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -298,6 +343,102 @@ export default function Edit({ user, countries, statuses }: EditProps) {
                                 )}
                             </div>
 
+                                {/* Role */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="country_code">
+                                        Role{' '}
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.role}
+                                        onValueChange={(value) =>
+                                            setData('role', value)
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="role"
+                                            aria-invalid={!!errors.role}
+                                        >
+                                            <SelectValue placeholder="Select a role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {roles.map((role) => (
+                                                <SelectItem
+                                                    key={role.name}
+                                                    value={role.name}
+                                                >
+                                                    {role.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.role && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.role}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Product */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="product">
+                                        Product{' '}
+                                    </Label>
+                                    <Select
+                                        value={data.product_id}
+                                        onValueChange={(value) =>
+                                            setData('product_id', value)
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="product_id"
+                                            aria-invalid={!!errors.product_id}
+                                        >
+                                            <SelectValue placeholder="Select a product" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {products.map((product) => (
+                                                <SelectItem
+                                                    key={`${product.en_name}-${product.id}`}
+                                                    value={product.id.toString()}
+                                                >
+                                                    {product.en_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.product_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.product_id}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="merchants">
+                                        Merchants{' '}
+                                    </Label>
+                                    <MultiSelect
+                                        options={availableMerchants.map((merchant) => ({
+                                            id: merchant.id,
+                                            label: merchant.en_name,
+                                        }))}
+                                        selected={data.merchant_ids}
+                                        onChange={(values) =>
+                                            setData('merchant_ids', values)
+                                        }
+                                        placeholder="Select merchants assign to user..."
+                                        error={!!errors.merchant_ids}
+                                    />
+                                    {errors.merchant_ids && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.merchant_ids}
+                                        </p>
+                                    )}
+                                </div>
+
                                 {/* Submit Buttons */}
                                 <div className="flex items-center justify-end gap-4 pt-4">
                                     <Button
@@ -317,7 +458,7 @@ export default function Edit({ user, countries, statuses }: EditProps) {
                     </Card>
 
                     {/* Summary */}
-                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                    <div className="hidden lg:block space-y-6 lg:sticky lg:top-6 lg:self-start">
                         <Card className="border-muted/60 bg-muted/30 py-6">
                             <CardHeader>
                                 <CardTitle>Live Summary</CardTitle>

@@ -23,7 +23,13 @@ import {
     CheckCircle2,
     IdCard,
     Earth,
+    KeyIcon,
+    PackageIcon,
+    ChevronDown,
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Table, TableBody, TableBodyRow, TableCell, TableHead, TableHeader, TableHeadRow } from '@/components/ui/table';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,6 +73,7 @@ interface ShowProps {
 }
 
 export default function Show({ user }: ShowProps) {
+    const [isOpen, setOpen] = useState(false);
     const handleDelete = () => {
         if (confirm(`Are you sure you want to delete ${user.name}?`)) {
             router.delete(`/users/${user.id}`);
@@ -154,6 +161,36 @@ export default function Show({ user }: ShowProps) {
                         <CardContent className="flex items-center justify-between p-5">
                             <div>
                                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Role
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {user.role}
+                                </p>
+                            </div>
+                            <KeyIcon className="h-5 w-5 text-blue-600" />
+                        </CardContent>
+                    </Card>
+                    {
+                        user.product && (
+                            <Card>
+                                <CardContent className="flex items-center justify-between p-5">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                            Product
+                                        </p>
+                                        <p className="mt-2 text-sm font-semibold">
+                                            {user.product.en_name}
+                                        </p>
+                                    </div>
+                                    <PackageIcon className="h-5 w-5 text-yellow-600" />
+                                </CardContent>
+                            </Card>
+                        )
+                    }
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                                     Country
                                 </p>
                                 <p className="mt-2 text-sm font-semibold">
@@ -164,6 +201,96 @@ export default function Show({ user }: ShowProps) {
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Assign Merchants */}
+                {
+                    user.merchants?.length > 0 && (
+                        <div className="py-6">
+                            <Collapsible
+                                open={isOpen}
+                                onOpenChange={() =>
+                                    setOpen(!isOpen)
+                                }
+                            >
+                                <Card className="py-6">
+                                    <CardHeader>
+                                        <CollapsibleTrigger asChild>
+                                            <div className="flex cursor-pointer items-center justify-between">
+                                                <div className="flex-1">
+                                                    <CardTitle>
+                                                        Assign Merchants
+                                                    </CardTitle>
+                                                    <CardDescription>
+                                                        Merchants over whom the user has authority
+                                                    </CardDescription>
+                                                </div>
+                                                <ChevronDown
+                                                    className={`h-5 w-5 transition-transform duration-200 ${
+                                                        isOpen
+                                                            ? 'rotate-180 transform'
+                                                            : ''
+                                                    }`}
+                                                />
+                                            </div>
+                                        </CollapsibleTrigger>
+                                    </CardHeader>
+                                    <CollapsibleContent>
+                                        <CardContent className="space-y-6">
+                                            <Table>
+                                                <TableHeader className="bg-muted/60 text-foreground">
+                                                    <TableHeadRow>
+                                                        <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                            ID
+                                                        </TableHead>
+                                                        <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                            English Name
+                                                        </TableHead>
+                                                        <TableHead className={'font-semibold text-foreground/70 text-center'}>
+                                                            Arabic Name
+                                                        </TableHead>
+                                                    </TableHeadRow>
+                                                </TableHeader>
+                                                {
+                                                    <TableBody>
+                                                        {
+                                                            user.merchants.length ? (
+                                                                user.merchants.map((merchant) => (
+                                                                    <TableBodyRow
+                                                                        key={merchant.id}
+                                                                        className="cursor-pointer hover:bg-muted/40"
+                                                                        onClick={() =>
+                                                                            router.visit(`/merchants/${merchant.id}`)
+                                                                        }
+                                                                    >
+                                                                        <TableCell className="">
+                                                                            {merchant.id}
+                                                                        </TableCell>
+                                                                        <TableCell className="">
+                                                                            {merchant.en_name}
+                                                                        </TableCell>
+                                                                        <TableCell className="">
+                                                                            {merchant.ar_name}
+                                                                        </TableCell>
+                                                                    </TableBodyRow>
+                                                                ))
+                                                            ) : (
+                                                                <TableBodyRow>
+                                                                    <TableCell colSpan={5} className={"text-center"}>
+                                                                        No data found.
+                                                                    </TableCell>
+                                                                </TableBodyRow>
+                                                            )
+                                                        }
+                                                    </TableBody>
+                                                }
+                                            </Table>
+                                        </CardContent>
+                                    </CollapsibleContent>
+                                </Card>
+                            </Collapsible>
+                        </div>
+                    )
+                }
 
                 {/* User Information Card */}
                 <Card className={'py-6'}>

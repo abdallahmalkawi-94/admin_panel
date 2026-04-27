@@ -36,6 +36,10 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'mobile_number')->ignore($userId),
             ],
             'status_id' => ['required', 'integer', 'exists:user_statuses,id'],
+            'role' => ['required', 'string', 'exists:roles,name'],
+            'product_id' => ['nullable', 'integer', 'min:1', 'exists:products,id'],
+            'merchant_ids' => ['array'],
+            'merchant_ids.*' => ['integer', 'exists:merchants,id'],
         ];
     }
 
@@ -51,6 +55,9 @@ class UpdateUserRequest extends FormRequest
             'country_code' => 'country',
             'mobile_number' => 'mobile number',
             'status_id' => 'status',
+            'product_id' => 'product',
+            'merchant_ids' => 'merchants',
+            'merchant_ids.*' => 'merchants',
         ];
     }
 

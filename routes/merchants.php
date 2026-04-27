@@ -10,6 +10,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("/parent-merchants-by-product", [MerchantController::class, "getParentMerchantsByProduct"])
             ->middleware('throttle:60,1')
             ->name("merchants.parent-by-product");
+        Route::get("/merchants-by-product", [MerchantController::class, "getMerchantsByProduct"])
+            ->middleware('throttle:60,1')
+            ->name("merchants.by-product");
         Route::get("/create", [MerchantController::class, "create"])->name("merchants.create");
         Route::post("/", [MerchantController::class, "store"])->name("merchants.store");
         Route::get("/{merchant}", [MerchantController::class, "show"])->name("merchants.show");
