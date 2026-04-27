@@ -72,9 +72,13 @@ class UserController extends Controller
     public function create(): Response|ResponseFactory
     {
         $countries = CountriesDropDown();
+        $roles = RoleDropDown();
+        $products = ProductsDropDown();
 
         return inertia('users/create', [
             'countries' => $countries,
+            'roles' => $roles,
+            'products' => $products,
         ]);
     }
 
@@ -85,6 +89,11 @@ class UserController extends Controller
     {
         $user->load(['status', 'country']);
 
+        if ($user->getAttribute("product_id")) {
+            $user->load(['product', 'userMerchants.merchant']);
+        }
+
+//        dd((new UserResource($user))->resolve());
         return inertia('users/show', [
             'user' => (new UserResource($user))->resolve(),
         ]);
@@ -95,14 +104,18 @@ class UserController extends Controller
      */
     public function edit(User $user): Response|ResponseFactory
     {
-        $user->load(['status', 'country']);
+        $user->load(['status', 'country', 'userMerchants']);
         $countries = CountriesDropDown();
         $statuses = UserStatusesDropDown();
+        $roles = RoleDropDown();
+        $products = ProductsDropDown();
 
         return inertia('users/edit', [
             'user' => (new UserResource($user))->resolve(),
             'countries' => $countries,
             'statuses' => $statuses,
+            'roles' => $roles,
+            'products' => $products,
         ]);
     }
 

@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, Product } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,10 +20,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Save, UserPlus, Sparkles, Mail, Phone, MapPin } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { Mail, MapPin, Phone, Save, Sparkles, UserPlus } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import users from '@/routes/users';
+import axios from 'axios';
+import { MerchantDropDown } from '@/types/dropdown';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,16 +44,26 @@ interface Country {
     name: string;
 }
 
-interface CreateProps {
-    countries: Country[];
+interface Role {
+    id: number;
+    name: string;
 }
 
-export default function Create({ countries }: CreateProps) {
+interface CreateProps {
+    countries: Country[];
+    roles: Role[];
+    products: Product[];
+}
+
+export default function Create({ countries, roles, products }: CreateProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         country_code: '',
         mobile_number: '',
+        role: '',
+        product_id: '',
+        merchant_ids: [] as number[],
     });
 
     const [phoneValidationError, setPhoneValidationError] = useState<
@@ -73,6 +86,32 @@ export default function Create({ countries }: CreateProps) {
             setPhoneValidationError(null);
         }
     };
+
+    const [availableMerchants, setAvailableMerchants] = useState<MerchantDropDown[]>([]);
+    const [loadingMerchants, setLoadingMerchants] = useState(false);
+
+    // Fetch merchants when product changes
+    useEffect(() => {
+        if (data.product_id) {
+            setLoadingMerchants(true);
+            axios.get('/merchants/merchants-by-product', {
+                params: { product_id: data.product_id }
+            })
+                .then(response => {
+                    setAvailableMerchants(response.data.merchants);
+                })
+                .catch(error => {
+                    console.error('Error fetching merchants:', error);
+                    setAvailableMerchants([]);
+                })
+                .finally(() => {
+                    setLoadingMerchants(false);
+                });
+        } else {
+            setAvailableMerchants([]);
+            // setData('parent_merchant_id', '');
+        }
+    }, [data.product_id]);
 
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -99,10 +138,10 @@ export default function Create({ countries }: CreateProps) {
             <div className="flex h-full flex-1 flex-col gap-8 p-6">
                 {/* Hero */}
                 <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-500/10 via-amber-400/10 to-sky-500/10 p-6">
-                    <div className="pointer-events-none absolute right-6 top-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
+                    <div className="pointer-events-none absolute top-6 right-6 hidden h-24 w-24 rounded-full bg-sky-400/20 blur-2xl lg:block" />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                            <div className="flex items-center gap-2 text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                 <Sparkles className="h-4 w-4" />
                                 User Onboarding
                             </div>
@@ -110,7 +149,8 @@ export default function Create({ countries }: CreateProps) {
                                 Create a new user
                             </h1>
                             <p className="text-muted-foreground">
-                                Capture identity details and send access credentials instantly.
+                                Capture identity details and send access
+                                credentials instantly.
                             </p>
                         </div>
                         <Badge variant="info">Pending Verification</Badge>
@@ -119,7 +159,7 @@ export default function Create({ countries }: CreateProps) {
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
                     {/* Form */}
-                    <Card className='py-6'>
+                    <Card className="py-6">
                         <CardHeader className="flex flex-row items-start justify-between gap-4">
                             <div>
                                 <CardTitle>User Information</CardTitle>
@@ -131,120 +171,220 @@ export default function Create({ countries }: CreateProps) {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Name */}
-                            <div className="space-y-2">
-                                <Label htmlFor="name">
-                                    Full Name{' '}
-                                    <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    value={data.name}
-                                    onChange={(e) =>
-                                        setData('name', e.target.value)
-                                    }
-                                    placeholder="John Doe"
-                                    aria-invalid={!!errors.name}
-                                />
-                                {errors.name && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.name}
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Email & Mobile Number */}
-                            <div className="grid gap-6 md:grid-cols-2">
+                                {/* Name */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">
-                                        Email{' '}
+                                    <Label htmlFor="name">
+                                        Full Name{' '}
                                         <span className="text-destructive">
                                             *
                                         </span>
                                     </Label>
                                     <Input
-                                        id="email"
-                                        type="email"
-                                        value={data.email}
+                                        id="name"
+                                        type="text"
+                                        value={data.name}
                                         onChange={(e) =>
-                                            setData('email', e.target.value)
+                                            setData('name', e.target.value)
                                         }
-                                        placeholder="john.doe@example.com"
-                                        aria-invalid={!!errors.email}
+                                        placeholder="John Doe"
+                                        aria-invalid={!!errors.name}
                                     />
-                                    {errors.email && (
+                                    {errors.name && (
                                         <p className="text-sm text-destructive">
-                                            {errors.email}
+                                            {errors.name}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Email & Mobile Number */}
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">
+                                            Email{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) =>
+                                                setData('email', e.target.value)
+                                            }
+                                            placeholder="john.doe@example.com"
+                                            aria-invalid={!!errors.email}
+                                        />
+                                        {errors.email && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.email}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="mobile_number">
+                                            Mobile Number{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <PhoneInput
+                                            id="mobile_number"
+                                            defaultCountry="SA"
+                                            value={data.mobile_number}
+                                            onChange={handlePhoneChange}
+                                            placeholder="Enter phone number"
+                                            aria-invalid={
+                                                !!(
+                                                    errors.mobile_number ||
+                                                    phoneValidationError
+                                                )
+                                            }
+                                        />
+                                        {(errors.mobile_number ||
+                                            phoneValidationError) && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.mobile_number ||
+                                                    phoneValidationError}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Country */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="country_code">
+                                        Country{' '}
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.country_code}
+                                        onValueChange={(value) =>
+                                            setData('country_code', value)
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="country_code"
+                                            aria-invalid={!!errors.country_code}
+                                        >
+                                            <SelectValue placeholder="Select a country" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {countries.map((country) => (
+                                                <SelectItem
+                                                    key={country.code}
+                                                    value={country.code}
+                                                >
+                                                    {country.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.country_code && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.country_code}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Role */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="country_code">
+                                        Role{' '}
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
+                                    </Label>
+                                    <Select
+                                        value={data.role}
+                                        onValueChange={(value) =>
+                                            setData('role', value)
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="role"
+                                            aria-invalid={!!errors.role}
+                                        >
+                                            <SelectValue placeholder="Select a role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {roles.map((role) => (
+                                                <SelectItem
+                                                    key={role.name}
+                                                    value={role.name}
+                                                >
+                                                    {role.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.role && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.role}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Product */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="product">
+                                        Product{' '}
+                                    </Label>
+                                    <Select
+                                        value={data.product_id}
+                                        onValueChange={(value) =>
+                                            setData('product_id', value)
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="product_id"
+                                            aria-invalid={!!errors.product_id}
+                                        >
+                                            <SelectValue placeholder="Select a product" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {products.map((product) => (
+                                                <SelectItem
+                                                    key={`${product.en_name}-${product.id}`}
+                                                    value={product.id.toString()}
+                                                >
+                                                    {product.en_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.product_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.product_id}
                                         </p>
                                     )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="mobile_number">
-                                        Mobile Number{' '}
-                                        <span className="text-destructive">
-                                            *
-                                        </span>
+                                    <Label htmlFor="merchants">
+                                        Merchants{' '}
                                     </Label>
-                                    <PhoneInput
-                                        id="mobile_number"
-                                        defaultCountry="SA"
-                                        value={data.mobile_number}
-                                        onChange={handlePhoneChange}
-                                        placeholder="Enter phone number"
-                                        aria-invalid={
-                                            !!(
-                                                errors.mobile_number ||
-                                                phoneValidationError
-                                            )
+                                    <MultiSelect
+                                        options={availableMerchants.map((merchant) => ({
+                                            id: merchant.id,
+                                            label: merchant.en_name,
+                                        }))}
+                                        selected={data.merchant_ids}
+                                        onChange={(values) =>
+                                            setData('merchant_ids', values)
                                         }
+                                        placeholder="Select merchants assign to user..."
+                                        error={!!errors.merchant_ids}
                                     />
-                                    {(errors.mobile_number ||
-                                        phoneValidationError) && (
+                                    {errors.merchant_ids && (
                                         <p className="text-sm text-destructive">
-                                            {errors.mobile_number ||
-                                                phoneValidationError}
+                                            {errors.merchant_ids}
                                         </p>
                                     )}
                                 </div>
-                            </div>
-
-                            {/* Country */}
-                            <div className="space-y-2">
-                                <Label htmlFor="country_code">
-                                    Country{' '}
-                                    <span className="text-destructive">*</span>
-                                </Label>
-                                <Select
-                                    value={data.country_code}
-                                    onValueChange={(value) =>
-                                        setData('country_code', value)
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="country_code"
-                                        aria-invalid={!!errors.country_code}
-                                    >
-                                        <SelectValue placeholder="Select a country" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {countries.map((country) => (
-                                            <SelectItem
-                                                key={country.code}
-                                                value={country.code}
-                                            >
-                                                {country.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.country_code && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.country_code}
-                                    </p>
-                                )}
-                            </div>
 
                                 {/* Submit Buttons */}
                                 <div className="flex items-center justify-end gap-4 pt-4">
@@ -265,7 +405,7 @@ export default function Create({ countries }: CreateProps) {
                     </Card>
 
                     {/* Summary */}
-                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                    <div className="hidden lg:block space-y-6 lg:sticky lg:top-6 lg:self-start">
                         <Card className="border-muted/60 bg-muted/30 py-6">
                             <CardHeader>
                                 <CardTitle>Live Summary</CardTitle>
@@ -275,28 +415,36 @@ export default function Create({ countries }: CreateProps) {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
                                         User
                                     </p>
                                     <p className="text-lg font-semibold">
                                         {data.name || 'New User'}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
-                                        {data.email || 'Email pending'}
+                                        {data.role}
                                     </p>
                                 </div>
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Mail className="h-4 w-4" />
-                                        <span>{data.email || 'No email yet'}</span>
+                                        <span>
+                                            {data.email || 'No email yet'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <Phone className="h-4 w-4" />
-                                        <span>{data.mobile_number || 'No phone yet'}</span>
+                                        <span>
+                                            {data.mobile_number ||
+                                                'No phone yet'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-muted-foreground">
                                         <MapPin className="h-4 w-4" />
-                                        <span>{selectedCountry?.name || 'Country pending'}</span>
+                                        <span>
+                                            {selectedCountry?.name ||
+                                                'Country pending'}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="rounded-xl border border-dashed p-3 text-sm text-muted-foreground">

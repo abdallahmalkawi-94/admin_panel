@@ -1115,7 +1115,7 @@ export default function Edit({
                         </div>
                     </form>
 
-                    <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+                    <div className="hidden lg:block space-y-6 lg:sticky lg:top-6 lg:self-start">
                         <Card className="border-muted/60 bg-muted/30 py-6">
                             <CardHeader>
                                 <CardTitle>Live Summary</CardTitle>

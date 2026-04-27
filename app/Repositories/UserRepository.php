@@ -23,7 +23,7 @@ class UserRepository extends BaseRepository
     public function paginate(int $perPage = 15, array $filters = []): Collection|LengthAwarePaginator
     {
         return $this->getModel()->newQuery()
-            ->with(['status', 'country'])
+            ->with(['status', 'country', 'product'])
             ->applyFilters($filters)
             ->paginate($perPage);
     }

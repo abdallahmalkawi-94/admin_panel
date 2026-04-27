@@ -66,6 +66,17 @@ export interface User {
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+    product_id: number;
+    product: Product;
+    role: string;
+    user_merchants: UserMerchant[]
+    merchants: Merchant[];
+}
+
+export interface UserMerchant {
+    id: number;
+    user_id: number;
+    merchant_id: number;
 }
 
 export interface Product {

@@ -17,6 +17,7 @@ use App\Models\RefundOption;
 use App\Models\TermsAndCondition;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Permission\Models\Role;
 
 function CountriesDropDown(): array
 {
@@ -169,5 +170,17 @@ function PayoutModelsDropDown(): array
                 'description' => $payoutModel->description,
             ])
             ->toArray();
+    });
+}
+
+function RoleDropDown(): array
+{
+    return Cache::remember('roles:dropdown', 86400, function () {
+        return Role::query()
+            ->get(['id', 'name'])
+            ->map(fn($role) => [
+                'id' => $role->id,
+                'name' => $role->name,
+            ])->toArray();
     });
 }

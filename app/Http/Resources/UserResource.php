@@ -26,6 +26,33 @@ class UserResource extends JsonResource
                 'id' => $this->status?->id,
                 'description' => $this->status?->description,
             ],
+            'product_id' => $this->product_id,
+            'product' => $this->whenLoaded('product', function () {
+                return [
+                    'id' => $this->product->id,
+                    'en_name' => $this->product->en_name,
+                    'ar_name' => $this->product->ar_name,
+                ];
+            }),
+            'role' => $this->getRoleNames()->first(),
+            'user_merchants' => $this->whenLoaded('userMerchants', function () {
+                return $this->userMerchants->map(function ($userMerchant) {
+                    return [
+                        'id' => $userMerchant->id,
+                        'user_id' => $userMerchant->user_id,
+                        'merchant_id' => $userMerchant->merchant_id,
+                    ];
+                });
+            }),
+            'merchants' => $this->whenLoaded('userMerchants', function () {
+                return $this->userMerchants->map(function ($userMerchant) {
+                    return [
+                        'id' => $userMerchant->merchant->id,
+                        'en_name' => $userMerchant->merchant->en_name,
+                        'ar_name' => $userMerchant->merchant->ar_name,
+                    ];
+                });
+            }),
             'avatar' => $this->avatar ? asset('storage/' . $this->avatar) : null,
             'email_verified_at' => $this->email_verified_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
