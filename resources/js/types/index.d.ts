@@ -69,7 +69,7 @@ export interface User {
     product_id: number;
     product: Product;
     role: string;
-    user_merchants: UserMerchant[]
+    user_merchants: UserMerchant[];
     merchants: Merchant[];
 }
 
@@ -288,6 +288,34 @@ export interface Merchant {
     }[];
     created_at: string;
     updated_at: string;
+}
+
+export interface PayerProfile {
+    id: number;
+    full_name: string;
+    username: string;
+    referral_id: number;
+    email: string;
+    mobile_number: string;
+    product_id: number;
+    product?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    merchant_id?: number | null;
+    merchant?: {
+        id: number;
+        en_name: string;
+        ar_name: string;
+    } | null;
+    status: number;
+    total_points: number;
+    identity_no: string;
+    identity_type_id: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
 }
 
 export interface PspStatus {

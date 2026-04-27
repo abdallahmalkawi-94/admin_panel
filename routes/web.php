@@ -22,6 +22,7 @@ require __DIR__.'/countries.php';
 require __DIR__.'/currencies.php';
 require __DIR__.'/languages.php';
 require __DIR__.'/merchants.php';
+require __DIR__.'/payer-profiles.php';
 require __DIR__.'/banks.php';
 require __DIR__.'/psps.php';
 require __DIR__.'/payment-methods.php';
