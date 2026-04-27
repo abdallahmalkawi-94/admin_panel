@@ -24,6 +24,7 @@ import {
     PackageIcon,
     ReceiptIcon,
     Store,
+    UserRound,
     UsersIcon,
 } from 'lucide-react';
 import AppLogo from './app-logo';
@@ -42,16 +43,16 @@ const navigationGroups: NavGroup[] = [
                 icon: UsersIcon,
                 items: [
                     {
-                        title: "Users",
+                        title: 'Users',
                         href: '/users',
                         icon: UsersIcon,
                     },
                     {
-                        title: "Roles & Permissions",
+                        title: 'Roles & Permissions',
                         href: '/roles',
-                        icon: LockIcon
-                    }
-                ]
+                        icon: LockIcon,
+                    },
+                ],
             },
             {
                 title: 'Product Management',
@@ -78,6 +79,11 @@ const navigationGroups: NavGroup[] = [
                         icon: CreditCardIcon,
                     },
                 ],
+            },
+            {
+                title: 'Payer Profiles',
+                href: '/payer-profiles',
+                icon: UserRound,
             },
         ],
     },
