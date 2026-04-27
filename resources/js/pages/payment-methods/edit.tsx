@@ -60,7 +60,7 @@ export default function Edit({ paymentMethod }: EditProps) {
                 </div>
 
                 {/* Form */}
-                <Card>
+                <Card className={'py-6'}>
                     <CardHeader>
                         <CardTitle>Payment Method Information</CardTitle>
                         <CardDescription>

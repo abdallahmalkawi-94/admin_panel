@@ -42,12 +42,6 @@ export default function Show({ bank }: ShowProps) {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" asChild>
-                            <Link href="/banks">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back
-                            </Link>
-                        </Button>
                         <Button asChild>
                             <Link href={`/banks/${bank.id}/edit`}>
                                 <Edit className="mr-2 h-4 w-4" />
@@ -59,7 +53,7 @@ export default function Show({ bank }: ShowProps) {
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* Bank Information */}
-                    <Card>
+                    <Card className={'py-6'}>
                         <CardHeader>
                             <CardTitle>Bank Information</CardTitle>
                             <CardDescription>
@@ -111,7 +105,7 @@ export default function Show({ bank }: ShowProps) {
                     </Card>
 
                     {/* Timestamps */}
-                    <Card>
+                    <Card className={'py-6'}>
                         <CardHeader>
                             <CardTitle>Timestamps</CardTitle>
                         </CardHeader>

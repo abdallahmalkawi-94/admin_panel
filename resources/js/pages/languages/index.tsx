@@ -135,7 +135,6 @@ export default function Index({ languages, filters }: IndexProps) {
                     description="A list of all languages including their codes and text direction."
                     data={languages}
                     columns={columns}
-                    getRowHref={(language) => `/languages/${language.code}`}
                     searchFilters={searchFilters}
                     onPageSizeChange={handlePerPageChange}
                     emptyMessage="No languages found."

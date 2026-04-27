@@ -36,7 +36,7 @@ export default function Show({ currency }: ShowProps) {
                     </div>
                 </div>
 
-                <Card>
+                <Card className={'py-6'}>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">

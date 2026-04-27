@@ -101,6 +101,7 @@ export interface Country {
     iso2: string;
     iso3?: string | null;
     name: string;
+    native?: string;
     phone_code?: string | null;
     region?: string | null;
     subregion?: string | null;

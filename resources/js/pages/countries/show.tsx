@@ -52,7 +52,7 @@ export default function Show({ country }: ShowProps) {
                 </div>
 
                 {/* Country Information Card */}
-                <Card>
+                <Card className={'py-6'}>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -65,9 +65,6 @@ export default function Show({ country }: ShowProps) {
                                     </CardDescription>
                                 </div>
                             </div>
-                            <Badge variant={getStatusVariant(country.status)}>
-                                {country.status === 1 ? 'Active' : 'Inactive'}
-                            </Badge>
                         </div>
                     </CardHeader>
                     <CardContent>

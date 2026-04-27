@@ -42,12 +42,6 @@ export default function Show({ paymentMethod }: ShowProps) {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" asChild>
-                            <Link href="/payment-methods">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back
-                            </Link>
-                        </Button>
                         <Button asChild>
                             <Link href={`/payment-methods/${paymentMethod.id}/edit`}>
                                 <Edit className="mr-2 h-4 w-4" />
@@ -59,7 +53,7 @@ export default function Show({ paymentMethod }: ShowProps) {
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* Payment Method Information */}
-                    <Card>
+                    <Card className={'py-6'}>
                         <CardHeader>
                             <CardTitle>Payment Method Information</CardTitle>
                             <CardDescription>
@@ -123,7 +117,7 @@ export default function Show({ paymentMethod }: ShowProps) {
                     </Card>
 
                     {/* Timestamps */}
-                    <Card>
+                    <Card className={'py-6'}>
                         <CardHeader>
                             <CardTitle>Timestamps</CardTitle>
                         </CardHeader>

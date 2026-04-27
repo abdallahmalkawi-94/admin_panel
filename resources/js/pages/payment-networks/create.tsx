@@ -80,7 +80,7 @@ export default function Create() {
                 </div>
 
                 {/* Form */}
-                <Card>
+                <Card className={'py-6'}>
                     <CardHeader>
                         <CardTitle>Payment Network Information</CardTitle>
                         <CardDescription>
