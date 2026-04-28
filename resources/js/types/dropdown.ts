@@ -7,6 +7,12 @@ export interface CurrencyDropDown {
     code: string;
     name: string;
 }
+
+export interface LanguageDropDown {
+    code: string;
+    name: string;
+    name_native: string;
+}
 export interface BankDropDown {
     id: number;
     en_name: string;
